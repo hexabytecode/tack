@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ArrowRight, AtSign, Bot, CalendarDays, Check, ClipboardCopy, FileText, Flag, Grab, KanbanSquare,
-  List, MessageSquare, MousePointer2, Plug, Plus, Settings, Sparkles, Terminal, UserRound, Zap,
+  ArrowRight, AtSign, Bot, CalendarDays, Check, ClipboardCopy, FileText, Flag, KanbanSquare,
+  List, MessageSquare, Plug, Plus, Settings, Sparkles, Terminal, UserRound, Zap,
 } from 'lucide-react'
 import { LayoutGroup, motion } from 'motion/react'
 import { useStore } from '../store'
@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Avatar, PriorityBadge, StatusIcon, StatusPill, TypeBadge, Wordmark, cx, useReveal } from '@/lib/ui'
 import Markdown from '../components/Markdown'
 import MarkdownEditor from '../components/MarkdownEditor'
+import { ArrowCursor, GrabCursor } from '../components/Cursors'
 import { STATUSES, USERS, type IssueType, type Priority, type Status } from '../data/mock'
 
 const u = (id: string) => USERS.find(x => x.id === id)
@@ -178,7 +179,7 @@ function HeroBoard() {
                         className={cx('relative', intro && 'hero-card')} style={d(300 + n++ * 80)}>
                         <MiniCard c={c} lifted={lifted === c.key} flash={landed === c.key} done={s.id === 'done'} />
                         {lifted === c.key && (
-                          <Grab aria-hidden="true" className="anim-fade pointer-events-none absolute left-[62%] top-[45%] size-6 -translate-x-1/2 -translate-y-1/2 fill-paper text-ink drop-shadow-[0_2px_3px_rgba(0,0,0,.3)]" strokeWidth={1.75} />
+                          <span className="anim-fade pointer-events-none absolute left-[62%] top-[45%] -translate-x-1/2 -translate-y-1/2"><GrabCursor /></span>
                         )}
                       </motion.div>
                     ))}
@@ -190,7 +191,7 @@ function HeroBoard() {
               initial={false}
               animate={{ x: cursor.x, y: cursor.y, opacity: cursor.show ? 1 : 0 }}
               transition={{ x: { type: 'spring', stiffness: 170, damping: 24 }, y: { type: 'spring', stiffness: 170, damping: 24 }, opacity: { duration: 0.12 } }}>
-              <MousePointer2 className="size-5 fill-ink text-paper drop-shadow-[0_2px_3px_rgba(0,0,0,.3)]" strokeWidth={1.5} />
+              <ArrowCursor />
             </motion.div>
           </div>
         </div>
