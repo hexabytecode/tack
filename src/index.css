@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #000000;
+  --color-paper: #ffffff;
+  --color-accent: #183fd9;
+  --color-accent-soft: #8ea5ff;
+  --color-slate: #636a80;
+  --color-cloud: #eeeef2;
+  --color-line: #e2e3e9;
+  --color-wash: #f7f7f9;
+  --color-placeholder: #9ca3af;
+  --color-success: #1a7a52;
+  --color-warning: #d97a0a;
+  --color-danger: #dc2626;
+  --color-tint: rgba(24, 63, 217, 0.06);
+  --color-tint-hover: rgba(24, 63, 217, 0.05);
+
+  --font-sans: "Inter", Arial, Helvetica, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Courier New", monospace;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+html { -webkit-font-smoothing: antialiased; }
+body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
+::selection { background: rgba(24, 63, 217, 0.15); }
+
+.icon {
+  font-family: "Material Symbols Outlined";
+  font-weight: 300;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+  font-variation-settings: "opsz" 20;
+  user-select: none;
+}
+
+.label-mono { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* Links: text stays black, a 1px underline appears. Never light-blue text on hover. */
+.link { border-bottom: 1px solid transparent; transition: border-color 0.12s ease; }
+.link:hover { border-bottom-color: currentColor; }
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
+/* Top loading bar */
+.route-bar { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 60; pointer-events: none; opacity: 0; transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.route-bar.on { opacity: 1; }
+.route-bar i { display: block; height: 100%; width: 0; background: var(--color-accent); box-shadow: 0 0 8px rgba(24, 63, 217, 0.6); transition: width 0.3s cubic-bezier(0, 0, 0.2, 1); }
+
+/* Reveal on scroll */
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity 0.45s var(--ease-out-soft), transform 0.45s var(--ease-out-soft); transition-delay: var(--d, 0ms); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Agent flash */
+@keyframes agent-flash { 0% { background: rgba(24, 63, 217, 0.14); border-color: var(--color-accent); } 100% { background: var(--color-paper); border-color: var(--color-line); } }
+.flash { animation: agent-flash 1.4s ease-out 0.1s both; }
+
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes drop-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-in { from { transform: translateX(100%); } to { transform: none; } }
+.anim-drop { animation: drop-in 0.3s var(--ease-out-soft) both; }
+.anim-pop { animation: pop-in 0.16s var(--ease-out-soft) both; }
+.anim-fade { animation: fade-in 0.2s ease both; }
+.anim-slide { animation: slide-in 0.24s var(--ease-out-soft) both; }
+.anim-rise { animation: rise-in 0.2s var(--ease-out-soft) both; }
+
+/* Landing: hero board */
+@keyframes hero-card { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.hero-card { animation: hero-card 0.45s var(--ease-out-soft) both; animation-delay: var(--d, 0ms); }
+
+/* Landing: strike the old cost */
+.strike-line { position: absolute; left: -4px; right: -4px; top: 52%; height: 2px; background: #8e93a8; transform: scaleX(0); transform-origin: left; transition: transform 0.6s var(--ease-out-soft) 0.2s; }
+.in .strike-line { transform: scaleX(1); }
+.zero { opacity: 0; transition: opacity 0.3s ease 0.85s; }
+.in .zero { opacity: 1; }
+
+/* Landing: dots along the AI cable */
+@keyframes cable-dot { from { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } to { offset-distance: 100%; opacity: 0; } }
+.cable-dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); offset-path: path("M 10 10 C 60 40, 110 40, 170 20"); animation: cable-dot 2s linear infinite; animation-play-state: paused; }
+.in .cable-dot { animation-play-state: running; }
+
+/* Typing in the landing create mock */
+.type-on { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; max-width: 0; }
+.in .type-on { max-width: 100%; transition: max-width 1s steps(40, end) 0.2s; }
+.in .after-type { animation: drop-in 0.5s var(--ease-out-soft) 1.3s both; }
+.after-type { opacity: 0; }
+
+.scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; transition-delay: 0ms !important; }
+  .reveal { opacity: 1; transform: none; }
+  .cable-dot { display: none; }
+  .type-on { max-width: 100%; }
+  .after-type { opacity: 1; }
+}
