@@ -1,10 +1,10 @@
-/* System-style cursors for the landing demo: white fill, black outline, soft shadow.
-   Drawn here so they match macOS/Windows cursors rather than an icon set. */
+/* macOS-style cursors for the landing demo: the black arrow with a white edge, and the
+   white "grabbing" hand with a black outline. Drawn here rather than taken from an icon set. */
 
 export function ArrowCursor({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ filter: 'drop-shadow(0 1.5px 2px rgba(0,0,0,.35))', overflow: 'visible' }}>
-      <path d="M4.5 2.5v16.2l4.1-3.9 2.9 6.5 2.9-1.3-2.9-6.4h5.9z" fill="#fff" stroke="#000" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M5 2.6v16.6l3.9-3.7 2.6 6.1 3-1.3-2.6-5.9h5.4z" fill="#000" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
     </svg>
   )
 }

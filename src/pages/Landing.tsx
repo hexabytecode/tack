@@ -4,7 +4,6 @@ import {
   ArrowRight, AtSign, Bot, CalendarDays, Check, ClipboardCopy, FileText, Flag, KanbanSquare,
   List, MessageSquare, Plug, Plus, Settings, Sparkles, Terminal, UserRound, Zap,
 } from 'lucide-react'
-import { LayoutGroup, motion } from 'motion/react'
 import { useStore } from '../store'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,8 +11,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Avatar, PriorityBadge, StatusIcon, StatusPill, TypeBadge, Wordmark, cx, useReveal } from '@/lib/ui'
 import Markdown from '../components/Markdown'
 import MarkdownEditor from '../components/MarkdownEditor'
-import { ArrowCursor, GrabCursor } from '../components/Cursors'
-import { STATUSES, USERS, type IssueType, type Priority, type Status } from '../data/mock'
+import { DragBoard, Scaled, boardHeight, type DemoCard } from '../components/DragBoard'
+import { APP_H, MacBook, SCREEN_W } from '../components/MacBook'
+import { USERS, type IssueType, type Priority, type Status } from '../data/mock'
 
 const u = (id: string) => USERS.find(x => x.id === id)
 const d = (ms: number) => ({ ['--d' as string]: `${ms}ms` }) as CSSProperties
@@ -47,35 +47,15 @@ export function Nav() {
   )
 }
 
-/* ── Hero board: cards rise in, then a card hops a column every few seconds (no tilt). */
 type Mini = { key: string; title: string; type: IssueType; prio: Priority; who: string }
-const HERO: Record<Status, Mini[]> = {
-  todo: [
-    { key: 'WEB-145', title: 'Audit accessibility for billing flow', type: 'task', prio: 'medium', who: 'sk' },
-    { key: 'WEB-144', title: 'Safari flexbox gap bug', type: 'bug', prio: 'low', who: 'mr' },
-  ],
-  progress: [
-    { key: 'WEB-142', title: 'Checkout button overlaps footer on mobile', type: 'bug', prio: 'high', who: 'al' },
-    { key: 'WEB-139', title: 'Add VAT number to invoices', type: 'task', prio: 'high', who: 'jd' },
-  ],
-  review: [{ key: 'WEB-135', title: 'Optimise hero illustration size', type: 'task', prio: 'medium', who: 'mr' }],
-  done: [
-    { key: 'WEB-131', title: 'Set up preview deployments', type: 'task', prio: 'medium', who: 'jd' },
-    { key: 'WEB-132', title: 'Fix cookie banner overlap', type: 'bug', prio: 'low', who: 'al' },
-  ],
-}
-const HOPS: [string, Status, Status][] = [['WEB-139', 'progress', 'review'], ['WEB-135', 'review', 'done'], ['WEB-144', 'todo', 'progress'], ['WEB-142', 'progress', 'review']]
-
-function MiniCard({ c, lifted, done, flash, style, className }: { c: Mini; lifted?: boolean; done?: boolean; flash?: boolean; style?: CSSProperties; className?: string }) {
+function MiniCard({ c, className }: { c: Mini; className?: string }) {
   return (
-    <div style={style} className={cx('rounded-[4px] border bg-paper p-2.5 transition-[box-shadow,border-color] duration-200',
-      lifted ? 'border-ink shadow-[0_14px_30px_rgba(0,0,0,.16)]' : 'border-line', flash && 'flash', className)}>
-      <p className={cx('line-clamp-2 text-[12.5px] font-medium leading-snug', done && 'text-slate')}>{c.title}</p>
+    <div className={cx('rounded-[4px] border border-line bg-paper p-2.5', className)}>
+      <p className="line-clamp-2 text-[12.5px] font-medium leading-snug">{c.title}</p>
       <div className="mt-2.5 flex items-center justify-between gap-1">
         <span className="flex min-w-0 items-center gap-1">
           <span className="whitespace-nowrap font-mono text-[10.5px] text-slate">{c.key}</span>
-          <span className="hidden sm:inline-flex"><TypeBadge type={c.type} compact /></span>
-          <span className="hidden md:inline-flex"><PriorityBadge priority={c.prio} compact /></span>
+          <TypeBadge type={c.type} compact /><PriorityBadge priority={c.prio} compact />
         </span>
         <Avatar user={u(c.who)} size={20} />
       </div>
@@ -83,72 +63,35 @@ function MiniCard({ c, lifted, done, flash, style, className }: { c: Mini; lifte
   )
 }
 
-/* The hero board plays a real drag: a cursor goes to a card, picks it up, carries it to the
-   next column and lets go. Cards glide to their new place (layout animation), never jump. */
+/* ── Hero board: the app's board drawn at a fixed size inside the laptop, where a cursor
+   picks a card up and carries it to the next column every few seconds. */
+const HERO_CARDS: DemoCard[] = [
+  { key: 'WEB-145', title: 'Audit accessibility for billing flow', type: 'task', prio: 'medium', who: 'sk', col: 'todo' },
+  { key: 'WEB-144', title: 'Safari flexbox gap bug', type: 'bug', prio: 'low', who: 'mr', col: 'todo' },
+  { key: 'WEB-142', title: 'Checkout button overlaps footer on mobile', type: 'bug', prio: 'high', who: 'al', col: 'progress' },
+  { key: 'WEB-139', title: 'Add VAT number to invoices', type: 'task', prio: 'high', who: 'jd', col: 'progress' },
+  { key: 'WEB-135', title: 'Optimise hero illustration size', type: 'task', prio: 'medium', who: 'mr', col: 'review' },
+  { key: 'WEB-131', title: 'Set up preview deployments', type: 'task', prio: 'medium', who: 'jd', col: 'done' },
+  { key: 'WEB-132', title: 'Fix cookie banner overlap', type: 'bug', prio: 'low', who: 'al', col: 'done' },
+  { key: 'WEB-146', title: 'Dark mode for email templates', type: 'task', prio: 'low', who: 'jd', col: 'todo' },
+  { key: 'WEB-147', title: 'Search ignores archived projects', type: 'bug', prio: 'medium', who: 'sk', col: 'todo' },
+  { key: 'WEB-143', title: 'Translate onboarding into Spanish', type: 'task', prio: 'medium', who: 'mr', col: 'progress' },
+  { key: 'WEB-136', title: 'Invoice PDF cuts off long addresses', type: 'bug', prio: 'high', who: 'sk', col: 'review' },
+  { key: 'WEB-128', title: 'Move status emails to a weekly digest', type: 'task', prio: 'low', who: 'jd', col: 'done' },
+  { key: 'WEB-127', title: 'Login page logo is blurry on retina', type: 'bug', prio: 'low', who: 'mr', col: 'done' },
+]
+const HERO_HOPS: [string, Status][] = [
+  ['WEB-139', 'review'], ['WEB-135', 'done'], ['WEB-144', 'progress'], ['WEB-142', 'review'],
+  ['WEB-142', 'progress'], ['WEB-144', 'todo'], ['WEB-135', 'review'], ['WEB-139', 'progress'],
+]
+const BOARD_W = SCREEN_W - 210
+const HERO_ROWS = Math.floor((APP_H - 48 - boardHeight(0)) / (boardHeight(1) - boardHeight(0)))
+
 function HeroBoard() {
-  const [cols, setCols] = useState(HERO)
-  const [lifted, setLifted] = useState<string | null>(null)
-  const [landed, setLanded] = useState<string | null>(null)
-  const [cursor, setCursor] = useState({ x: 0, y: 0, show: false, jump: false })
-  const area = useRef<HTMLDivElement>(null)
-  const cards = useRef(new Map<string, HTMLDivElement>())
-  const [intro, setIntro] = useState(true)
-  useEffect(() => { const t = setTimeout(() => setIntro(false), 1500); return () => clearTimeout(t) }, [])
-
-  const centre = (key: string) => {
-    const el = cards.current.get(key); const box = area.current
-    if (!el || !box) return null
-    const r = el.getBoundingClientRect(); const b = box.getBoundingClientRect()
-    return { x: r.left - b.left + r.width * 0.62, y: r.top - b.top + r.height * 0.45 }
-  }
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    let step = 0
-    let timers: number[] = []
-    const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms))
-    const tick = () => {
-      const [key, from, to] = HOPS[step % HOPS.length]
-      const back = Math.floor(step / HOPS.length) % 2 === 1
-      const [src, dst] = back ? [to, from] : [from, to]
-      const start = centre(key)
-      if (!start) return
-      setCursor(c => ({ ...c, ...start, show: true, jump: !c.show }))
-      later(650, () => { setCursor(c => ({ ...c, show: false })); setLifted(key) })
-      later(850, () => setCols(c => {
-        const card = c[src].find(x => x.key === key)
-        if (!card) return c
-        return { ...c, [src]: c[src].filter(x => x.key !== key), [dst]: [card, ...c[dst]] }
-      }))
-      later(1750, () => {
-        const end = centre(key)
-        setLifted(null); setLanded(key)
-        // Place the arrow where the card landed while it is still hidden, then show it: no trip back from the start.
-        if (end) {
-          setCursor({ ...end, show: false, jump: true })
-          requestAnimationFrame(() => requestAnimationFrame(() => setCursor(c => ({ ...c, show: true, jump: false }))))
-        }
-      })
-      later(2150, () => setCursor(c => ({ ...c, x: c.x + 36, y: c.y + 28, jump: false })))
-      later(3000, () => setLanded(null))
-      step++
-    }
-    const startT = window.setTimeout(tick, 1600)
-    const loop = window.setInterval(tick, 3800)
-    return () => { clearTimeout(startT); clearInterval(loop); timers.forEach(clearTimeout); timers = [] }
-  }, [])
-
-  let n = 0
-  const spring = { type: 'spring' as const, stiffness: 260, damping: 30, mass: 0.9 }
   return (
-    <div className="overflow-hidden rounded-[6px] border border-line bg-paper text-left shadow-[0_24px_60px_-30px_rgba(0,0,0,.25)]">
-      <div className="flex items-center justify-between border-b border-line bg-cloud px-4 py-2.5">
-        <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-line" /><span className="size-2.5 rounded-full bg-line" /><span className="size-2.5 rounded-full bg-line" /></div>
-        <span className="font-mono text-[11px] text-slate">tack.app / website-relaunch / board</span>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] text-success"><span className="relative flex size-1.5"><span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" /><span className="relative size-1.5 rounded-full bg-success" /></span>LIVE</span>
-      </div>
-      <div className="flex">
-        <div className="hidden w-[200px] shrink-0 flex-col gap-5 border-r border-line p-4 lg:flex">
+    <MacBook>
+      <div className="flex h-full text-left">
+        <div className="flex w-[210px] shrink-0 flex-col gap-5 border-r border-line p-4">
           <Wordmark height={22} />
           <div className="flex flex-col gap-0.5">
             <div className="label-mono px-2 py-1 text-[10px] text-slate">Projects</div>
@@ -171,95 +114,24 @@ function HeroBoard() {
             <span className="text-[13px]"><span className="text-slate">Website relaunch</span><span className="mx-2 text-line">/</span><span className="font-medium">Board</span></span>
             <span className="flex h-7 items-center gap-1 rounded-[4px] bg-ink px-2.5 text-[12px] font-medium text-paper"><Plus className="size-3.5" />Create issue</span>
           </div>
-          <div ref={area} className="relative">
-            <LayoutGroup>
-              <div className="grid min-h-[330px] grid-cols-2 gap-3 bg-wash p-4 sm:grid-cols-4">
-                {STATUSES.map(s => (
-                  <div key={s.id} className="flex flex-col gap-2 rounded-[4px] border border-line bg-cloud p-2">
-                    <div className="flex items-center gap-1.5 px-0.5 pb-1"><StatusPill status={s.id} size="sm" /><span className="font-mono text-[10.5px] text-slate">{cols[s.id].length}</span></div>
-                    {cols[s.id].map(c => (
-                      <motion.div key={c.key} layout="position" layoutId={c.key} transition={spring}
-                        ref={el => { if (el) cards.current.set(c.key, el); else cards.current.delete(c.key) }}
-                        animate={{ scale: lifted === c.key ? 1.03 : 1, zIndex: lifted === c.key ? 20 : 1 }}
-                        className={cx('relative', intro && 'hero-card')} style={d(300 + n++ * 80)}>
-                        <MiniCard c={c} lifted={lifted === c.key} flash={landed === c.key} done={s.id === 'done'} />
-                        {lifted === c.key && (
-                          <span className="anim-fade pointer-events-none absolute left-[62%] top-[45%] -translate-x-1/2 -translate-y-1/2"><GrabCursor /></span>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </LayoutGroup>
-            <motion.div aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-30"
-              initial={false}
-              animate={{ x: cursor.x, y: cursor.y, opacity: cursor.show ? 1 : 0 }}
-              transition={cursor.jump ? { duration: 0 } : { x: { type: 'spring', stiffness: 170, damping: 24 }, y: { type: 'spring', stiffness: 170, damping: 24 }, opacity: { duration: 0.12 } }}>
-              <ArrowCursor />
-            </motion.div>
-          </div>
+          <div className="h-[calc(100%-48px)] bg-wash"><DragBoard columns={['todo', 'progress', 'review', 'done']} initial={HERO_CARDS} hops={HERO_HOPS} width={BOARD_W} rows={HERO_ROWS} interval={3600} startDelay={1200} /></div>
         </div>
       </div>
-    </div>
+    </MacBook>
   )
 }
 
 /* Two mini columns: a hand picks a card up, carries it across and drops it, then takes it back. */
-const DRAG_START: Record<'progress' | 'review', Mini[]> = {
-  progress: [
-    { key: 'WEB-140', title: 'Password reset email lands in spam', type: 'bug', prio: 'high', who: 'al' },
-    { key: 'WEB-141', title: 'Update pricing page copy', type: 'task', prio: 'low', who: 'sk' },
-  ],
-  review: [{ key: 'WEB-135', title: 'Optimise hero illustration size', type: 'task', prio: 'medium', who: 'mr' }],
-}
+const DRAG_CARDS: DemoCard[] = [
+  { key: 'WEB-140', title: 'Password reset email lands in spam', type: 'bug', prio: 'high', who: 'al', col: 'progress' },
+  { key: 'WEB-141', title: 'Update pricing page copy', type: 'task', prio: 'low', who: 'sk', col: 'progress' },
+  { key: 'WEB-135', title: 'Optimise hero illustration size', type: 'task', prio: 'medium', who: 'mr', col: 'review' },
+]
 function MiniDrag() {
-  const [cols, setCols] = useState(DRAG_START)
-  const [held, setHeld] = useState(false)
-  const [landed, setLanded] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    let timers: number[] = []
-    let forward = true
-    let visible = false
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting }, { threshold: 0.3 })
-    if (ref.current) io.observe(ref.current)
-    const tick = () => {
-      if (!visible) return
-      const [src, dst] = forward ? ['progress', 'review'] as const : ['review', 'progress'] as const
-      setHeld(true)
-      timers.push(window.setTimeout(() => setCols(c => {
-        const card = c[src].find(x => x.key === 'WEB-140')
-        if (!card) return c
-        return { ...c, [src]: c[src].filter(x => x.key !== 'WEB-140'), [dst]: [card, ...c[dst]] }
-      }), 350))
-      timers.push(window.setTimeout(() => { setHeld(false); setLanded(true) }, 1200))
-      timers.push(window.setTimeout(() => setLanded(false), 2300))
-      forward = !forward
-    }
-    const loop = window.setInterval(tick, 3000)
-    timers.push(window.setTimeout(tick, 800))
-    return () => { clearInterval(loop); timers.forEach(clearTimeout); io.disconnect() }
-  }, [])
-  const spring = { type: 'spring' as const, stiffness: 240, damping: 30, mass: 0.9 }
   return (
-    <div ref={ref} className="grid grid-cols-2 gap-3 rounded-[6px] border border-line bg-wash p-3">
-      <LayoutGroup id="mini-drag">
-        {(['progress', 'review'] as const).map(st => (
-          <div key={st} className="flex min-h-[200px] flex-col gap-2 rounded-[4px] border border-line bg-cloud p-2">
-            <div className="flex items-center gap-1.5 px-0.5 pb-0.5"><StatusPill status={st} size="sm" /><span className="font-mono text-[10.5px] text-slate">{cols[st].length}</span></div>
-            {cols[st].map(c => (
-              <motion.div key={c.key} layout="position" layoutId={`md-${c.key}`} transition={spring}
-                animate={{ scale: held && c.key === 'WEB-140' ? 1.03 : 1, zIndex: held && c.key === 'WEB-140' ? 20 : 1 }} className="relative">
-                <MiniCard c={c} lifted={held && c.key === 'WEB-140'} flash={landed && c.key === 'WEB-140'} />
-                {held && c.key === 'WEB-140' && <span className="anim-fade pointer-events-none absolute left-[62%] top-[45%] -translate-x-1/2 -translate-y-1/2"><GrabCursor /></span>}
-              </motion.div>
-            ))}
-          </div>
-        ))}
-      </LayoutGroup>
-    </div>
+    <Scaled width={480} height={boardHeight(2)} className="overflow-hidden rounded-[6px] border border-line">
+      <DragBoard columns={['progress', 'review']} initial={DRAG_CARDS} hops={[['WEB-140', 'review'], ['WEB-140', 'progress']]} width={480} rows={2} interval={3400} startDelay={700} />
+    </Scaled>
   )
 }
 
@@ -465,7 +337,7 @@ export default function Landing() {
     <div className="min-h-dvh bg-paper">
       <Nav />
 
-      <section className="mx-auto max-w-[1232px] px-4 pb-14 pt-16 text-center md:px-6 md:pt-24">
+      <section className="mx-auto max-w-[1232px] overflow-hidden px-4 pb-0 pt-16 text-center md:px-6 md:pt-24">
         <Badge variant="secondary" className="anim-rise gap-2 rounded-[4px] border border-line px-2.5 py-1">
           <Sparkles className="!size-3 text-brand" /><span className="label-mono text-[10.5px] text-slate">Simple · calm · $5 a seat</span>
         </Badge>
@@ -479,7 +351,7 @@ export default function Landing() {
           <Button size="lg" onClick={open}>Open Tack<ArrowRight /></Button>
           <Button size="lg" variant="secondary" asChild><a href="#product">How it works</a></Button>
         </div>
-        <div className="anim-rise mx-auto mt-16 max-w-[1232px]" style={{ animationDelay: '240ms' }}><HeroBoard /></div>
+        <div className="anim-rise mx-auto -mb-[3.3%] mt-16 max-w-[1180px]" style={{ animationDelay: '240ms' }}><HeroBoard /></div>
       </section>
 
       <Ticker />
