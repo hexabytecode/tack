@@ -1,3 +1,8 @@
 {
-  "rewrites": [{ "source": "/((?!assets/|illustrations/|favicon|llms\\.txt|ai/.+\\.md).*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/ai", "destination": "/index.html" },
+    { "source": "/app", "destination": "/index.html" },
+    { "source": "/app/:path*", "destination": "/index.html" }
+  ]
 }

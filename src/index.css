@@ -173,3 +173,8 @@ a:focus-visible, button:not([data-slot]):focus-visible { outline: 2px solid rgba
 @keyframes tack-give { 0%, 45% { transform: none } 58% { transform: scaleY(.93) } 100% { transform: none } }
 @keyframes tack-nod { 0% { transform: none } 40% { transform: translateY(-1.6px) } 100% { transform: none } }
 @media (prefers-reduced-motion: reduce) { .tack-logo * { animation: none !important } }
+
+/* Loading skeletons */
+.skel { background: linear-gradient(90deg, var(--color-cloud) 0%, #f6f6f9 45%, var(--color-cloud) 90%); background-size: 200% 100%; animation: skel-shine 1.4s ease-in-out infinite; }
+@keyframes skel-shine { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none } }
