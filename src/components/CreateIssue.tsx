@@ -63,7 +63,7 @@ export default function CreateIssue() {
             <Label htmlFor="new-title" className="sr-only">Title</Label>
             <Input id="new-title" ref={titleRef} value={title} onChange={e => setTitle(e.target.value)} placeholder="Issue title"
               className="h-10 text-[15px] font-medium placeholder:font-normal" />
-            <MarkdownEditor id="new-description" value={description} onChange={setDescription} people={members} placeholder="Add a description (optional). Markdown works." rows={4} />
+            <MarkdownEditor id="new-description" value={description} onChange={setDescription} people={members} placeholder="Add a description (optional)" rows={4} />
 
             <div className="flex flex-wrap items-center gap-2">
               <ToggleGroup type="single" value={type} onValueChange={v => v && setType(v as IssueType)} variant="outline" size="sm" aria-label="Type">

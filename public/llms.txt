@@ -1,0 +1,17 @@
+# Tack
+
+> Tack is a calm, simple issue tracker for small teams. People use it first; AI tools can help if someone connects one.
+
+Each project has a board with four columns (To do, In progress, In review, Done). Issues are numbered by project, like WEB-142. Read the topic you need below rather than everything at once.
+
+## Guides
+
+- [Getting started](/ai/getting-started.md): connect Claude, Cursor or another AI tool in one step
+- [Issues](/ai/issues.md): what an issue is, its fields, statuses and keys
+- [MCP tools](/ai/mcp.md): the four actions an AI can take, with examples
+- [REST API](/ai/api.md): the same four actions over plain HTTP
+
+## Rules for AI tools
+
+- Ask before moving more than a few issues at once.
+- Everything you change is shown to the team as "by agent".

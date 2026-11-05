@@ -24,7 +24,7 @@ function useOpen() {
   return () => navigate(state.signedIn ? '/app/WEB/board' : '/login')
 }
 
-function Nav() {
+export function Nav() {
   const open = useOpen()
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur">
@@ -32,9 +32,10 @@ function Nav() {
         <div className="flex items-center gap-10">
           <Link to="/" aria-label="Tack home"><Wordmark height={26} /></Link>
           <nav className="hidden items-center gap-7 text-[14px] text-ink md:flex">
-            <a href="#product" className="link">Product</a>
-            <a href="#pricing" className="link">Pricing</a>
-            <a href="#faq" className="link">FAQ</a>
+            <a href="/#product" className="link">Product</a>
+            <a href="/#pricing" className="link">Pricing</a>
+            <Link to="/ai" className="link">For AI</Link>
+            <a href="/#faq" className="link">FAQ</a>
           </nav>
         </div>
         <div className="flex items-center gap-5">
@@ -88,7 +89,7 @@ function HeroBoard() {
   const [cols, setCols] = useState(HERO)
   const [lifted, setLifted] = useState<string | null>(null)
   const [landed, setLanded] = useState<string | null>(null)
-  const [cursor, setCursor] = useState({ x: 0, y: 0, grab: false, show: false })
+  const [cursor, setCursor] = useState({ x: 0, y: 0, show: false, jump: false })
   const area = useRef<HTMLDivElement>(null)
   const cards = useRef(new Map<string, HTMLDivElement>())
   const [intro, setIntro] = useState(true)
@@ -112,7 +113,7 @@ function HeroBoard() {
       const [src, dst] = back ? [to, from] : [from, to]
       const start = centre(key)
       if (!start) return
-      setCursor(c => ({ ...c, ...start, show: true, grab: false }))
+      setCursor(c => ({ ...c, ...start, show: true, jump: !c.show }))
       later(650, () => { setCursor(c => ({ ...c, show: false })); setLifted(key) })
       later(850, () => setCols(c => {
         const card = c[src].find(x => x.key === key)
@@ -122,9 +123,13 @@ function HeroBoard() {
       later(1750, () => {
         const end = centre(key)
         setLifted(null); setLanded(key)
-        if (end) setCursor({ ...end, show: true, grab: false })
+        // Place the arrow where the card landed while it is still hidden, then show it: no trip back from the start.
+        if (end) {
+          setCursor({ ...end, show: false, jump: true })
+          requestAnimationFrame(() => requestAnimationFrame(() => setCursor(c => ({ ...c, show: true, jump: false }))))
+        }
       })
-      later(2100, () => setCursor(c => ({ ...c, x: c.x + 36, y: c.y + 28 })))
+      later(2150, () => setCursor(c => ({ ...c, x: c.x + 36, y: c.y + 28, jump: false })))
       later(3000, () => setLanded(null))
       step++
     }
@@ -190,12 +195,70 @@ function HeroBoard() {
             <motion.div aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-30"
               initial={false}
               animate={{ x: cursor.x, y: cursor.y, opacity: cursor.show ? 1 : 0 }}
-              transition={{ x: { type: 'spring', stiffness: 170, damping: 24 }, y: { type: 'spring', stiffness: 170, damping: 24 }, opacity: { duration: 0.12 } }}>
+              transition={cursor.jump ? { duration: 0 } : { x: { type: 'spring', stiffness: 170, damping: 24 }, y: { type: 'spring', stiffness: 170, damping: 24 }, opacity: { duration: 0.12 } }}>
               <ArrowCursor />
             </motion.div>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+/* Two mini columns: a hand picks a card up, carries it across and drops it, then takes it back. */
+const DRAG_START: Record<'progress' | 'review', Mini[]> = {
+  progress: [
+    { key: 'WEB-140', title: 'Password reset email lands in spam', type: 'bug', prio: 'high', who: 'al' },
+    { key: 'WEB-141', title: 'Update pricing page copy', type: 'task', prio: 'low', who: 'sk' },
+  ],
+  review: [{ key: 'WEB-135', title: 'Optimise hero illustration size', type: 'task', prio: 'medium', who: 'mr' }],
+}
+function MiniDrag() {
+  const [cols, setCols] = useState(DRAG_START)
+  const [held, setHeld] = useState(false)
+  const [landed, setLanded] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let timers: number[] = []
+    let forward = true
+    let visible = false
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting }, { threshold: 0.3 })
+    if (ref.current) io.observe(ref.current)
+    const tick = () => {
+      if (!visible) return
+      const [src, dst] = forward ? ['progress', 'review'] as const : ['review', 'progress'] as const
+      setHeld(true)
+      timers.push(window.setTimeout(() => setCols(c => {
+        const card = c[src].find(x => x.key === 'WEB-140')
+        if (!card) return c
+        return { ...c, [src]: c[src].filter(x => x.key !== 'WEB-140'), [dst]: [card, ...c[dst]] }
+      }), 350))
+      timers.push(window.setTimeout(() => { setHeld(false); setLanded(true) }, 1200))
+      timers.push(window.setTimeout(() => setLanded(false), 2300))
+      forward = !forward
+    }
+    const loop = window.setInterval(tick, 3000)
+    timers.push(window.setTimeout(tick, 800))
+    return () => { clearInterval(loop); timers.forEach(clearTimeout); io.disconnect() }
+  }, [])
+  const spring = { type: 'spring' as const, stiffness: 240, damping: 30, mass: 0.9 }
+  return (
+    <div ref={ref} className="grid grid-cols-2 gap-3 rounded-[6px] border border-line bg-wash p-3">
+      <LayoutGroup id="mini-drag">
+        {(['progress', 'review'] as const).map(st => (
+          <div key={st} className="flex min-h-[200px] flex-col gap-2 rounded-[4px] border border-line bg-cloud p-2">
+            <div className="flex items-center gap-1.5 px-0.5 pb-0.5"><StatusPill status={st} size="sm" /><span className="font-mono text-[10.5px] text-slate">{cols[st].length}</span></div>
+            {cols[st].map(c => (
+              <motion.div key={c.key} layout="position" layoutId={`md-${c.key}`} transition={spring}
+                animate={{ scale: held && c.key === 'WEB-140' ? 1.03 : 1, zIndex: held && c.key === 'WEB-140' ? 20 : 1 }} className="relative">
+                <MiniCard c={c} lifted={held && c.key === 'WEB-140'} flash={landed && c.key === 'WEB-140'} />
+                {held && c.key === 'WEB-140' && <span className="anim-fade pointer-events-none absolute left-[62%] top-[45%] -translate-x-1/2 -translate-y-1/2"><GrabCursor /></span>}
+              </motion.div>
+            ))}
+          </div>
+        ))}
+      </LayoutGroup>
     </div>
   )
 }
@@ -247,16 +310,28 @@ function CountUp({ to, prefix = '', suffix = '' }: { to: number; prefix?: string
   return <span ref={ref}>{prefix}{v}{suffix}</span>
 }
 
-/* Illustrations are shown exactly as drawn in Figma: they wipe in on scroll and float gently. */
-function Illo({ src, alt, className }: { src: string; alt: string; className?: string }) {
+/* Illustrations are the Figma drawings. The moving parts are animated frame by frame from the
+   drawing itself (see assets/illustrations/*_anim.py) and play as a short silent loop. */
+function Illo({ name, alt, className }: { name: string; alt: string; className?: string }) {
+  const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   return (
     <div className={cx('illo relative flex items-center justify-center overflow-hidden rounded-[6px] border border-line bg-paper', className)}>
-      <div className="illo-float w-full"><img src={src} alt={alt} width={1200} height={800} loading="lazy" className="illo-img block h-auto w-full" /></div>
+      <div className="w-full">
+        {reduce ? (
+          <img src={`/illustrations/${name}-poster.webp`} alt={alt} width={1200} height={800} loading="lazy" className="illo-img block h-auto w-full" />
+        ) : (
+          <video className="illo-img block h-auto w-full" width={1200} height={800} autoPlay muted loop playsInline preload="metadata"
+            poster={`/illustrations/${name}-poster.webp`} aria-label={alt}>
+            <source src={`/illustrations/${name}-anim.webm`} type="video/webm" />
+            <source src={`/illustrations/${name}-anim.mp4`} type="video/mp4" />
+          </video>
+        )}
+      </div>
     </div>
   )
 }
-const BoardIllo = ({ className }: { className?: string }) => <Illo src="/illustrations/board.webp" alt="Line drawing of a board with one card lifted off, pinned by a blue tack" className={className} />
-const ConnectorIllo = ({ className }: { className?: string }) => <Illo src="/illustrations/connector.webp" alt="Line drawing of an AI block plugged into Tack" className={className} />
+const BoardIllo = ({ className }: { className?: string }) => <Illo name="board" alt="Line drawing: a pinned card lowers onto the board and drops into its slot" className={className} />
+const ConnectorIllo = ({ className }: { className?: string }) => <Illo name="connector" alt="Line drawing: an AI block plugged into Tack, with data flowing along the cable" className={className} />
 
 function Eyebrow({ children, icon: I }: { children: ReactNode; icon?: typeof Zap }) {
   return <div className="label-mono flex items-center gap-1.5 text-slate">{I && <I className="size-3.5" />}{children}</div>
@@ -352,7 +427,7 @@ function IssueMock() {
         <Avatar user={u('al')} size={26} />
         <div className="min-w-0 flex-1"><div className="flex items-baseline gap-2"><span className="text-[13px] font-medium">Alex Lin</span><span className="font-mono text-[11px] text-slate">45m ago</span></div><Markdown className="mt-0.5">{RICH}</Markdown></div>
       </div>
-      <div className="mt-4"><MarkdownEditor id="landing-reply" value={reply} onChange={setReply} onSubmit={() => setReply('')} people={people} rows={2} placeholder="Write a comment… try **bold**, a checklist, @Samira or a callout" /></div>
+      <div className="mt-4"><MarkdownEditor id="landing-reply" value={reply} onChange={setReply} onSubmit={() => setReply('')} people={people} rows={2} /></div>
       <div className="mt-4 flex flex-col gap-1.5 font-mono text-[11.5px] text-slate">
         <span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-line" /><span><span className="text-ink">Samira Khan</span> assigned this to Alex Lin · 3h ago</span></span>
         <span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-brand" /><span><span className="text-brand">Claude (agent)</span> linked WEB-132 · 1h ago</span></span>
@@ -430,14 +505,8 @@ export default function Landing() {
           <Feature n="01" eyebrow="The board" icon={KanbanSquare} title="Drag it, done."
             body="Four columns, every card in view. Bugs, tasks and priorities each have their own colour and icon, so you can read the board at a glance."
             extra={<div className="mt-5 flex flex-wrap gap-1.5"><TypeBadge type="bug" /><TypeBadge type="task" /><PriorityBadge priority="high" /><PriorityBadge priority="medium" /><PriorityBadge priority="low" /></div>}
-            mock={<div className="grid grid-cols-[1fr_1.15fr] items-center gap-4">
-              <div className="rounded-[4px] border border-line bg-cloud p-2.5">
-                <div className="mb-2 px-0.5"><StatusPill status="progress" size="sm" /></div>
-                <div className="flex flex-col gap-2">
-                  <MiniCard c={{ key: 'WEB-140', title: 'Password reset email lands in spam', type: 'bug', prio: 'high', who: 'al' }} lifted />
-                  <MiniCard c={{ key: 'WEB-141', title: 'Update pricing page copy', type: 'task', prio: 'low', who: 'sk' }} />
-                </div>
-              </div>
+            mock={<div className="flex flex-col gap-4">
+              <MiniDrag />
               <BoardIllo />
             </div>} />
           <Feature n="02" eyebrow="Quick create" icon={Plus} title="New issue in five seconds." flip
@@ -520,7 +589,7 @@ export default function Landing() {
           <div className="mt-12 grid gap-4 lg:grid-cols-[repeat(3,1fr)_1.25fr]">
             {([
               [Plug, 'MCP', 'Connect Claude or Cursor', 'One command and a personal key. Four actions: search, read, create, update.', <code key="c" className="flex items-center gap-2 rounded-[4px] bg-ink p-3 font-mono text-[11px] text-brand-soft"><Terminal className="size-3.5 shrink-0" />claude mcp add tack …/mcp</code>],
-              [FileText, 'llms.txt', 'One file explains Tack', 'A short plain-text guide any AI can read to understand your projects and fields.', <code key="l" className="block rounded-[4px] bg-cloud p-3 font-mono text-[11px] leading-relaxed text-slate"># Tack<br />## Tools</code>],
+              [FileText, 'llms.txt', 'Short guides your AI can read', 'A tiny index plus one file per topic, so your AI reads only what it needs.', <Button key="l" variant="secondary" size="sm" className="w-fit" asChild><Link to="/ai">Open the AI guide<ArrowRight /></Link></Button>],
               [ClipboardCopy, 'Copy for AI', 'Copy any issue for AI', 'One button turns an issue into clean text you can paste into any chat.', <span key="b" className="inline-flex h-8 w-fit items-center gap-1.5 rounded-[4px] border border-line bg-paper px-2.5 font-mono text-[11px]"><ClipboardCopy className="size-3.5" />Copy for AI</span>],
             ] as const).map(([I, e, t, b, x], i) => (
               <div key={e} className="reveal flex flex-col justify-between gap-6 rounded-[6px] border border-line bg-paper p-5" style={d(i * 100)}>
@@ -564,7 +633,7 @@ export default function Landing() {
           </div>
           <div className="flex gap-16">
             <div className="flex flex-col gap-2 text-[13.5px]"><div className="label-mono mb-1">Product</div><Link to="/app/WEB/board" className="link w-fit text-slate">Board</Link><Link to="/app/WEB/list" className="link w-fit text-slate">List</Link><Link to="/app/me" className="link w-fit text-slate">My issues</Link></div>
-            <div className="flex flex-col gap-2 text-[13.5px]"><div className="label-mono mb-1">Tack</div><a href="#pricing" className="link w-fit text-slate">Pricing</a><a href="#faq" className="link w-fit text-slate">FAQ</a><Link to="/login" className="link w-fit text-slate">Log in</Link></div>
+            <div className="flex flex-col gap-2 text-[13.5px]"><div className="label-mono mb-1">Tack</div><a href="#pricing" className="link w-fit text-slate">Pricing</a><Link to="/ai" className="link w-fit text-slate">For AI</Link><a href="#faq" className="link w-fit text-slate">FAQ</a><Link to="/login" className="link w-fit text-slate">Log in</Link></div>
           </div>
         </div>
         <div className="border-t border-line">

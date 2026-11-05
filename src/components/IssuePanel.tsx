@@ -100,7 +100,7 @@ export default function IssuePanel() {
                     {!editingDesc && <Button size="sm" variant="ghost" className="text-slate" onClick={() => setEditingDesc(true)}><PenLine />Edit</Button>}
                   </div>
                   {editingDesc ? (
-                    <MarkdownEditor id="issue-desc" value={desc} onChange={setDesc} people={members} rows={7} submitLabel="Save"
+                    <MarkdownEditor id="issue-desc" open value={desc} onChange={setDesc} people={members} rows={7} submitLabel="Save" placeholder="Describe the issue…"
                       onSubmit={() => { patch({ description: desc }); setEditingDesc(false) }}
                       onCancel={() => { setDesc(issue.description); setEditingDesc(false) }} />
                   ) : (
@@ -136,7 +136,7 @@ export default function IssuePanel() {
                   </ul>
                   <div className="mt-4">
                     <MarkdownEditor id="issue-reply" value={reply} onChange={setReply} onSubmit={sendReply} people={members}
-                      placeholder="Write a comment… try **bold**, a checklist, @Samira or a callout" />
+                      placeholder="Leave a comment…" />
                   </div>
                 </section>
 

@@ -15,10 +15,12 @@ const Board = lazy(() => import('./pages/Board'))
 const List = lazy(() => import('./pages/List'))
 const MyIssues = lazy(() => import('./pages/MyIssues'))
 const Settings = lazy(() => import('./pages/Settings'))
+const AiGuide = lazy(() => import('./pages/AiGuide'))
 
 const TITLES: [RegExp, string][] = [
   [/^\/$/, 'Tack — the issue tracker your team will actually use'],
   [/^\/login/, 'Sign in · Tack'],
+  [/^\/ai$/, 'Tack for AI'],
   [/\/board$/, 'Board · Tack'],
   [/\/list$/, 'List · Tack'],
   [/\/me$/, 'My issues · Tack'],
@@ -28,7 +30,7 @@ const TITLES: [RegExp, string][] = [
 function ScrollAndTitle() {
   const { pathname } = useLocation()
   useEffect(() => {
-    if (pathname === '/') window.scrollTo(0, 0)
+    if (pathname === '/' || pathname === '/ai') window.scrollTo(0, 0)
     document.title = TITLES.find(([re]) => re.test(pathname))?.[1] ?? 'Tack'
   }, [pathname])
   return null
@@ -46,6 +48,7 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/ai" element={<Suspense fallback={null}><AiGuide /></Suspense>} />
           <Route path="/app" element={<Navigate to="/app/WEB/board" replace />} />
           <Route path="/app/me" element={app(<MyIssues />)} />
           <Route path="/app/:project/board" element={app(<Board />)} />

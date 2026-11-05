@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Archive, Bot, RotateCcw, Copy, Eye, EyeOff, FileText, KeyRound, Play, Plug, Save, Terminal, UserPlus, UserMinus } from 'lucide-react'
 import { useStore } from '../store'
 import { ME } from '../data/mock'
@@ -124,19 +124,9 @@ export default function Settings() {
                 </div>
                 <code className="block whitespace-pre-wrap break-all font-mono text-[12.5px] leading-relaxed text-brand-soft">{command}</code>
               </div>
-              <div className="rounded-[4px] border border-line bg-paper">
-                <div className="flex items-center justify-between border-b border-line px-4 py-2">
-                  <span className="flex items-center gap-2 font-mono text-[12px]"><FileText className="size-4 text-slate" />llms.txt</span>
-                  <span className="font-mono text-[11px] text-slate">The file your AI reads first</span>
-                </div>
-                <pre className="overflow-x-auto px-4 py-3 font-mono text-[12px] leading-[1.8] text-slate">{`# Tack
-> A calm, simple issue tracker. People first; AI optional.
-
-## Getting started
-Connect to https://tack.company.com/mcp with your personal key.
-
-## Tools
-- search_issues · get_issue · create_issue · update_issue`}</pre>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[4px] border border-line bg-paper px-4 py-3">
+                <span className="flex items-center gap-2.5 text-[13.5px]"><FileText className="size-4 text-slate" />Short guides your AI can read: one index, one file per topic.</span>
+                <Button size="sm" variant="secondary" asChild><Link to="/ai">Open the AI guide</Link></Button>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-[4px] border border-dashed border-brand/40 bg-tint px-4 py-3">
                 <span className="flex items-center gap-2 text-[13.5px]"><Bot className="size-4 text-brand" />See what an AI update looks like on the board.</span>
