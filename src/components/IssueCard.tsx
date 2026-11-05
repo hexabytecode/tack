@@ -27,7 +27,7 @@ const IssueCard = forwardRef<HTMLDivElement, Props>(function IssueCard({ issue, 
           <Bot className="size-3" />By agent · Claude
         </span>
       )}
-      <p className={cx('line-clamp-2 text-[13.5px] font-medium leading-snug', issue.status === 'done' && 'text-slate line-through decoration-slate/40')}>{issue.title}</p>
+      <p className={cx('line-clamp-2 text-[13.5px] font-medium leading-snug', issue.status === 'done' && 'text-slate')}>{issue.title}</p>
       <div className="mt-3 flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           <span className="font-mono text-[11.5px] text-slate">{issue.key}</span>

@@ -74,7 +74,7 @@
 }
 
 @layer base {
-  * { @apply border-border outline-ring/50; }
+  * { @apply border-border; }
 }
 
 html { -webkit-font-smoothing: antialiased; }
@@ -87,7 +87,8 @@ body { background: var(--color-paper); color: var(--color-ink); font-family: var
 .link { border-bottom: 1px solid transparent; transition: border-color 0.12s ease; }
 .link:hover { border-bottom-color: currentColor; }
 
-:where(button, a, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--color-brand); outline-offset: 1px; }
+/* One focus style: shadcn controls draw their own soft blue ring; plain links get a matching outline. */
+a:focus-visible, button:not([data-slot]):focus-visible { outline: 2px solid rgba(24, 63, 217, 0.4); outline-offset: 2px; border-radius: 3px; }
 
 /* Top loading bar */
 .route-bar { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 60; pointer-events: none; opacity: 0; transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -144,18 +145,6 @@ body { background: var(--color-paper); color: var(--color-ink); font-family: var
 .illo.in .illo-img { clip-path: inset(0 0 0 0); }
 @keyframes illo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .illo.in .illo-float { animation: illo-float 5s ease-in-out 1.3s infinite; }
-@keyframes illo-ping { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(2.6); opacity: 0; } }
-.illo-ping { transform-box: fill-box; transform-origin: center; opacity: 0; }
-.illo.in .illo-ping { animation: illo-ping 2s cubic-bezier(0, 0, 0.2, 1) 1.2s infinite; }
-.illo.in .illo-ping-2 { animation-delay: 2.2s; }
-.illo-trace { stroke-dasharray: 140; stroke-dashoffset: 140; }
-.illo.in .illo-trace { animation: illo-trace 3.2s ease-in-out 1.4s infinite; }
-@keyframes illo-trace { 0% { stroke-dashoffset: 140; } 40%, 70% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -140; } }
-.illo-dot { opacity: 0; }
-.illo.in .illo-dot { opacity: 1; transition: opacity 0.3s 1.2s; }
-@keyframes illo-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
-.illo-blink { transform-box: fill-box; transform-origin: center; }
-.illo.in .illo-blink { animation: illo-blink 3.5s ease-in-out 1.5s infinite; }
 
 .scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
 .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
@@ -164,7 +153,6 @@ body { background: var(--color-paper); color: var(--color-ink); font-family: var
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; transition-delay: 0ms !important; }
   .reveal { opacity: 1; transform: none; }
   .illo .illo-img { clip-path: none; }
-  .illo-dot, .illo-ping { display: none; }
   .ticker-track { animation: none; }
   .type-on { max-width: 100%; }
   .after-type { opacity: 1; }

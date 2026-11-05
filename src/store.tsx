@@ -1,4 +1,4 @@
-import { toast as sonner } from 'sonner'
+import { notify, type NotifyOptions } from './lib/notify'
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
 import { ME, PROJECTS, USERS, nextNumber, seed, STATUSES, type Activity, type Comment, type Issue, type IssueType, type Priority, type Project, type Status, type User } from './data/mock'
 
@@ -120,7 +120,7 @@ interface Ctx {
   dispatch: (a: Action) => void
   user: (id: string | null) => User | undefined
   create: (n: NewIssue) => Issue
-  toast: (text: string) => void
+  toast: (text: string, opts?: NotifyOptions) => void
   createOpen: boolean
   setCreateOpen: (open: boolean, project?: string) => void
   createProject: string | null
@@ -148,7 +148,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(t)
   }, [state.flash])
 
-  const toast = useCallback((text: string) => { sonner(text) }, [])
+  const toast = useCallback((text: string, opts?: NotifyOptions) => { notify(text, opts) }, [])
 
   const create = useCallback((n: NewIssue) => {
     const now = Date.now()

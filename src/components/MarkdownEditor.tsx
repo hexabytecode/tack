@@ -28,11 +28,11 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
   const [tab, setTab] = useState('write')
   const [mention, setMention] = useState(false)
 
-  const apply = (before: string, after = '', block = false) => {
+  const apply = (before: string, after = '', block = false, fallback = '') => {
     const el = ref.current
     if (!el) return
     const { selectionStart: s, selectionEnd: e } = el
-    const picked = value.slice(s, e)
+    const picked = value.slice(s, e) || fallback
     const prefix = block && s > 0 && value[s - 1] !== '\n' ? '\n' : ''
     const next = value.slice(0, s) + prefix + before + picked + after + value.slice(e)
     onChange(next)
@@ -44,26 +44,26 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
   }
 
   const tools = [
-    { icon: Bold, label: 'Bold', run: () => apply('**', '**') },
-    { icon: Italic, label: 'Italic', run: () => apply('_', '_') },
-    { icon: Code, label: 'Code', run: () => apply('`', '`') },
-    { icon: Link2, label: 'Link', run: () => apply('[', '](https://)') },
-    { icon: List, label: 'Bulleted list', run: () => apply('- ', '', true) },
-    { icon: ListOrdered, label: 'Numbered list', run: () => apply('1. ', '', true) },
-    { icon: ListChecks, label: 'Checklist', run: () => apply('- [ ] ', '', true) },
-    { icon: Quote, label: 'Quote', run: () => apply('> ', '', true) },
+    { icon: Bold, label: 'Bold', run: () => apply('**', '**', false, 'bold text') },
+    { icon: Italic, label: 'Italic', run: () => apply('_', '_', false, 'italic text') },
+    { icon: Code, label: 'Code', run: () => apply('`', '`', false, 'code') },
+    { icon: Link2, label: 'Link', run: () => apply('[', '](https://example.com)', false, 'link text') },
+    { icon: List, label: 'Bulleted list', run: () => apply('- ', '', true, 'List item') },
+    { icon: ListOrdered, label: 'Numbered list', run: () => apply('1. ', '', true, 'First step') },
+    { icon: ListChecks, label: 'Checklist', run: () => apply('- [ ] ', '', true, 'To do') },
+    { icon: Quote, label: 'Quote', run: () => apply('> ', '', true, 'Quote') },
   ]
 
   return (
-    <div className="rounded-[4px] border border-line bg-paper focus-within:border-slate/60">
+    <div className="rounded-[4px] border border-line bg-paper transition-[border-color,box-shadow] focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
       <Tabs value={tab} onValueChange={setTab}>
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-2 py-1.5">
-          <TabsList className="h-7 rounded-[4px] p-0.5">
-            <TabsTrigger value="write" className="h-6 rounded-[3px] px-2.5 text-[12px]">Write</TabsTrigger>
-            <TabsTrigger value="preview" className="h-6 rounded-[3px] px-2.5 text-[12px]">Preview</TabsTrigger>
+        <div className="flex items-center justify-between gap-2 border-b border-line px-2 py-1.5">
+          <TabsList className="shrink-0">
+            <TabsTrigger value="write" className="px-2.5 py-0.5 text-[12px]">Write</TabsTrigger>
+            <TabsTrigger value="preview" className="px-2.5 py-0.5 text-[12px]">Preview</TabsTrigger>
           </TabsList>
           {tab === 'write' && (
-            <div className="flex flex-wrap items-center gap-0.5">
+            <div className="-mr-1 flex min-w-0 items-center gap-0.5 overflow-x-auto scrollbar-thin">
               {tools.map(t => (
                 <Tooltip key={t.label}>
                   <TooltipTrigger asChild>
@@ -83,7 +83,7 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
                 </Tooltip>
                 <DropdownMenuContent align="end">
                   {[['NOTE', 'Note'], ['TIP', 'Tip'], ['WARNING', 'Heads up'], ['DONE', 'Decision']].map(([k, l]) => (
-                    <DropdownMenuItem key={k} onSelect={() => apply(`> [!${k}] `, '', true)}>{l}</DropdownMenuItem>
+                    <DropdownMenuItem key={k} onSelect={() => apply(`> [!${k}] `, '', true, l)}>{l}</DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -119,16 +119,16 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
             onChange={e => onChange(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onSubmit?.() } }}
             placeholder={placeholder}
-            className="min-h-0 resize-y rounded-none border-0 px-3 py-2 text-[13.5px] shadow-none focus-visible:ring-0"
+            className="min-h-0 resize-y rounded-none border-0 bg-transparent px-3 py-2 text-[13.5px] shadow-none focus-visible:border-0 focus-visible:ring-0"
           />
         </TabsContent>
         <TabsContent value="preview" className="m-0 min-h-[76px] px-3 py-2">
           {value.trim() ? <Markdown>{value}</Markdown> : <p className="text-[13px] text-placeholder">Nothing to preview yet.</p>}
         </TabsContent>
       </Tabs>
-      <div className="flex items-center justify-between border-t border-line px-3 py-1.5">
-        <span className="font-mono text-[10.5px] text-slate">Markdown · @mention · WEB-142 links</span>
-        <div className="flex gap-1.5">
+      <div className="flex items-center justify-between gap-2 border-t border-line px-3 py-1.5">
+        <span className="hidden font-mono text-[10.5px] text-slate sm:inline">Markdown · @mention · WEB-142 links</span>
+        <div className="ml-auto flex gap-1.5">
           {onCancel && <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>}
           {onSubmit && <Button type="button" size="sm" onClick={onSubmit} disabled={!value.trim()}>{submitLabel}</Button>}
         </div>

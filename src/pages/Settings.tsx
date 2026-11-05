@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { Archive, Bot, Copy, Eye, EyeOff, FileText, KeyRound, Play, Plug, Save, Terminal, UserPlus, UserMinus } from 'lucide-react'
+import { Archive, Bot, RotateCcw, Copy, Eye, EyeOff, FileText, KeyRound, Play, Plug, Save, Terminal, UserPlus, UserMinus } from 'lucide-react'
 import { useStore } from '../store'
 import { ME } from '../data/mock'
 import { TopBar, Crumb } from '../components/AppShell'
@@ -47,7 +47,7 @@ export default function Settings() {
     navigate('/app/WEB/board')
     setTimeout(() => {
       dispatch({ t: 'agent', key: target.key, status: 'review', note: 'Opened the change for review and moved this card.\n\n> [!NOTE] The fix is ready for someone to check.' })
-      toast(`Claude moved ${target.key} to In review`)
+      toast(`Claude moved ${target.key}`, { kind: 'agent', status: 'review', description: 'by agent' })
     }, 900)
   }
 
@@ -60,7 +60,7 @@ export default function Settings() {
           <p className="mb-10 mt-1 text-[14px] text-slate">Name, people and connections for {p.name}.</p>
 
           <Section label="General" icon={FileText}>
-            <form className="flex flex-col gap-5" onSubmit={e => { e.preventDefault(); if (name.trim()) { dispatch({ t: 'project', key: p.key, patch: { name: name.trim() } }); toast('Project saved') } }}>
+            <form className="flex flex-col gap-5" onSubmit={e => { e.preventDefault(); if (name.trim()) { dispatch({ t: 'project', key: p.key, patch: { name: name.trim() } }); toast('Project saved', { kind: 'success' }) } }}>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="project-name">Project name</Label>
                 <Input id="project-name" value={name} onChange={e => setName(e.target.value)} className="h-[38px] bg-paper" />
@@ -75,7 +75,7 @@ export default function Settings() {
           </Section>
 
           <Section label="Members" icon={UserPlus} aside={<Badge variant="secondary" className="rounded-[4px] text-[10px]">{members.length} total</Badge>}>
-            <form className="mb-3 flex gap-2" onSubmit={e => { e.preventDefault(); if (/\S+@\S+\.\S+/.test(invite)) { dispatch({ t: 'invite', email: invite.trim(), project: p.key }); toast(`Invite sent to ${invite.trim()}`); setInvite('') } }}>
+            <form className="mb-3 flex gap-2" onSubmit={e => { e.preventDefault(); if (/\S+@\S+\.\S+/.test(invite)) { dispatch({ t: 'invite', email: invite.trim(), project: p.key }); toast('Invite sent', { kind: 'success', description: invite.trim() }); setInvite('') } }}>
               <Input id="invite-email" value={invite} onChange={e => setInvite(e.target.value)} placeholder="colleague@company.com" type="email" className="h-[38px] bg-paper" />
               <Button type="submit" variant="secondary" className="h-[38px]" disabled={!invite}><UserPlus />Invite</Button>
             </form>
@@ -113,14 +113,14 @@ export default function Settings() {
                 <div className="flex flex-wrap items-center gap-2">
                   <code className="min-w-0 flex-1 truncate rounded-[4px] bg-cloud px-3 py-2 font-mono text-[12.5px]">{key}</code>
                   <Button size="sm" variant="secondary" onClick={() => setShowKey(s => !s)}>{showKey ? <EyeOff /> : <Eye />}{showKey ? 'Hide' : 'Show'}</Button>
-                  <Button size="sm" variant="secondary" onClick={async () => toast(await copy('tk_demo_7Hq2LmX9vR4bN8sK') ? 'Key copied' : 'Copy blocked by the browser')}><Copy />Copy</Button>
+                  <Button size="sm" variant="secondary" onClick={async () => toast(await copy('tk_demo_7Hq2LmX9vR4bN8sK') ? 'Key copied' : 'Copy blocked by the browser', { kind: 'copy' })}><Copy />Copy</Button>
                 </div>
                 <p className="mt-2 font-mono text-[11px] text-slate">Demo key. It doesn’t connect to anything.</p>
               </div>
               <div className="rounded-[4px] bg-ink p-4">
                 <div className="label-mono mb-2 flex items-center justify-between text-[#8E93A8]">
                   <span className="flex items-center gap-1.5"><Terminal className="size-3.5" />Connect Claude Code</span>
-                  <button className="flex items-center gap-1 normal-case tracking-normal hover:text-paper" onClick={async () => toast(await copy(command) ? 'Command copied' : 'Copy blocked by the browser')}><Copy className="size-3.5" />Copy</button>
+                  <button className="flex items-center gap-1 normal-case tracking-normal hover:text-paper" onClick={async () => toast(await copy(command) ? 'Command copied' : 'Copy blocked by the browser', { kind: 'copy', description: 'Paste it into your terminal' })}><Copy className="size-3.5" />Copy</button>
                 </div>
                 <code className="block whitespace-pre-wrap break-all font-mono text-[12.5px] leading-relaxed text-brand-soft">{command}</code>
               </div>
@@ -166,6 +166,10 @@ Connect to https://tack.company.com/mcp with your personal key.
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+            </div>
+            <div className="mt-8 flex items-center justify-between rounded-[4px] border border-dashed border-line px-4 py-3">
+              <span className="text-[13px] text-slate">This is a demo. Changes are kept in your browser only.</span>
+              <Button variant="ghost" size="sm" onClick={() => { dispatch({ t: 'reset' }); toast('Demo data reset', { kind: 'success', description: 'Back to the original sample issues' }) }}><RotateCcw />Reset demo data</Button>
             </div>
           </Section>
         </div>

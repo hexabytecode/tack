@@ -5,7 +5,7 @@ import { STATUSES, type Issue } from '../data/mock'
 import { TopBar, Crumb } from '../components/AppShell'
 import { FilterRow, useFilteredIssues } from './Board'
 import { ArrowDown } from 'lucide-react'
-import { Avatar, IssueChips, StatusLabel, cx, dueLabel, timeAgo } from '@/lib/ui'
+import { Avatar, IssueChips, StatusPill, cx, dueLabel, timeAgo } from '@/lib/ui'
 
 type SortKey = 'updated' | 'status' | 'priority' | 'due'
 const rank = { status: Object.fromEntries(STATUSES.map((s, n) => [s.id, n])), priority: { high: 0, medium: 1, low: 2 } } as const
@@ -60,7 +60,7 @@ export default function List() {
                 <tr key={i.key} onClick={() => open(i.key)} className={cx('h-11 cursor-pointer border-b border-line transition-colors hover:bg-[#F7F7FA]', state.flash === i.key && 'flash')}>
                   <td className="whitespace-nowrap pl-6 pr-3 font-mono text-[12px] text-slate">{i.key}</td>
                   <td className="max-w-[420px] px-3"><button className="block w-full truncate text-left text-[13.5px] font-medium" onClick={e => { e.stopPropagation(); open(i.key) }}>{i.title}</button></td>
-                  <td className="whitespace-nowrap px-3"><StatusLabel status={i.status} /></td>
+                  <td className="whitespace-nowrap px-3"><StatusPill status={i.status} size="sm" /></td>
                   <td className="whitespace-nowrap px-3"><span className="flex gap-1.5"><IssueChips issue={i} /></span></td>
                   <td className="whitespace-nowrap px-3"><span className="flex items-center gap-2 text-[13px]"><Avatar user={a} />{a?.name.split(' ')[0] ?? <span className="text-slate">—</span>}</span></td>
                   <td className={cx('whitespace-nowrap px-3 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-warning' : 'text-slate')}>{due?.text ?? '—'}</td>
@@ -76,7 +76,7 @@ export default function List() {
               <button onClick={() => open(i.key)} className="flex w-full flex-col gap-2 px-4 py-3 text-left">
                 <span className="text-[14px] font-medium leading-snug">{i.title}</span>
                 <span className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><span className="font-mono text-[11.5px] text-slate">{i.key}</span><StatusLabel status={i.status} /></span>
+                  <span className="flex items-center gap-2"><span className="font-mono text-[11.5px] text-slate">{i.key}</span><StatusPill status={i.status} size="sm" /></span>
                   <Avatar user={user(i.assignee)} />
                 </span>
               </button>

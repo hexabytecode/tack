@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import DatePicker from './DatePicker'
 import Markdown from './Markdown'
 import MarkdownEditor from './MarkdownEditor'
-import { Avatar, PRIORITY_META, StatusIcon, TYPE_META, dueLabel, issueMarkdown, timeAgo } from '@/lib/ui'
+import { Avatar, PRIORITY_META, StatusPill, TYPE_META, dueLabel, issueMarkdown, timeAgo } from '@/lib/ui'
 import { cn } from '@/lib/utils'
 
 async function copy(text: string) {
@@ -61,17 +61,17 @@ export default function IssuePanel() {
           <>
             <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-line px-5">
               <div className="flex min-w-0 items-center gap-2">
-                <SheetTitle className="font-mono text-[13px] font-medium text-brand">{issue.key}</SheetTitle>
-                <span className="text-line">/</span>
-                <span className="truncate text-[13px] text-slate">{project.name}</span>
+                <SheetTitle className="whitespace-nowrap font-mono text-[13px] font-medium text-brand">{issue.key}</SheetTitle>
+                <span className="hidden text-line sm:inline">/</span>
+                <span className="hidden truncate text-[13px] text-slate sm:inline">{project.name}</span>
                 <SheetDescription className="sr-only">{issue.title}</SheetDescription>
               </div>
               <div className="flex items-center gap-1">
-                <Button size="sm" variant="secondary" onClick={async () => toast(await copy(issueMarkdown(issue, user(issue.assignee))) ? 'Copied as Markdown for AI' : 'Copy blocked by the browser')}>
-                  <ClipboardCopy />Copy for AI
+                <Button size="sm" variant="secondary" onClick={async () => toast(await copy(issueMarkdown(issue, user(issue.assignee))) ? 'Copied for AI' : 'Copy blocked by the browser', { kind: 'copy', description: `${issue.key} as Markdown, ready to paste` })}>
+                  <ClipboardCopy /><span className="hidden sm:inline">Copy for AI</span>
                 </Button>
                 <Tooltip><TooltipTrigger asChild>
-                  <Button size="icon-sm" variant="ghost" aria-label="Copy link" onClick={async () => toast(await copy(window.location.href) ? 'Link copied' : 'Copy blocked by the browser')}><Link2 /></Button>
+                  <Button size="icon-sm" variant="ghost" aria-label="Copy link" onClick={async () => toast(await copy(window.location.href) ? 'Link copied' : 'Copy blocked by the browser', { kind: 'copy', description: issue.key })}><Link2 /></Button>
                 </TooltipTrigger><TooltipContent>Copy link</TooltipContent></Tooltip>
                 <Tooltip><TooltipTrigger asChild>
                   <Button size="icon-sm" variant="ghost" aria-label="Close" onClick={close}><X /></Button>
@@ -157,9 +157,13 @@ export default function IssuePanel() {
 
               <aside className="flex shrink-0 flex-col gap-4 border-t border-line px-5 py-5 md:w-[248px] md:overflow-y-auto md:border-l md:border-t-0">
                 <Field label="Status">
-                  <Select value={issue.status} onValueChange={v => patch({ status: v as Status })}>
-                    <SelectTrigger id="issue-status" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
-                    <SelectContent>{STATUSES.map(s => <SelectItem key={s.id} value={s.id}><StatusIcon status={s.id} />{s.label}</SelectItem>)}</SelectContent>
+                  <Select value={issue.status} onValueChange={v => {
+                    const before = issue.status
+                    patch({ status: v as Status })
+                    toast(`${issue.key} moved`, { status: v as Status, description: issue.title, action: { label: 'Undo', onClick: () => patch({ status: before }) } })
+                  }}>
+                    <SelectTrigger id="issue-status" className="h-9 w-full px-2 text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{STATUSES.map(s => <SelectItem key={s.id} value={s.id}><StatusPill status={s.id} size="sm" /></SelectItem>)}</SelectContent>
                   </Select>
                 </Field>
                 <Field label="Assignee">

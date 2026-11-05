@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronsUpDown, KanbanSquare, List, LogOut, Menu, Plus, RotateCcw, Search, Settings, UserRound } from 'lucide-react'
+import { ChevronsUpDown, KanbanSquare, List, LogOut, Menu, Plus, Search, Settings, UserRound } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { useStore } from '../store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +13,7 @@ import IssuePanel from './IssuePanel'
 import { ME } from '../data/mock'
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const { state, user, dispatch, toast } = useStore()
+  const { state, user, dispatch } = useStore()
   const { project = 'WEB' } = useParams()
   const navigate = useNavigate()
   const me = user(ME)
@@ -58,26 +59,40 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </nav>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex items-center justify-between gap-2 rounded-[4px] border-t border-line px-1 pt-3 text-left outline-none hover:bg-transparent">
-            <span className="flex min-w-0 items-center gap-2.5">
-              <Avatar user={me} size={28} />
-              <span className="min-w-0">
-                <span className="block truncate text-[13px] font-medium leading-tight">{me?.name}</span>
-                <span className="flex items-center gap-1 font-mono text-[10px] text-slate"><span className="size-1.5 rounded-full bg-success" />Online</span>
+      <div className="border-t border-line pt-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-auto w-full justify-between gap-2 px-2 py-1.5 data-[state=open]:bg-tint">
+              <span className="flex min-w-0 items-center gap-2.5">
+                <Avatar user={me} size={30} />
+                <span className="min-w-0 text-left">
+                  <span className="block truncate text-[13px] font-medium leading-tight">{me?.name}</span>
+                  <span className="block truncate text-[11.5px] font-normal text-slate">{me?.title}</span>
+                </span>
               </span>
-            </span>
-            <ChevronsUpDown className="size-4 text-slate" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="top" align="start" className="w-[210px]">
-          <DropdownMenuLabel className="font-normal"><div className="text-[13px] font-medium">{me?.name}</div><div className="font-mono text-[11px] text-slate">{me?.email}</div></DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => { dispatch({ t: 'reset' }); toast('Demo data reset') }}><RotateCcw />Reset demo data</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => { dispatch({ t: 'signOut' }); navigate('/login') }}><LogOut />Sign out</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <ChevronsUpDown className="size-4 text-slate" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-[232px] p-1.5">
+            <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2 font-normal">
+              <Avatar user={me} size={36} />
+              <span className="min-w-0">
+                <span className="block truncate text-[13.5px] font-medium">{me?.name}</span>
+                <span className="block truncate font-mono text-[11px] text-slate">{me?.email}</span>
+              </span>
+            </DropdownMenuLabel>
+            <div className="mx-2 mb-1.5 flex items-center gap-1.5">
+              <Badge variant="outline" className="h-5 rounded-[4px] border-[#C9D3F6] bg-[#EEF2FD] font-mono text-[10px] text-brand">{me?.role}</Badge>
+              <Badge variant="outline" className="h-5 gap-1 rounded-[4px] font-mono text-[10px] font-normal text-slate"><span className="size-1.5 rounded-full bg-success" />Online</Badge>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => navigate('/app/me')}><UserRound />My issues</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => navigate(`/app/${project}/settings`)}><Settings />Project settings</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => { dispatch({ t: 'signOut' }); navigate('/login') }}><LogOut />Sign out</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   )
 }

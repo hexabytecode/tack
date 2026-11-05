@@ -6,7 +6,7 @@ import { TopBar } from '../components/AppShell'
 import { CalendarClock } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { PriorityBadge, StatusLabel, TypeBadge, cx, dueLabel } from '@/lib/ui'
+import { PriorityBadge, StatusPill, TypeBadge, cx, dueLabel } from '@/lib/ui'
 
 export default function MyIssues() {
   const { state } = useStore()
@@ -48,8 +48,8 @@ export default function MyIssues() {
                         <button onClick={() => setParams(prm => { prm.set('issue', i.key); return prm })}
                           className={cx('grid w-full grid-cols-[72px_1fr_auto] items-center gap-3 border-b border-line px-2 py-3 text-left transition-colors hover:bg-[#F7F7FA] md:grid-cols-[80px_1fr_150px_120px_90px]', state.flash === i.key && 'flash')}>
                           <span className="font-mono text-[12px] text-slate">{i.key}</span>
-                          <span className={cx('truncate text-[14px]', i.status === 'done' && 'text-slate line-through decoration-slate/50')}>{i.title}</span>
-                          <span className="hidden md:block"><StatusLabel status={i.status} /></span>
+                          <span className={cx('truncate text-[14px]', i.status === 'done' && 'text-slate')}>{i.title}</span>
+                          <span className="hidden md:block"><StatusPill status={i.status} size="sm" /></span>
                           <span className="hidden gap-1.5 md:flex"><TypeBadge type={i.type} compact /><PriorityBadge priority={i.priority} /></span>
                           <span className={cx('inline-flex items-center justify-end gap-1 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-[#B42318]' : 'text-slate')}>{due && <CalendarClock className="size-3" />}{due?.text ?? '—'}</span>
                         </button>

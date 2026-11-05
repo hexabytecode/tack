@@ -6,7 +6,6 @@ import { ME, type IssueType, type Priority } from '../data/mock'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -25,7 +24,6 @@ export default function CreateIssue() {
   const [priority, setPriority] = useState<Priority>('medium')
   const [assignee, setAssignee] = useState<string>(ME)
   const [due, setDue] = useState<string | null>(null)
-  const [another, setAnother] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -38,9 +36,8 @@ export default function CreateIssue() {
   const submit = () => {
     if (!title.trim()) { titleRef.current?.focus(); return }
     const issue = create({ project, title: title.trim(), description: description.trim(), type, priority, assignee: assignee === 'none' ? null : assignee, due })
-    toast(`Created ${issue.key} · ${issue.title}`)
+    toast(`Created ${issue.key}`, { kind: 'create', status: 'todo', description: issue.title })
     setTitle(''); setDescription(''); setDue(null)
-    if (another) { titleRef.current?.focus(); return }
     setCreateOpen(false)
     navigate(`/app/${project}/board`)
   }
@@ -103,10 +100,7 @@ export default function CreateIssue() {
           </div>
 
           <DialogFooter className="flex-row items-center justify-between border-t border-line px-5 py-3 sm:justify-between">
-            <label className="flex cursor-pointer items-center gap-2 text-[13px] text-slate">
-              <Checkbox id="new-another" checked={another} onCheckedChange={v => setAnother(v === true)} />
-              Create another
-            </label>
+            <span className="text-[12.5px] text-slate">Only the title is required.</span>
             <div className="flex items-center gap-2">
               <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
               <Button type="submit">Create issue <span className="hidden items-center gap-0.5 rounded-[3px] bg-white/15 px-1 font-mono text-[10px] sm:inline-flex">⌘<CornerDownLeft className="!size-2.5" /></span></Button>

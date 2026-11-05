@@ -14,7 +14,7 @@ import IssueCard from '../components/IssueCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Avatar, PRIORITY_META, StatusIcon, TYPE_META, cx } from '@/lib/ui'
+import { Avatar, PRIORITY_META, StatusPill, TYPE_META, cx } from '@/lib/ui'
 
 type Columns = Record<Status, string[]>
 
@@ -112,11 +112,10 @@ function Column({ status, keys, byKey, onAdd }: { status: Status; keys: string[]
   return (
     <section className={cx('flex w-[85vw] max-w-[320px] shrink-0 snap-start flex-col rounded-[4px] border bg-cloud p-2.5 transition-colors md:w-auto md:max-w-none md:flex-1 md:shrink', isOver ? 'border-slate/50 bg-[#E8E8EE]' : 'border-line')}>
       <header className="mb-2.5 flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
-          <StatusIcon status={status} />
-          <h2 className="label-mono text-ink">{meta.label}</h2>
+        <h2 className="flex items-center gap-2">
+          <StatusPill status={status} />
           <span className="font-mono text-[12px] text-slate">{keys.length}</span>
-        </div>
+        </h2>
         <Tooltip>
           <TooltipTrigger asChild><Button variant="ghost" size="icon-sm" className="size-6 text-slate" onClick={onAdd} aria-label={`Add issue to ${meta.label}`}><Plus /></Button></TooltipTrigger>
           <TooltipContent>New issue</TooltipContent>
@@ -144,7 +143,7 @@ export default function Board() {
   }, [issues])
   const [cols, setCols] = useState<Columns>(fromStore)
   const [active, setActive] = useState<string | null>(null)
-  const [origin, setOrigin] = useState<Status | null>(null)
+  const [origin, setOrigin] = useState<{ status: Status; index: number } | null>(null)
 
   useEffect(() => { if (!active) setCols(fromStore) }, [fromStore, active])
 
@@ -158,7 +157,15 @@ export default function Board() {
   const findCol = (id: string): Status | undefined =>
     (STATUSES.some(s => s.id === id) ? id as Status : (Object.keys(cols) as Status[]).find(s => cols[s].includes(id)))
 
-  const onStart = (e: DragStartEvent) => { setActive(String(e.active.id)); setOrigin(findCol(String(e.active.id)) ?? null) }
+  const onStart = (e: DragStartEvent) => {
+    const id = String(e.active.id)
+    const issue = byKey.get(id)
+    setActive(id)
+    if (issue) {
+      const col = state.issues.filter(i => i.project === issue.project && i.status === issue.status).sort((a, b) => a.order - b.order)
+      setOrigin({ status: issue.status, index: col.findIndex(i => i.key === id) })
+    }
+  }
 
   const onOver = ({ active: a, over }: DragOverEvent) => {
     if (!over) return
@@ -187,7 +194,10 @@ export default function Board() {
     const index = next ? full.findIndex(i => i.key === next) : full.length
     setCols(c => ({ ...c, [col]: list }))
     dispatch({ t: 'move', key: id, status: col, index: index < 0 ? full.length : index })
-    if (origin && origin !== col) toast(`${id} moved to ${STATUSES.find(s => s.id === col)!.label}`)
+    if (origin && origin.status !== col) {
+      const back = origin
+      toast(`${id} moved`, { status: col, description: byKey.get(id)?.title, action: { label: 'Undo', onClick: () => dispatch({ t: 'move', key: id, status: back.status, index: back.index }) } })
+    }
   }
 
   const activeIssue = active ? byKey.get(active) : undefined

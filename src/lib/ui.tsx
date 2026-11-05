@@ -181,3 +181,19 @@ export function issueMarkdown(issue: Issue, assignee?: User) {
     issue.description || '_No description yet._',
   ].filter(l => l !== null).join('\n')
 }
+
+/* Tinted pill for statuses: colour, icon and label together, so a status never reads as plain text. */
+export const STATUS_PILL: Record<Status, string> = {
+  todo: 'border-line bg-[#F3F4F7] text-slate',
+  progress: 'border-[#C9D3F6] bg-[#EEF2FD] text-brand',
+  review: 'border-[#F3DDB8] bg-[#FDF6EA] text-[#93500A]',
+  done: 'border-[#BFE3D0] bg-[#EAF6EF] text-success',
+}
+export function StatusPill({ status, className, size = 'md' }: { status: Status; className?: string; size?: 'sm' | 'md' }) {
+  return (
+    <span className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border font-medium whitespace-nowrap', size === 'sm' ? 'h-[20px] px-2 text-[11px]' : 'h-6 px-2.5 text-[12px]', STATUS_PILL[status], className)}>
+      <StatusIcon status={status} className={size === 'sm' ? 'size-3' : 'size-3.5'} />
+      {statusMeta(status).label}
+    </span>
+  )
+}
