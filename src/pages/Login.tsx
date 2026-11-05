@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Loader2, ShieldCheck } from 'lucide-react'
 import { useStore } from '../store'
-import { Icon, Logo } from '../lib/ui'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Logo } from '@/lib/ui'
 
 function GoogleG() {
   return (
@@ -28,22 +31,20 @@ export default function Login() {
     <div className="flex min-h-dvh flex-col bg-paper px-4">
       <main className="flex flex-1 items-center justify-center py-16">
         <div className="anim-rise flex w-full max-w-[380px] flex-col items-center">
-          <Link to="/" className="mb-8" aria-label="Tack home"><Logo /></Link>
-          <div className="w-full rounded-[4px] border border-line p-8 text-center">
-            <h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Sign in to Tack</h1>
-            <p className="mt-2 text-[14px] text-slate">Use your company Google account.</p>
-            <button
-              onClick={signIn}
-              disabled={busy}
-              className="mt-7 flex h-10 w-full items-center justify-center gap-2.5 rounded-[4px] border border-line bg-cloud text-[14px] font-medium transition-colors hover:border-ink disabled:opacity-60"
-            >
-              {busy ? <Icon name="progress_activity" className="animate-spin" /> : <GoogleG />}
-              {busy ? 'Signing you in…' : 'Continue with Google'}
-            </button>
-            <div className="mt-6 border-t border-line pt-5">
-              <span className="label-mono inline-flex items-center gap-2 text-slate"><span className="h-1.5 w-1.5 rounded-full bg-slate" />Company accounts only</span>
-            </div>
-          </div>
+          <Link to="/" className="mb-8" aria-label="Tack home"><Logo size="lg" /></Link>
+          <Card className="w-full rounded-[4px] py-0 shadow-none">
+            <CardContent className="p-8 text-center">
+              <h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Sign in to Tack</h1>
+              <p className="mt-2 text-[14px] text-slate">Use your company Google account.</p>
+              <Button variant="secondary" size="lg" onClick={signIn} disabled={busy} className="mt-7 w-full text-[14px]">
+                {busy ? <Loader2 className="animate-spin" /> : <GoogleG />}
+                {busy ? 'Signing you in…' : 'Continue with Google'}
+              </Button>
+              <div className="mt-6 border-t border-line pt-5">
+                <span className="label-mono inline-flex items-center gap-1.5 text-slate"><ShieldCheck className="size-3.5" />Company accounts only</span>
+              </div>
+            </CardContent>
+          </Card>
           <p className="mt-5 text-center font-mono text-[11px] text-slate">Demo: no account needed, any click signs you in.</p>
         </div>
       </main>

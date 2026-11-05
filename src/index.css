@@ -1,10 +1,13 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   --color-ink: #000000;
   --color-paper: #ffffff;
-  --color-accent: #183fd9;
-  --color-accent-soft: #8ea5ff;
+  --color-brand: #183fd9;
+  --color-brand-soft: #8ea5ff;
   --color-slate: #636a80;
   --color-cloud: #eeeef2;
   --color-line: #e2e3e9;
@@ -22,24 +25,61 @@
   --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* shadcn tokens, mapped to Tack */
+:root {
+  --radius: 0.25rem;
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: #eeeef2;
+  --secondary-foreground: #000000;
+  --muted: #eeeef2;
+  --muted-foreground: #636a80;
+  --accent: #f1f3fc;
+  --accent-foreground: #000000;
+  --destructive: #dc2626;
+  --border: #e2e3e9;
+  --input: #e2e3e9;
+  --ring: #183fd9;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 1px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+}
+
 html { -webkit-font-smoothing: antialiased; }
 body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
 ::selection { background: rgba(24, 63, 217, 0.15); }
-
-.icon {
-  font-family: "Material Symbols Outlined";
-  font-weight: 300;
-  font-style: normal;
-  font-size: 18px;
-  line-height: 1;
-  display: inline-block;
-  white-space: nowrap;
-  direction: ltr;
-  -webkit-font-feature-settings: "liga";
-  font-feature-settings: "liga";
-  font-variation-settings: "opsz" 20;
-  user-select: none;
-}
 
 .label-mono { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
 
@@ -47,19 +87,19 @@ body { background: var(--color-paper); color: var(--color-ink); font-family: var
 .link { border-bottom: 1px solid transparent; transition: border-color 0.12s ease; }
 .link:hover { border-bottom-color: currentColor; }
 
-:where(button, a, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+:where(button, a, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--color-brand); outline-offset: 1px; }
 
 /* Top loading bar */
 .route-bar { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 60; pointer-events: none; opacity: 0; transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
 .route-bar.on { opacity: 1; }
-.route-bar i { display: block; height: 100%; width: 0; background: var(--color-accent); box-shadow: 0 0 8px rgba(24, 63, 217, 0.6); transition: width 0.3s cubic-bezier(0, 0, 0.2, 1); }
+.route-bar i { display: block; height: 100%; width: 0; background: var(--color-brand); box-shadow: 0 0 8px rgba(24, 63, 217, 0.6); transition: width 0.3s cubic-bezier(0, 0, 0.2, 1); }
 
 /* Reveal on scroll */
-.reveal { opacity: 0; transform: translateY(10px); transition: opacity 0.45s var(--ease-out-soft), transform 0.45s var(--ease-out-soft); transition-delay: var(--d, 0ms); }
-.reveal.in { opacity: 1; transform: none; }
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.45s var(--ease-out-soft), transform 0.45s var(--ease-out-soft); transition-delay: var(--d, 0ms); }
+.reveal.in, .in .reveal.in { opacity: 1; transform: none; }
 
 /* Agent flash */
-@keyframes agent-flash { 0% { background: rgba(24, 63, 217, 0.14); border-color: var(--color-accent); } 100% { background: var(--color-paper); border-color: var(--color-line); } }
+@keyframes agent-flash { 0% { background: rgba(24, 63, 217, 0.14); border-color: var(--color-brand); } 100% { background: var(--color-paper); border-color: var(--color-line); } }
 .flash { animation: agent-flash 1.4s ease-out 0.1s both; }
 
 @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -83,10 +123,6 @@ body { background: var(--color-paper); color: var(--color-ink); font-family: var
 .zero { opacity: 0; transition: opacity 0.3s ease 0.85s; }
 .in .zero { opacity: 1; }
 
-/* Landing: dots along the AI cable */
-@keyframes cable-dot { from { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } to { offset-distance: 100%; opacity: 0; } }
-.cable-dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); offset-path: path("M 10 10 C 60 40, 110 40, 170 20"); animation: cable-dot 2s linear infinite; animation-play-state: paused; }
-.in .cable-dot { animation-play-state: running; }
 
 /* Typing in the landing create mock */
 .type-on { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; max-width: 0; }
@@ -94,13 +130,42 @@ body { background: var(--color-paper); color: var(--color-ink); font-family: var
 .in .after-type { animation: drop-in 0.5s var(--ease-out-soft) 1.3s both; }
 .after-type { opacity: 0; }
 
+
+/* Landing: activity ticker */
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-track { animation: ticker 38s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker::before, .ticker::after { content: ""; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 1; pointer-events: none; }
+.ticker::before { left: 0; background: linear-gradient(90deg, var(--color-paper), transparent); }
+.ticker::after { right: 0; background: linear-gradient(-90deg, var(--color-paper), transparent); }
+
+/* Landing: illustrations. Wipe in left to right on scroll, then float gently with live accents. */
+.illo .illo-img { clip-path: inset(0 100% 0 0); transition: clip-path 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.15s; }
+.illo.in .illo-img { clip-path: inset(0 0 0 0); }
+@keyframes illo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.illo.in .illo-float { animation: illo-float 5s ease-in-out 1.3s infinite; }
+@keyframes illo-ping { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(2.6); opacity: 0; } }
+.illo-ping { transform-box: fill-box; transform-origin: center; opacity: 0; }
+.illo.in .illo-ping { animation: illo-ping 2s cubic-bezier(0, 0, 0.2, 1) 1.2s infinite; }
+.illo.in .illo-ping-2 { animation-delay: 2.2s; }
+.illo-trace { stroke-dasharray: 140; stroke-dashoffset: 140; }
+.illo.in .illo-trace { animation: illo-trace 3.2s ease-in-out 1.4s infinite; }
+@keyframes illo-trace { 0% { stroke-dashoffset: 140; } 40%, 70% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -140; } }
+.illo-dot { opacity: 0; }
+.illo.in .illo-dot { opacity: 1; transition: opacity 0.3s 1.2s; }
+@keyframes illo-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.illo-blink { transform-box: fill-box; transform-origin: center; }
+.illo.in .illo-blink { animation: illo-blink 3.5s ease-in-out 1.5s infinite; }
+
 .scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
 .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; transition-delay: 0ms !important; }
   .reveal { opacity: 1; transform: none; }
-  .cable-dot { display: none; }
+  .illo .illo-img { clip-path: none; }
+  .illo-dot, .illo-ping { display: none; }
+  .ticker-track { animation: none; }
   .type-on { max-width: 100%; }
   .after-type { opacity: 1; }
 }

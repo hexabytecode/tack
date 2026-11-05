@@ -4,7 +4,8 @@ import { useStore } from '../store'
 import { STATUSES, type Issue } from '../data/mock'
 import { TopBar, Crumb } from '../components/AppShell'
 import { FilterRow, useFilteredIssues } from './Board'
-import { Avatar, IssueChips, Icon, StatusLabel, cx, dueLabel, timeAgo } from '../lib/ui'
+import { ArrowDown } from 'lucide-react'
+import { Avatar, IssueChips, StatusLabel, cx, dueLabel, timeAgo } from '@/lib/ui'
 
 type SortKey = 'updated' | 'status' | 'priority' | 'due'
 const rank = { status: Object.fromEntries(STATUSES.map((s, n) => [s.id, n])), priority: { high: 0, medium: 1, low: 2 } } as const
@@ -33,7 +34,7 @@ export default function List() {
     <th className={cx('label-mono h-9 whitespace-nowrap px-3 text-left font-medium text-slate', className)}>
       {k ? (
         <button onClick={() => setSort(k)} className={cx('inline-flex items-center gap-1 uppercase hover:text-ink', sort === k && 'text-ink')}>
-          {children}{sort === k && <Icon name="arrow_downward" className="!text-[13px]" />}
+          {children}{sort === k && <ArrowDown className="size-3" />}
         </button>
       ) : children}
     </th>

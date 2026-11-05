@@ -24,7 +24,7 @@ export interface Activity { id: string; issue: string; actor: string; text: stri
 
 export const STATUSES: { id: Status; label: string; color: string }[] = [
   { id: 'todo', label: 'To do', color: 'var(--color-slate)' },
-  { id: 'progress', label: 'In progress', color: 'var(--color-accent)' },
+  { id: 'progress', label: 'In progress', color: 'var(--color-brand)' },
   { id: 'review', label: 'In review', color: 'var(--color-warning)' },
   { id: 'done', label: 'Done', color: 'var(--color-success)' },
 ]
@@ -111,10 +111,11 @@ export function seed(now = Date.now()) {
     }
   }
   comments.push(
-    { id: 'c1', issue: 'WEB-142', author: 'sk', body: 'Reproduced on an iPhone 15 in Safari and Chrome. The bottom safe area isn’t taken into account.', at: now - 3 * H },
-    { id: 'c2', issue: 'WEB-142', author: 'al', body: 'Taking this one. @Samira I’ll add the safe-area padding and send it for review today.', at: now - 1 * H },
-    { id: 'c3', issue: 'WEB-140', author: 'jd', body: 'Sender records look fine. I think it’s the wording in the subject line.', at: now - 5 * H },
-    { id: 'c4', issue: 'APP-31', author: 'cm', body: 'Only happens on 17.4. Older versions are fine.', at: now - 8 * H },
+    { id: 'c1', issue: 'WEB-142', author: 'sk', at: now - 3 * H, body: 'Reproduced on an **iPhone 15** in Safari and Chrome. The bottom safe area isn’t taken into account.\n\n> [!WARNING] This blocks checkout for anyone on a small phone, so it should go out this week.' },
+    { id: 'c2', issue: 'WEB-142', author: 'al', at: now - 1 * H, body: 'Taking this one. @Samira here’s the plan:\n\n- [x] Add the safe-area padding to the checkout bar\n- [ ] Check it on Android\n- [ ] Send for review\n\nSame root cause as WEB-132, so I’ll reuse that fix.' },
+    { id: 'c3', issue: 'WEB-140', author: 'jd', at: now - 5 * H, body: 'Sender records look fine. I think it’s the wording in the subject line.\n\n> [!TIP] Try `Reset your password` instead of `Action required`. It scores much better with spam filters.' },
+    { id: 'c4', issue: 'APP-31', author: 'cm', at: now - 8 * H, body: 'Only happens on **iOS 17.4**. Older versions are fine. @Alex can you check the certificate?' },
+    { id: 'c5', issue: 'WEB-139', author: 'pp', at: now - 6 * H, body: '> [!DONE] We’ll show the VAT number under the company name on every invoice.' },
   )
   activity.push(
     { id: 'a1', issue: 'WEB-142', actor: 'sk', text: 'assigned this to Alex Lin', at: now - 3 * H },

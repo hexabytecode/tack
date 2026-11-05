@@ -5,6 +5,8 @@ import { useEffect } from 'react'
 import './index.css'
 import { StoreProvider } from './store'
 import RouteProgress from './components/RouteProgress'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from '@/components/ui/sonner'
 import AppShell from './components/AppShell'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
@@ -38,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <StoreProvider>
+        <TooltipProvider delayDuration={300}>
         <RouteProgress />
         <ScrollAndTitle />
         <Routes>
@@ -50,6 +53,8 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/app/:project/settings" element={app(<Settings />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Toaster theme="light" position="bottom-right" toastOptions={{ className: 'font-sans text-[13px]' }} />
+        </TooltipProvider>
       </StoreProvider>
     </BrowserRouter>
   </StrictMode>,

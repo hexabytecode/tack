@@ -1,7 +1,8 @@
+import { toast as sonner } from 'sonner'
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
 import { ME, PROJECTS, USERS, nextNumber, seed, STATUSES, type Activity, type Comment, type Issue, type IssueType, type Priority, type Project, type Status, type User } from './data/mock'
 
-const KEY = 'tack-demo-v1'
+const KEY = 'tack-demo-v2'
 
 interface State {
   signedIn: boolean
@@ -114,15 +115,12 @@ function reducer(s: State, a: Action): State {
   }
 }
 
-interface Toast { id: string; text: string }
-
 interface Ctx {
   state: State
   dispatch: (a: Action) => void
   user: (id: string | null) => User | undefined
   create: (n: NewIssue) => Issue
   toast: (text: string) => void
-  toasts: Toast[]
   createOpen: boolean
   setCreateOpen: (open: boolean, project?: string) => void
   createProject: string | null
@@ -132,7 +130,6 @@ const StoreCtx = createContext<Ctx | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, load)
-  const [toasts, setToasts] = useState<Toast[]>([])
   const [createOpen, setOpen] = useState(false)
   const [createProject, setCreateProject] = useState<string | null>(null)
   const stateRef = useRef(state)
@@ -151,11 +148,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(t)
   }, [state.flash])
 
-  const toast = useCallback((text: string) => {
-    const id = uid()
-    setToasts(ts => [...ts, { id, text }])
-    setTimeout(() => setToasts(ts => ts.filter(t => t.id !== id)), 3000)
-  }, [])
+  const toast = useCallback((text: string) => { sonner(text) }, [])
 
   const create = useCallback((n: NewIssue) => {
     const now = Date.now()
@@ -168,12 +161,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<Ctx>(() => ({
-    state, dispatch, toast, toasts, create,
+    state, dispatch, toast, create,
     user: (id) => state.users.find(u => u.id === id),
     createOpen,
     setCreateOpen: (open, project) => { setOpen(open); if (project) setCreateProject(project) },
     createProject,
-  }), [state, toast, toasts, create, createOpen, createProject])
+  }), [state, toast, create, createOpen, createProject])
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>
 }

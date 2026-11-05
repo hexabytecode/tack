@@ -1,13 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Bot, ClipboardCopy, History, Link2, MessageSquare, PenLine, Tag, X } from 'lucide-react'
 import { useStore } from '../store'
-import { Avatar, Button, Icon, StatusDot, cx, dueLabel, issueMarkdown, timeAgo } from '../lib/ui'
 import { ME, STATUSES, type Issue, type IssueType, type Priority, type Status } from '../data/mock'
-
-const select = 'h-8 w-full rounded-[4px] border border-line bg-paper px-2 text-[13px] focus:outline-2 focus:outline-accent'
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import DatePicker from './DatePicker'
+import Markdown from './Markdown'
+import MarkdownEditor from './MarkdownEditor'
+import { Avatar, PRIORITY_META, StatusIcon, TYPE_META, dueLabel, issueMarkdown, timeAgo } from '@/lib/ui'
+import { cn } from '@/lib/utils'
 
 async function copy(text: string) {
   try { await navigator.clipboard.writeText(text); return true } catch { return false }
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div className="flex flex-col gap-1.5"><div className="label-mono text-slate">{label}</div>{children}</div>
 }
 
 export default function IssuePanel() {
@@ -25,177 +39,161 @@ export default function IssuePanel() {
   useEffect(() => {
     if (!issue) return
     setTitle(issue.title); setDesc(issue.description); setEditingDesc(false); setReply('')
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issue?.key])
 
-  if (!issue) return null
-  const project = state.projects.find(p => p.key === issue.project)!
-  const members = state.users.filter(u => project.members.includes(u.id))
-  const comments = state.comments.filter(c => c.issue === issue.key).sort((a, b) => a.at - b.at)
-  const activity = state.activity.filter(a => a.issue === issue.key).sort((a, b) => b.at - a.at)
-  const due = dueLabel(issue.due)
-  const patch = (p: Partial<Issue>) => dispatch({ t: 'update', key: issue.key, patch: p })
+  const project = issue && state.projects.find(p => p.key === issue.project)
+  const members = project ? state.users.filter(u => project.members.includes(u.id)) : []
+  const comments = issue ? state.comments.filter(c => c.issue === issue.key).sort((a, b) => a.at - b.at) : []
+  const activity = issue ? state.activity.filter(a => a.issue === issue.key).sort((a, b) => b.at - a.at) : []
+  const patch = (p: Partial<Issue>) => issue && dispatch({ t: 'update', key: issue.key, patch: p })
 
   const sendReply = () => {
-    if (!reply.trim()) return
+    if (!issue || !reply.trim()) return
     dispatch({ t: 'comment', key: issue.key, body: reply.trim() })
     setReply('')
   }
 
   return (
-    <div className="fixed inset-0 z-40">
-      <button className="anim-fade absolute inset-0 bg-ink/20" aria-label="Close issue" onClick={close} />
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-label={`${issue.key} ${issue.title}`}
-        className="anim-slide absolute inset-y-0 right-0 flex w-full max-w-[720px] flex-col border-l border-line bg-paper shadow-[0_8px_24px_rgba(0,0,0,.12)]"
-      >
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-line px-5">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[13px] font-medium text-accent">{issue.key}</span>
-            <span className="text-line">/</span>
-            <span className="truncate text-[13px] text-slate">{project.name}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button size="sm" variant="secondary" onClick={async () => toast(await copy(issueMarkdown(issue, user(issue.assignee))) ? 'Copied for AI' : 'Copy blocked by the browser')}>
-              <Icon name="content_copy" className="!text-[15px]" />Copy for AI
-            </Button>
-            <button className="rounded-[4px] p-1.5 text-slate hover:bg-cloud hover:text-ink" title="Copy link" aria-label="Copy link"
-              onClick={async () => toast(await copy(window.location.href) ? 'Link copied' : 'Copy blocked by the browser')}><Icon name="link" /></button>
-            <button className="rounded-[4px] p-1.5 text-slate hover:bg-cloud hover:text-ink" title="Close" aria-label="Close" onClick={close}><Icon name="close" /></button>
-          </div>
-        </header>
+    <Sheet open={!!issue} onOpenChange={o => { if (!o) close() }}>
+      <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-[760px] [&>button.absolute]:hidden" onOpenAutoFocus={e => e.preventDefault()}>
+        {issue && project && (
+          <>
+            <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-line px-5">
+              <div className="flex min-w-0 items-center gap-2">
+                <SheetTitle className="font-mono text-[13px] font-medium text-brand">{issue.key}</SheetTitle>
+                <span className="text-line">/</span>
+                <span className="truncate text-[13px] text-slate">{project.name}</span>
+                <SheetDescription className="sr-only">{issue.title}</SheetDescription>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button size="sm" variant="secondary" onClick={async () => toast(await copy(issueMarkdown(issue, user(issue.assignee))) ? 'Copied as Markdown for AI' : 'Copy blocked by the browser')}>
+                  <ClipboardCopy />Copy for AI
+                </Button>
+                <Tooltip><TooltipTrigger asChild>
+                  <Button size="icon-sm" variant="ghost" aria-label="Copy link" onClick={async () => toast(await copy(window.location.href) ? 'Link copied' : 'Copy blocked by the browser')}><Link2 /></Button>
+                </TooltipTrigger><TooltipContent>Copy link</TooltipContent></Tooltip>
+                <Tooltip><TooltipTrigger asChild>
+                  <Button size="icon-sm" variant="ghost" aria-label="Close" onClick={close}><X /></Button>
+                </TooltipTrigger><TooltipContent>Close · Esc</TooltipContent></Tooltip>
+              </div>
+            </header>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto md:flex-row md:overflow-hidden">
-          <div className="min-w-0 flex-1 px-5 py-5 md:overflow-y-auto">
-            <textarea
-              id="issue-title"
-              value={title}
-              rows={1}
-              onChange={e => setTitle(e.target.value)}
-              onBlur={() => title.trim() && title !== issue.title && patch({ title: title.trim() })}
-              className="w-full resize-none rounded-[4px] border border-transparent px-1 py-0.5 text-[20px] font-medium leading-snug tracking-tight hover:border-line focus:border-line focus:outline-none [field-sizing:content]"
-            />
-
-            <div className="mt-5">
-              <div className="label-mono mb-2 text-slate">Description</div>
-              {editingDesc ? (
-                <div className="flex flex-col gap-2">
-                  <textarea id="issue-desc" autoFocus value={desc} onChange={e => setDesc(e.target.value)} rows={7}
-                    className="w-full rounded-[4px] border border-line px-3 py-2 text-[13.5px] leading-relaxed focus:outline-2 focus:outline-accent" />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => { patch({ description: desc }); setEditingDesc(false) }}>Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setDesc(issue.description); setEditingDesc(false) }}>Cancel</Button>
-                  </div>
-                </div>
-              ) : (
-                <button onClick={() => setEditingDesc(true)} className="block w-full rounded-[4px] border border-transparent p-1 text-left text-[13.5px] leading-relaxed hover:border-line">
-                  {issue.description
-                    ? <span className="whitespace-pre-wrap">{issue.description}</span>
-                    : <span className="text-placeholder">Add a description…</span>}
-                </button>
-              )}
-            </div>
-
-            <div className="mt-7">
-              <div className="label-mono mb-3 flex justify-between text-slate"><span>Comments</span><span>{comments.length}</span></div>
-              <ul className="flex flex-col gap-4">
-                {comments.map(c => {
-                  const a = user(c.author)
-                  return (
-                    <li key={c.id} className="flex gap-3">
-                      {c.agent
-                        ? <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border border-accent bg-tint"><Icon name="smart_toy" className="!text-[14px] text-accent" /></span>
-                        : <Avatar user={a} size={26} />}
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-baseline gap-2">
-                          <span className="text-[13px] font-medium">{c.agent ? c.agent : a?.name}</span>
-                          {c.agent && <span className="rounded-[3px] border border-accent px-1 font-mono text-[9.5px] uppercase text-accent">by agent · for {a?.name}</span>}
-                          <span className="font-mono text-[11px] text-slate">{timeAgo(c.at)}</span>
-                        </div>
-                        <p className="mt-0.5 whitespace-pre-wrap text-[13.5px] leading-relaxed">{c.body}</p>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
-              <div className="mt-4 rounded-[4px] border border-line focus-within:outline-2 focus-within:outline-accent">
-                <textarea
-                  id="issue-reply"
-                  value={reply}
-                  onChange={e => setReply(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendReply() } }}
-                  placeholder="Write a comment… use @ to mention someone"
-                  rows={2}
-                  className="w-full resize-none rounded-t-[4px] px-3 py-2 text-[13.5px] placeholder:text-placeholder focus:outline-none"
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto md:flex-row md:overflow-hidden">
+              <div className="min-w-0 flex-1 px-5 py-5 md:overflow-y-auto">
+                <Textarea
+                  id="issue-title"
+                  aria-label="Title"
+                  value={title}
+                  rows={1}
+                  onChange={e => setTitle(e.target.value)}
+                  onBlur={() => title.trim() && title !== issue.title && patch({ title: title.trim() })}
+                  className="min-h-0 w-full resize-none rounded-[4px] border-transparent px-1 py-0.5 text-[20px] font-medium leading-snug tracking-tight shadow-none [field-sizing:content] hover:border-line focus-visible:border-line focus-visible:ring-0 md:text-[20px]"
                 />
-                <div className="flex items-center justify-between border-t border-line px-2 py-1.5">
-                  <button className="rounded-[4px] p-1 text-slate hover:bg-cloud hover:text-ink" title="Mention" aria-label="Mention someone" onClick={() => setReply(r => r + '@')}><Icon name="alternate_email" /></button>
-                  <Button size="sm" onClick={sendReply} disabled={!reply.trim()}>Comment</Button>
+                <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+                  {issue.labels.map(l => <Badge key={l} variant="secondary" className="gap-1 rounded-[4px] font-mono text-[11px] font-normal"><Tag className="!size-3 text-slate" />{l}</Badge>)}
                 </div>
-              </div>
-            </div>
 
-            <div className="mt-7 pb-4">
-              <div className="label-mono mb-2 text-slate">History</div>
-              <ul className="flex flex-col gap-1.5">
-                {activity.map(a => (
-                  <li key={a.id} className="flex items-start gap-2 font-mono text-[11.5px] leading-relaxed text-slate">
-                    <span className={cx('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', a.agent ? 'bg-accent' : 'bg-line')} />
-                    <span>
-                      {a.agent ? <span className="text-accent">{a.agent} (agent)</span> : <span className="text-ink">{user(a.actor)?.name}</span>} {a.text} · {timeAgo(a.at)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                <section className="mt-5">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="label-mono text-slate">Description</span>
+                    {!editingDesc && <Button size="sm" variant="ghost" className="text-slate" onClick={() => setEditingDesc(true)}><PenLine />Edit</Button>}
+                  </div>
+                  {editingDesc ? (
+                    <MarkdownEditor id="issue-desc" value={desc} onChange={setDesc} people={members} rows={7} submitLabel="Save"
+                      onSubmit={() => { patch({ description: desc }); setEditingDesc(false) }}
+                      onCancel={() => { setDesc(issue.description); setEditingDesc(false) }} />
+                  ) : (
+                    <div className="rounded-[4px] px-1">
+                      {issue.description ? <Markdown>{issue.description}</Markdown> : <button className="text-[13.5px] text-placeholder" onClick={() => setEditingDesc(true)}>Add a description…</button>}
+                    </div>
+                  )}
+                </section>
 
-          <aside className="flex shrink-0 flex-col gap-4 border-t border-line px-5 py-5 md:w-[240px] md:overflow-y-auto md:border-l md:border-t-0">
-            <Field label="Status">
-              <div className="relative">
-                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2"><StatusDot status={issue.status} /></span>
-                <select id="issue-status" value={issue.status} onChange={e => patch({ status: e.target.value as Status })} className={cx(select, 'pl-6')}>
-                  {STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                </select>
+                <Separator className="my-6" />
+
+                <section>
+                  <div className="label-mono mb-3 flex items-center gap-1.5 text-slate"><MessageSquare className="size-3.5" />Comments<span className="ml-auto">{comments.length}</span></div>
+                  <ul className="flex flex-col gap-4">
+                    {comments.map(c => {
+                      const a = user(c.author)
+                      return (
+                        <li key={c.id} className="flex gap-3">
+                          {c.agent
+                            ? <span className="flex size-[26px] shrink-0 items-center justify-center rounded-full border border-brand bg-tint"><Bot className="size-3.5 text-brand" /></span>
+                            : <Avatar user={a} size={26} />}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-baseline gap-2">
+                              <span className="text-[13px] font-medium">{c.agent ?? a?.name}</span>
+                              {c.agent && <Badge variant="outline" className="h-4 rounded-[3px] border-brand px-1 font-mono text-[9.5px] uppercase text-brand">by agent · for {a?.name}</Badge>}
+                              <span className="font-mono text-[11px] text-slate">{timeAgo(c.at)}</span>
+                            </div>
+                            <Markdown className="mt-0.5">{c.body}</Markdown>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  <div className="mt-4">
+                    <MarkdownEditor id="issue-reply" value={reply} onChange={setReply} onSubmit={sendReply} people={members}
+                      placeholder="Write a comment… try **bold**, a checklist, @Samira or a callout" />
+                  </div>
+                </section>
+
+                <Separator className="my-6" />
+
+                <section className="pb-4">
+                  <div className="label-mono mb-2 flex items-center gap-1.5 text-slate"><History className="size-3.5" />History</div>
+                  <ul className="flex flex-col gap-1.5">
+                    {activity.map(a => (
+                      <li key={a.id} className="flex items-start gap-2 font-mono text-[11.5px] leading-relaxed text-slate">
+                        <span className={cn('mt-1.5 size-1.5 shrink-0 rounded-full', a.agent ? 'bg-brand' : 'bg-line')} />
+                        <span>{a.agent ? <span className="text-brand">{a.agent} (agent)</span> : <span className="text-ink">{user(a.actor)?.name}</span>} {a.text} · {timeAgo(a.at)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               </div>
-            </Field>
-            <Field label="Assignee">
-              <select id="issue-assignee" value={issue.assignee ?? ''} onChange={e => patch({ assignee: e.target.value || null })} className={select}>
-                <option value="">Unassigned</option>
-                {members.map(u => <option key={u.id} value={u.id}>{u.name}{u.id === ME ? ' (you)' : ''}</option>)}
-              </select>
-            </Field>
-            <Field label="Priority">
-              <select id="issue-priority" value={issue.priority} onChange={e => patch({ priority: e.target.value as Priority })} className={select}>
-                <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-              </select>
-            </Field>
-            <Field label="Type">
-              <select id="issue-type" value={issue.type} onChange={e => patch({ type: e.target.value as IssueType })} className={select}>
-                <option value="task">Task</option><option value="bug">Bug</option>
-              </select>
-            </Field>
-            <Field label="Due">
-              <input id="issue-due" type="date" value={issue.due ?? ''} onChange={e => patch({ due: e.target.value || null })} className={cx(select, due?.overdue && 'text-warning')} />
-            </Field>
-            <Field label="Labels">
-              <div className="flex flex-wrap gap-1.5">
-                {issue.labels.length ? issue.labels.map(l => <span key={l} className="rounded-[3px] bg-cloud px-1.5 py-0.5 font-mono text-[11px]">{l}</span>) : <span className="text-[13px] text-placeholder">None</span>}
-              </div>
-            </Field>
-            <Field label="Created"><span className="font-mono text-[11.5px] text-slate">{new Date(issue.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · updated {timeAgo(issue.updatedAt)}</span></Field>
-          </aside>
-        </div>
-      </section>
-    </div>
+
+              <aside className="flex shrink-0 flex-col gap-4 border-t border-line px-5 py-5 md:w-[248px] md:overflow-y-auto md:border-l md:border-t-0">
+                <Field label="Status">
+                  <Select value={issue.status} onValueChange={v => patch({ status: v as Status })}>
+                    <SelectTrigger id="issue-status" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{STATUSES.map(s => <SelectItem key={s.id} value={s.id}><StatusIcon status={s.id} />{s.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Assignee">
+                  <Select value={issue.assignee ?? 'none'} onValueChange={v => patch({ assignee: v === 'none' ? null : v })}>
+                    <SelectTrigger id="issue-assignee" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Unassigned</SelectItem>
+                      {members.map(u => <SelectItem key={u.id} value={u.id}><Avatar user={u} size={18} />{u.name}{u.id === ME ? ' (you)' : ''}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Priority">
+                  <Select value={issue.priority} onValueChange={v => patch({ priority: v as Priority })}>
+                    <SelectTrigger id="issue-priority" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{(['high', 'medium', 'low'] as Priority[]).map(k => { const m = PRIORITY_META[k]; return <SelectItem key={k} value={k}><m.icon className={cn('size-3.5', m.iconCls)} />{m.label}</SelectItem> })}</SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Type">
+                  <Select value={issue.type} onValueChange={v => patch({ type: v as IssueType })}>
+                    <SelectTrigger id="issue-type" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{(['task', 'bug'] as IssueType[]).map(k => { const m = TYPE_META[k]; return <SelectItem key={k} value={k}><m.icon className={cn('size-3.5', m.iconCls)} />{m.label}</SelectItem> })}</SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Due">
+                  <DatePicker id="issue-due" value={issue.due} onChange={v => patch({ due: v })} className="w-full" warn={dueLabel(issue.due)?.overdue && issue.status !== 'done'} />
+                </Field>
+                <Field label="Created">
+                  <span className="font-mono text-[11.5px] text-slate">{new Date(issue.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · updated {timeAgo(issue.updatedAt)}</span>
+                </Field>
+              </aside>
+            </div>
+          </>
+        )}
+      </SheetContent>
+    </Sheet>
   )
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div><div className="label-mono mb-1.5 text-slate">{label}</div>{children}</div>
 }

@@ -1,47 +1,82 @@
-import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
-import { STATUSES, type Issue, type Priority, type Status, type User } from '../data/mock'
+import { useEffect, useRef } from 'react'
+import { Bug, ChevronsUp, ChevronUp, ChevronDown, Circle, CircleCheck, CircleDashed, CircleDot, SquareCheck, type LucideIcon } from 'lucide-react'
+import { Avatar as UIAvatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import { STATUSES, type Issue, type IssueType, type Priority, type Status, type User } from '../data/mock'
 
-export function cx(...c: (string | false | null | undefined)[]) { return c.filter(Boolean).join(' ') }
+export const cx = cn
 
-export function LogoMark({ size = 24 }: { size?: number }) {
+/* ── Logo ─────────────────────────────────────────────────────────────
+   Monoline lettering drawn with the same 3.5 stroke as the mark, so the
+   "t" in the wordmark is the mark itself. Full logo for wide spaces,
+   the mark alone for tight ones (favicon, phone header, avatars). */
+const INK = '#000'
+const BLUE = '#183FD9'
+
+export function LogoMark({ size = 24, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
-      <circle cx="10" cy="4.5" r="3.5" fill="#183FD9" />
-      <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5.5 10.5H15" stroke="#000" strokeWidth="3.5" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cn('shrink-0', className)}>
+      <circle cx="10" cy="4.5" r="3.5" fill={BLUE} />
+      <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" stroke={INK} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5.5 10.5H15" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
     </svg>
   )
 }
 
-export function Logo({ sub }: { sub?: string }) {
+export function Wordmark({ height = 24, className, label = 'Tack' }: { height?: number; className?: string; label?: string }) {
   return (
-    <span className="flex items-center gap-2.5">
-      <LogoMark />
-      <span>
-        <span className="block text-[18px] font-medium leading-none tracking-tight">Tack</span>
-        {sub && <span className="mt-1 block font-mono text-[10px] uppercase leading-none text-slate">{sub}</span>}
-      </span>
+    <svg height={height} width={(height * 64) / 24} viewBox="0 0 64 24" fill="none" role="img" aria-label={label} className={cn('shrink-0', className)}>
+      <circle cx="10" cy="4.5" r="3.5" fill={BLUE} />
+      <g stroke={INK} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" />
+        <path d="M5.5 10.5H15" />
+        {/* a */}
+        <circle cx="26.5" cy="14.8" r="4.9" />
+        <path d="M31.4 10v10" />
+        {/* c */}
+        <path d="M45.6 11.4a4.9 4.9 0 1 0 0 6.8" />
+        {/* k */}
+        <path d="M51.5 3.5V20" />
+        <path d="M58.6 10.2 52.6 15.6" />
+        <path d="M54.8 13.9 59 20" />
+      </g>
+    </svg>
+  )
+}
+
+export function Logo({ sub, size = 'md' }: { sub?: string; size?: 'sm' | 'md' | 'lg' }) {
+  const h = size === 'lg' ? 30 : size === 'sm' ? 20 : 24
+  return (
+    <span className="flex flex-col items-start gap-1.5">
+      <Wordmark height={h} />
+      {sub && <span className="font-mono text-[10px] uppercase leading-none tracking-[0.06em] text-slate">{sub}</span>}
     </span>
   )
 }
 
-export function Icon({ name, className, fill }: { name: string; className?: string; fill?: boolean }) {
-  return <span className={cx('icon', className)} style={fill ? { fontVariationSettings: '"FILL" 1, "opsz" 20' } : undefined} aria-hidden="true">{name}</span>
-}
-
-export function Avatar({ user, size = 22 }: { user?: User; size?: number }) {
+/* ── People ───────────────────────────────────────────────────────── */
+const TONES = ['#E8ECFB', '#FBEDE6', '#E6F4EE', '#F4ECFA', '#FBF4E2', '#EAF2F8']
+export function Avatar({ user, size = 22, className }: { user?: User; size?: number; className?: string }) {
+  const tone = user ? TONES[user.name.charCodeAt(0) % TONES.length] : '#EEEEF2'
   return (
-    <span
-      title={user?.name ?? 'Unassigned'}
-      className="inline-flex shrink-0 items-center justify-center rounded-full border border-line bg-cloud font-mono font-medium text-ink"
-      style={{ width: size, height: size, fontSize: size < 24 ? 9.5 : 11 }}
-    >
-      {user ? user.initials : <Icon name="person" className="!text-[13px] text-slate" />}
-    </span>
+    <UIAvatar title={user?.name ?? 'Unassigned'} className={cn('shrink-0 border border-line', className)} style={{ width: size, height: size }}>
+      <AvatarFallback className="font-mono font-medium text-ink" style={{ background: tone, fontSize: size < 24 ? 9.5 : 11 }}>
+        {user ? user.initials : '–'}
+      </AvatarFallback>
+    </UIAvatar>
   )
 }
 
+/* ── Status, type and priority ──────────────────────────────────────
+   Each gets its own icon and colour, so a card reads at a glance. */
 export const statusMeta = (s: Status) => STATUSES.find(x => x.id === s)!
+export const STATUS_ICON: Record<Status, LucideIcon> = { todo: Circle, progress: CircleDashed, review: CircleDot, done: CircleCheck }
+
+export function StatusIcon({ status, className }: { status: Status; className?: string }) {
+  const I = STATUS_ICON[status]
+  return <I className={cn('size-3.5 shrink-0 transition-colors duration-200', className)} style={{ color: statusMeta(status).color }} strokeWidth={2.25} aria-hidden="true" />
+}
 
 export function StatusDot({ status, size = 8 }: { status: Status; size?: number }) {
   return <span className="inline-block shrink-0 rounded-full transition-colors duration-200" style={{ width: size, height: size, background: statusMeta(status).color }} />
@@ -49,49 +84,54 @@ export function StatusDot({ status, size = 8 }: { status: Status; size?: number 
 
 export function StatusLabel({ status }: { status: Status }) {
   return (
-    <span className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: statusMeta(status).color }}>
-      <StatusDot status={status} />
+    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: statusMeta(status).color }}>
+      <StatusIcon status={status} />
       {statusMeta(status).label}
     </span>
   )
 }
 
-export function Chip({ children, strong }: { children: ReactNode; strong?: boolean }) {
+export const TYPE_META: Record<IssueType, { label: string; icon: LucideIcon; cls: string; iconCls: string }> = {
+  task: { label: 'Task', icon: SquareCheck, cls: 'border-[#C9D3F6] bg-[#F1F4FD] text-brand', iconCls: 'text-brand' },
+  bug: { label: 'Bug', icon: Bug, cls: 'border-[#F5C9C9] bg-[#FDF1F1] text-[#B42318]', iconCls: 'text-[#D92D20]' },
+}
+
+export const PRIORITY_META: Record<Priority, { label: string; short: string; icon: LucideIcon; cls: string; iconCls: string }> = {
+  high: { label: 'High', short: 'High', icon: ChevronsUp, cls: 'border-[#F5C9C9] bg-[#FDF1F1] text-[#B42318]', iconCls: 'text-[#D92D20]' },
+  medium: { label: 'Medium', short: 'Med', icon: ChevronUp, cls: 'border-[#F3DDB8] bg-[#FDF6EA] text-[#93500A]', iconCls: 'text-warning' },
+  low: { label: 'Low', short: 'Low', icon: ChevronDown, cls: 'border-line bg-wash text-slate', iconCls: 'text-slate' },
+}
+
+export function TypeBadge({ type, compact }: { type: IssueType; compact?: boolean }) {
+  const m = TYPE_META[type]
   return (
-    <span className={cx('inline-flex h-[18px] items-center rounded-[3px] border px-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.04em]', strong ? 'border-ink text-ink' : 'border-line text-slate')}>
-      {children}
-    </span>
+    <Badge variant="outline" className={cn('h-[20px] gap-1 rounded-[4px] px-1.5 font-mono text-[10.5px] font-medium', m.cls)}>
+      <m.icon className={cn('!size-3', m.iconCls)} strokeWidth={2.25} />
+      {!compact && m.label}
+    </Badge>
   )
 }
 
-export const priorityLabel: Record<Priority, string> = { high: 'High', medium: 'Med', low: 'Low' }
+export function PriorityBadge({ priority, compact }: { priority: Priority; compact?: boolean }) {
+  const m = PRIORITY_META[priority]
+  return (
+    <Badge variant="outline" className={cn('h-[20px] gap-0.5 rounded-[4px] px-1.5 font-mono text-[10.5px] font-medium', m.cls)} title={`${m.label} priority`}>
+      <m.icon className={cn('!size-3', m.iconCls)} strokeWidth={2.5} />
+      {!compact && m.short}
+    </Badge>
+  )
+}
 
-export function IssueChips({ issue }: { issue: Issue }) {
+export function IssueChips({ issue, compact }: { issue: Issue; compact?: boolean }) {
   return (
     <>
-      <Chip strong={issue.type === 'bug'}>{issue.type}</Chip>
-      <Chip strong={issue.priority === 'high'}>{priorityLabel[issue.priority]}</Chip>
+      <TypeBadge type={issue.type} compact={compact} />
+      <PriorityBadge priority={issue.priority} compact={compact} />
     </>
   )
 }
 
-type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost'; size?: 'sm' | 'md' }
-export function Button({ variant = 'primary', size = 'md', className, ...rest }: BtnProps) {
-  return (
-    <button
-      {...rest}
-      className={cx(
-        'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-[4px] border font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50',
-        size === 'md' ? 'h-[34px] px-3.5 text-[13px]' : 'h-7 px-2.5 text-[12.5px]',
-        variant === 'primary' && 'border-ink bg-ink text-paper hover:border-accent hover:bg-accent',
-        variant === 'secondary' && 'border-line bg-cloud text-ink hover:border-ink',
-        variant === 'ghost' && 'border-transparent bg-transparent text-ink hover:underline',
-        className,
-      )}
-    />
-  )
-}
-
+/* ── Time ─────────────────────────────────────────────────────────── */
 export function timeAgo(at: number) {
   const s = Math.max(1, Math.round((Date.now() - at) / 1000))
   if (s < 60) return 'just now'
@@ -110,12 +150,13 @@ export function dueLabel(due: string | null) {
   return { text, overdue: days < 0, soon: days >= 0 && days <= 2 }
 }
 
+/* ── Scroll reveal ────────────────────────────────────────────────── */
 export function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null)
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const targets = [el, ...Array.from(el.querySelectorAll<HTMLElement>('.reveal'))]
+    const targets = [el, ...Array.from(el.querySelectorAll<HTMLElement>('.reveal, .illo'))]
     if (!('IntersectionObserver' in window)) { targets.forEach(t => t.classList.add('in')); return }
     const io = new IntersectionObserver(entries => {
       for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) }
@@ -131,8 +172,8 @@ export function issueMarkdown(issue: Issue, assignee?: User) {
     `# ${issue.key}: ${issue.title}`,
     '',
     `- Status: ${statusMeta(issue.status).label}`,
-    `- Type: ${issue.type}`,
-    `- Priority: ${issue.priority}`,
+    `- Type: ${TYPE_META[issue.type].label}`,
+    `- Priority: ${PRIORITY_META[issue.priority].label}`,
     `- Assignee: ${assignee?.name ?? 'Unassigned'}`,
     issue.due ? `- Due: ${issue.due}` : null,
     issue.labels.length ? `- Labels: ${issue.labels.join(', ')}` : null,

@@ -3,7 +3,10 @@ import { useSearchParams } from 'react-router-dom'
 import { useStore } from '../store'
 import { ME } from '../data/mock'
 import { TopBar } from '../components/AppShell'
-import { Chip, StatusLabel, cx, dueLabel, priorityLabel } from '../lib/ui'
+import { CalendarClock } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { PriorityBadge, StatusLabel, TypeBadge, cx, dueLabel } from '@/lib/ui'
 
 export default function MyIssues() {
   const { state } = useStore()
@@ -21,14 +24,14 @@ export default function MyIssues() {
           <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">My issues</h1>
-              <span className="label-mono rounded-[3px] bg-cloud px-2 py-1 text-slate">{openCount} open, assigned to you</span>
+              <Badge variant="secondary" className="label-mono rounded-[4px] text-slate">{openCount} open, assigned to you</Badge>
             </div>
-            <div className="flex rounded-[4px] border border-line p-0.5" role="tablist">
-              {(['open', 'done'] as const).map(t => (
-                <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-                  className={cx('rounded-[2px] px-4 py-1.5 text-[13px] capitalize transition-colors', tab === t ? 'bg-ink text-paper' : 'text-slate hover:text-ink')}>{t}</button>
-              ))}
-            </div>
+            <Tabs value={tab} onValueChange={v => setTab(v as 'open' | 'done')}>
+              <TabsList>
+                <TabsTrigger value="open" className="px-4">Open</TabsTrigger>
+                <TabsTrigger value="done" className="px-4">Done</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {state.projects.map(p => {
@@ -43,12 +46,12 @@ export default function MyIssues() {
                     return (
                       <li key={i.key}>
                         <button onClick={() => setParams(prm => { prm.set('issue', i.key); return prm })}
-                          className={cx('grid w-full grid-cols-[72px_1fr_auto] items-center gap-3 border-b border-line px-2 py-3 text-left transition-colors hover:bg-[#F7F7FA] md:grid-cols-[80px_1fr_150px_60px_70px]', state.flash === i.key && 'flash')}>
+                          className={cx('grid w-full grid-cols-[72px_1fr_auto] items-center gap-3 border-b border-line px-2 py-3 text-left transition-colors hover:bg-[#F7F7FA] md:grid-cols-[80px_1fr_150px_120px_90px]', state.flash === i.key && 'flash')}>
                           <span className="font-mono text-[12px] text-slate">{i.key}</span>
                           <span className={cx('truncate text-[14px]', i.status === 'done' && 'text-slate line-through decoration-slate/50')}>{i.title}</span>
                           <span className="hidden md:block"><StatusLabel status={i.status} /></span>
-                          <span className="hidden md:block"><Chip strong={i.priority === 'high'}>{priorityLabel[i.priority]}</Chip></span>
-                          <span className={cx('text-right font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-warning' : 'text-slate')}>{due?.text ?? '—'}</span>
+                          <span className="hidden gap-1.5 md:flex"><TypeBadge type={i.type} compact /><PriorityBadge priority={i.priority} /></span>
+                          <span className={cx('inline-flex items-center justify-end gap-1 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-[#B42318]' : 'text-slate')}>{due && <CalendarClock className="size-3" />}{due?.text ?? '—'}</span>
                         </button>
                       </li>
                     )

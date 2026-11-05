@@ -6,11 +6,15 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Filter, Plus, X } from 'lucide-react'
 import { useStore } from '../store'
 import { STATUSES, type Issue, type Status } from '../data/mock'
 import { TopBar, Crumb } from '../components/AppShell'
 import IssueCard from '../components/IssueCard'
-import { Avatar, Icon, StatusDot, cx } from '../lib/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Avatar, PRIORITY_META, StatusIcon, TYPE_META, cx } from '@/lib/ui'
 
 type Columns = Record<Status, string[]>
 
@@ -20,11 +24,13 @@ export function useFilteredIssues(project: string | undefined) {
   const q = (params.get('q') ?? '').toLowerCase()
   const who = params.get('who')
   const type = params.get('type')
+  const prio = params.get('prio')
   const issues = useMemo(() => state.issues.filter(i =>
     (!project || i.project === project) &&
     (!q || i.title.toLowerCase().includes(q) || i.key.toLowerCase().includes(q)) &&
-    (!who || (who === 'none' ? !i.assignee : i.assignee === who)) &&
-    (!type || i.type === type)), [state.issues, project, q, who, type])
+    (!who || i.assignee === who) &&
+    (!type || i.type === type) &&
+    (!prio || i.priority === prio)), [state.issues, project, q, who, type, prio])
   return { issues, q, who, type }
 }
 
@@ -32,35 +38,47 @@ export function FilterRow({ project, count }: { project: string; count: number }
   const { state, user } = useStore()
   const [params, setParams] = useSearchParams()
   const who = params.get('who')
-  const type = params.get('type')
+  const type = params.get('type') ?? 'all'
+  const prio = params.get('prio') ?? 'all'
   const p = state.projects.find(x => x.key === project)
-  const set = (k: string, v: string | null) => setParams(prev => { if (v) prev.set(k, v); else prev.delete(k); return prev }, { replace: true })
-  const active = who || type || params.get('q')
+  const set = (k: string, v: string | null) => setParams(prev => { if (v && v !== 'all') prev.set(k, v); else prev.delete(k); return prev }, { replace: true })
+  const active = who || params.get('type') || params.get('prio') || params.get('q')
 
   return (
-    <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-4 md:px-6">
-      <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2 md:px-6">
+      <div className="flex min-w-0 flex-wrap items-center gap-2.5">
         <div className="flex items-center -space-x-1" role="group" aria-label="Filter by person">
           {p?.members.slice(0, 6).map(id => {
             const on = who === id
             return (
-              <button key={id} onClick={() => set('who', on ? null : id)} title={user(id)?.name} aria-pressed={on}
-                className={cx('rounded-full ring-2 transition-transform hover:z-10 hover:-translate-y-0.5', on ? 'z-10 ring-accent' : 'ring-paper')}>
-                <Avatar user={user(id)} size={24} />
-              </button>
+              <Tooltip key={id}>
+                <TooltipTrigger asChild>
+                  <button onClick={() => set('who', on ? null : id)} aria-pressed={on} aria-label={`Only ${user(id)?.name}`}
+                    className={cx('rounded-full ring-2 transition-transform hover:z-10 hover:-translate-y-0.5', on ? 'z-10 ring-brand' : 'ring-paper')}>
+                    <Avatar user={user(id)} size={24} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{user(id)?.name}</TooltipContent>
+              </Tooltip>
             )
           })}
         </div>
-        <span className="h-4 w-px bg-line" />
-        <label className="relative">
-          <span className="sr-only">Type</span>
-          <select value={type ?? ''} onChange={e => set('type', e.target.value || null)}
-            className="h-8 appearance-none rounded-[4px] border border-line bg-cloud pl-2.5 pr-7 font-mono text-[11.5px] hover:border-ink focus:outline-2 focus:outline-accent">
-            <option value="">All types</option><option value="task">Tasks</option><option value="bug">Bugs</option>
-          </select>
-          <Icon name="expand_more" className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 !text-[16px] text-slate" />
-        </label>
-        {active && <button onClick={() => setParams({}, { replace: true })} className="link text-[13px] text-slate hover:text-ink">Clear</button>}
+        <span className="hidden h-4 w-px bg-line sm:block" />
+        <Select value={type} onValueChange={v => set('type', v)}>
+          <SelectTrigger size="sm" className="h-8 gap-1.5 text-[12.5px]" aria-label="Type"><Filter className="size-3.5 text-slate" /><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            {(['task', 'bug'] as const).map(k => { const m = TYPE_META[k]; return <SelectItem key={k} value={k}><m.icon className={cx('size-3.5', m.iconCls)} />{m.label}s</SelectItem> })}
+          </SelectContent>
+        </Select>
+        <Select value={prio} onValueChange={v => set('prio', v)}>
+          <SelectTrigger size="sm" className="h-8 text-[12.5px]" aria-label="Priority"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Any priority</SelectItem>
+            {(['high', 'medium', 'low'] as const).map(k => { const m = PRIORITY_META[k]; return <SelectItem key={k} value={k}><m.icon className={cx('size-3.5', m.iconCls)} />{m.label}</SelectItem> })}
+          </SelectContent>
+        </Select>
+        {active && <Button variant="ghost" size="sm" className="text-slate" onClick={() => setParams({}, { replace: true })}><X />Clear</Button>}
       </div>
       <span className="label-mono shrink-0 text-slate">{count} issues</span>
     </div>
@@ -79,7 +97,8 @@ function SortableCard({ issue }: { issue: Issue }) {
       ghost={isDragging}
       flash={state.flash === issue.key}
       byAgent={state.flash === issue.key && state.activity.some(a => a.issue === issue.key && a.agent && Date.now() - a.at < 5000)}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      comments={state.comments.filter(c => c.issue === issue.key).length}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
       {...attributes}
       {...listeners}
@@ -91,14 +110,17 @@ function Column({ status, keys, byKey, onAdd }: { status: Status; keys: string[]
   const { setNodeRef, isOver } = useDroppable({ id: status })
   const meta = STATUSES.find(s => s.id === status)!
   return (
-    <section className={cx('flex w-[85vw] max-w-[320px] shrink-0 snap-start flex-col rounded-[4px] border border-line bg-cloud p-2.5 md:w-auto md:max-w-none md:flex-1 md:shrink', isOver && 'border-slate/40')}>
+    <section className={cx('flex w-[85vw] max-w-[320px] shrink-0 snap-start flex-col rounded-[4px] border bg-cloud p-2.5 transition-colors md:w-auto md:max-w-none md:flex-1 md:shrink', isOver ? 'border-slate/50 bg-[#E8E8EE]' : 'border-line')}>
       <header className="mb-2.5 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <StatusDot status={status} />
+          <StatusIcon status={status} />
           <h2 className="label-mono text-ink">{meta.label}</h2>
           <span className="font-mono text-[12px] text-slate">{keys.length}</span>
         </div>
-        {status === 'todo' && <button onClick={onAdd} className="rounded-[4px] p-0.5 text-slate hover:bg-paper hover:text-ink" aria-label="Add issue"><Icon name="add" className="!text-[16px]" /></button>}
+        <Tooltip>
+          <TooltipTrigger asChild><Button variant="ghost" size="icon-sm" className="size-6 text-slate" onClick={onAdd} aria-label={`Add issue to ${meta.label}`}><Plus /></Button></TooltipTrigger>
+          <TooltipContent>New issue</TooltipContent>
+        </Tooltip>
       </header>
       <SortableContext items={keys} strategy={verticalListSortingStrategy}>
         <div ref={setNodeRef} className="flex min-h-24 flex-1 flex-col gap-2">
@@ -165,7 +187,7 @@ export default function Board() {
     const index = next ? full.findIndex(i => i.key === next) : full.length
     setCols(c => ({ ...c, [col]: list }))
     dispatch({ t: 'move', key: id, status: col, index: index < 0 ? full.length : index })
-    if (origin && origin !== col) toast(`${id} → ${STATUSES.find(s => s.id === col)!.label}`)
+    if (origin && origin !== col) toast(`${id} moved to ${STATUSES.find(s => s.id === col)!.label}`)
   }
 
   const activeIssue = active ? byKey.get(active) : undefined
@@ -179,8 +201,8 @@ export default function Board() {
           <div className="flex min-h-full snap-x gap-3 p-4 md:gap-4 md:p-6">
             {STATUSES.map(s => <Column key={s.id} status={s.id} keys={cols[s.id]} byKey={byKey} onAdd={() => setCreateOpen(true, project)} />)}
           </div>
-          <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
-            {activeIssue && <IssueCard issue={activeIssue} assignee={user(activeIssue.assignee)} lifted />}
+          <DragOverlay dropAnimation={{ duration: 220, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
+            {activeIssue && <IssueCard issue={activeIssue} assignee={user(activeIssue.assignee)} comments={state.comments.filter(c => c.issue === activeIssue.key).length} lifted />}
           </DragOverlay>
         </DndContext>
       </main>
