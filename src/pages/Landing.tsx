@@ -89,7 +89,7 @@ const HERO_ROWS = Math.floor((APP_H - 48 - boardHeight(0)) / (boardHeight(1) - b
 
 function HeroBoard() {
   return (
-    <MacBook>
+    <MacBook show={0.56}>
       <div className="flex h-full text-left">
         <div className="flex w-[210px] shrink-0 flex-col gap-5 border-r border-line p-4">
           <Wordmark height={22} />
@@ -351,7 +351,7 @@ export default function Landing() {
           <Button size="lg" onClick={open}>Open Tack<ArrowRight /></Button>
           <Button size="lg" variant="secondary" asChild><a href="#product">How it works</a></Button>
         </div>
-        <div className="anim-rise mx-auto -mb-[3.3%] mt-16 max-w-[1180px]" style={{ animationDelay: '240ms' }}><HeroBoard /></div>
+        <div className="anim-rise mx-auto mt-16 max-w-[1180px]" style={{ animationDelay: '240ms' }}><HeroBoard /></div>
       </section>
 
       <Ticker />

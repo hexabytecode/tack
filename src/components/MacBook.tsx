@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, Lock, PanelLeft, Plus, RotateCw, Share, Copy as Tabs } from 'lucide-react'
 import { Scaled } from './DragBoard'
 
-/* The laptop is a Figma render (public/illustrations/macbook-frame.webp) with its screen cut out.
-   The live page sits behind that hole, drawn at a fixed design size and scaled to fit, so the
-   frame and its contents always line up. Numbers below are pixel positions in the render. */
-const FRAME = { w: 1493, h: 913, screen: { x: 122, y: 24, w: 1249, h: 775 } }
+/* The laptop is the vector MacBook Pro from the MakPay hero mockup (public/illustrations/macbook.svg),
+   with its screen left open. The live page sits behind that opening, drawn at a fixed design size and
+   scaled to fit, so frame and contents always line up. Numbers are positions in the SVG's viewBox. */
+const FRAME = { w: 1400, h: 790, screen: { x: 156, y: 26, w: 1111, h: 674 } }
 export const SCREEN_W = 1200
 export const SCREEN_H = Math.round(SCREEN_W * FRAME.screen.h / FRAME.screen.w)
 const CHROME_H = 24 + 44
@@ -13,22 +13,45 @@ export const APP_H = SCREEN_H - CHROME_H
 
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
 
-export function MacBook({ children, url = 'tack.app/website-relaunch/board' }: { children: ReactNode; url?: string }) {
+/** `show` is how much of the laptop's height is visible; the rest is cut off below.
+    While the laptop scrolls into view it grows from slightly smaller to full size. */
+export function MacBook({ children, show = 1, url = 'tack.app/website-relaunch/board' }: { children: ReactNode; show?: number; url?: string }) {
   const s = FRAME.screen
+  const lid = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = lid.current
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const r = el.getBoundingClientRect()
+      const vh = window.innerHeight
+      const p = Math.min(1, Math.max(0, 1 - (r.top - vh * 0.15) / (vh * 0.6)))
+      const e = 1 - (1 - p) ** 2
+      el.style.transform = `scale(${0.86 + 0.14 * e})`
+    }
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update) }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); cancelAnimationFrame(raf) }
+  }, [])
   return (
-    <div className="relative mx-auto w-full" style={{ aspectRatio: `${FRAME.w} / ${FRAME.h}` }}>
-      <div className="absolute overflow-hidden bg-paper" style={{ left: pct(s.x, FRAME.w), top: pct(s.y, FRAME.h), width: pct(s.w, FRAME.w), height: pct(s.h, FRAME.h) }}>
-        <Scaled width={SCREEN_W} height={SCREEN_H}>
-          <div className="flex h-[24px] items-center justify-between bg-[#ececee] px-4 pl-5 text-[11.5px] text-ink">
-            <span className="flex items-center gap-4"><span className="font-semibold">Safari</span><span>File</span><span>Edit</span><span>View</span><span>History</span><span>Window</span></span>
-            <span className="flex items-center gap-3 text-[11px]"><span>100%</span><span>Wed 5 Nov</span><span>9:41</span></span>
-          </div>
-          <SafariBar url={url} />
-          <div className="bg-paper" style={{ height: APP_H }}>{children}</div>
-        </Scaled>
+    <div className="relative mx-auto w-full overflow-hidden" style={{ aspectRatio: `${FRAME.w} / ${FRAME.h * show}` }}>
+      <div ref={lid} className="absolute inset-x-0 top-0 origin-top will-change-transform" style={{ aspectRatio: `${FRAME.w} / ${FRAME.h}` }}>
+        <div className="absolute overflow-hidden rounded-[0.6%] bg-paper" style={{ left: pct(s.x, FRAME.w), top: pct(s.y, FRAME.h), width: pct(s.w, FRAME.w), height: pct(s.h, FRAME.h) }}>
+          <Scaled width={SCREEN_W} height={SCREEN_H}>
+            <div className="flex h-[24px] items-center justify-between bg-[#ececee] px-4 pl-5 text-[11.5px] text-ink">
+              <span className="flex items-center gap-4"><span className="font-semibold">Safari</span><span>File</span><span>Edit</span><span>View</span><span>History</span><span>Window</span></span>
+              <span className="flex items-center gap-3 text-[11px]"><span>100%</span><span>Wed 5 Nov</span><span>9:41</span></span>
+            </div>
+            <SafariBar url={url} />
+            <div className="bg-paper" style={{ height: APP_H }}>{children}</div>
+          </Scaled>
+        </div>
+        <img src="/illustrations/macbook.svg" alt="" aria-hidden="true" draggable={false}
+          className="pointer-events-none absolute inset-0 size-full select-none" />
       </div>
-      <img src="/illustrations/macbook-frame.webp" alt="" aria-hidden="true" draggable={false} fetchPriority="high"
-        className="pointer-events-none absolute inset-0 size-full select-none" />
     </div>
   )
 }

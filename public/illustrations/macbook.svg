@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="790" viewBox="183 58 1400 790">
+<!-- MacBook Pro frame from the MakPay hero mockup (device-mockup-source.svg), laptop only, screen left open. -->
+<defs>
+ <linearGradient id="metal" x2="0" y2="1"><stop stop-color="#777b7f"/><stop offset=".3" stop-color="#d7d9db"/><stop offset=".8" stop-color="#777b80"/><stop offset="1" stop-color="#494c50"/></linearGradient>
+ <linearGradient id="lid" x2="0" y2="1"><stop stop-color="#1a1b1e"/><stop offset="1" stop-color="#0c0d0f"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="12"/></filter>
+ <mask id="screen-hole" maskUnits="userSpaceOnUse" x="183" y="58" width="1400" height="790">
+  <rect x="183" y="58" width="1400" height="790" fill="#fff"/>
+  <path d="M347 84H830V96Q830 103 838 103H948Q956 103 956 96V84H1442Q1450 84 1450 92V750Q1450 758 1442 758H347Q339 758 339 750V92Q339 84 347 84Z" fill="#000"/>
+ </mask>
+</defs>
+<ellipse cx="883" cy="845" rx="735" ry="19" fill="#999" opacity=".22" filter="url(#shadow)"/>
+<g mask="url(#screen-hole)">
+ <rect x="320" y="67" width="1150" height="734" rx="27" fill="url(#lid)" stroke="#626568" stroke-width="5"/>
+ <rect x="336" y="81" width="1118" height="692" rx="12" fill="#050506"/>
+ <path d="M830 80H956V96Q956 103 948 103H838Q830 103 830 96Z" fill="#09090a"/>
+</g>
+<circle cx="893" cy="91" r="3.4" fill="#202a33"/><circle cx="892" cy="90" r="1" fill="#435466"/>
+<path d="M320 794H1471L1575 796V824Q1575 838 1554 839H213Q191 839 191 824V796Z" fill="url(#metal)" stroke="#797d80" stroke-width="2"/>
+<path d="M320 793H1470L1575 796H191Z" fill="#a4a7a9"/>
+<path d="M777 795H975V803Q975 811 962 811H790Q777 811 777 803Z" fill="#6e7275" opacity=".7"/>
+<path d="M191 833Q191 841 213 841H1554Q1575 841 1575 833" fill="none" stroke="#44484b" stroke-width="3"/>
+</svg>

@@ -157,3 +157,19 @@ a:focus-visible, button:not([data-slot]):focus-visible { outline: 2px solid rgba
   .type-on { max-width: 100%; }
   .after-type { opacity: 1; }
 }
+
+/* Logo hover: the blue tack head lifts and presses in, the t gives a little, then a, c, k nod in turn. */
+.tack-logo .tack-dot, .tack-logo .tack-t, .tack-logo .tack-l { transform-box: fill-box; transform-origin: 50% 100%; }
+:is(a, button, .tack-logo):hover > .tack-logo .tack-dot, .tack-logo:hover .tack-dot { animation: tack-press 620ms cubic-bezier(.3,.7,.3,1); }
+:is(a, button, .tack-logo):hover > .tack-logo .tack-t, .tack-logo:hover .tack-t { animation: tack-give 620ms cubic-bezier(.3,.7,.3,1); }
+:is(a, button, .tack-logo):hover > .tack-logo .tack-l, .tack-logo:hover .tack-l { animation: tack-nod 420ms cubic-bezier(.3,.7,.3,1) calc(220ms + var(--i) * 60ms) both; }
+@keyframes tack-press {
+  0% { transform: none }
+  35% { transform: translateY(-3px) }
+  55% { transform: translateY(1.2px) scale(1.12, .84) }
+  75% { transform: translateY(-.4px) }
+  100% { transform: none }
+}
+@keyframes tack-give { 0%, 45% { transform: none } 58% { transform: scaleY(.93) } 100% { transform: none } }
+@keyframes tack-nod { 0% { transform: none } 40% { transform: translateY(-1.6px) } 100% { transform: none } }
+@media (prefers-reduced-motion: reduce) { .tack-logo * { animation: none !important } }

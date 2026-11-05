@@ -16,30 +16,35 @@ const BLUE = '#183FD9'
 
 export function LogoMark({ size = 24, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cn('shrink-0', className)}>
-      <circle cx="10" cy="4.5" r="3.5" fill={BLUE} />
-      <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" stroke={INK} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5.5 10.5H15" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cn('tack-logo shrink-0 overflow-visible', className)}>
+      <circle className="tack-dot" cx="10" cy="4.5" r="3.5" fill={BLUE} />
+      <g className="tack-t">
+        <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" stroke={INK} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M5.5 10.5H15" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+      </g>
     </svg>
   )
 }
 
 export function Wordmark({ height = 24, className, label = 'Tack' }: { height?: number; className?: string; label?: string }) {
   return (
-    <svg height={height} width={(height * 64) / 24} viewBox="0 0 64 24" fill="none" role="img" aria-label={label} className={cn('shrink-0', className)}>
-      <circle cx="10" cy="4.5" r="3.5" fill={BLUE} />
+    <svg height={height} width={(height * 64) / 24} viewBox="0 0 64 24" fill="none" role="img" aria-label={label} className={cn('tack-logo shrink-0 overflow-visible', className)}>
+      <circle className="tack-dot" cx="10" cy="4.5" r="3.5" fill={BLUE} />
       <g stroke={INK} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" />
-        <path d="M5.5 10.5H15" />
-        {/* a */}
-        <circle cx="26.5" cy="14.8" r="4.9" />
-        <path d="M31.4 10v10" />
-        {/* c */}
-        <path d="M45.6 11.4a4.9 4.9 0 1 0 0 6.8" />
-        {/* k */}
-        <path d="M51.5 3.5V20" />
-        <path d="M58.6 10.2 52.6 15.6" />
-        <path d="M54.8 13.9 59 20" />
+        <g className="tack-t">
+          <path d="M10 8.5V17c0 1.66 1.34 3 3 3h3.5" />
+          <path d="M5.5 10.5H15" />
+        </g>
+        <g className="tack-l" style={{ ['--i' as string]: 0 }}>
+          <circle cx="26.5" cy="14.8" r="4.9" />
+          <path d="M31.4 10v10" />
+        </g>
+        <g className="tack-l" style={{ ['--i' as string]: 1 }}><path d="M45.6 11.4a4.9 4.9 0 1 0 0 6.8" /></g>
+        <g className="tack-l" style={{ ['--i' as string]: 2 }}>
+          <path d="M51.5 3.5V20" />
+          <path d="M58.6 10.2 52.6 15.6" />
+          <path d="M54.8 13.9 59 20" />
+        </g>
       </g>
     </svg>
   )
