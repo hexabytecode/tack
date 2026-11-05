@@ -38,7 +38,7 @@ export default function Markdown({ children, className }: { children: string; cl
   const names = state.users.map(u => ({ first: u.name.split(' ')[0], id: u.id }))
 
   return (
-    <div className={cn('md text-[13.5px] leading-relaxed', className)}>
+    <div className={cn('md min-w-0 text-[13.5px] leading-relaxed', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         urlTransform={u => u}
@@ -77,10 +77,13 @@ export default function Markdown({ children, className }: { children: string; cl
             }
             return <blockquote className="my-2 border-l-2 border-line pl-3 text-slate">{c}</blockquote>
           },
-          code: ({ children: c, className: lang }) => lang
-            ? <code className="block overflow-x-auto rounded-[4px] bg-ink px-3 py-2 font-mono text-[12px] text-brand-soft">{c}</code>
-            : <code className="rounded-[3px] bg-cloud px-1 py-px font-mono text-[12px]">{c}</code>,
-          pre: ({ children: c }) => <pre className="my-2">{c}</pre>,
+          code: ({ children: c }) => <code className="rounded-[3px] bg-cloud px-1 py-px font-mono text-[12px] [overflow-wrap:anywhere]">{c}</code>,
+          pre: ({ children: c }) => (
+            <pre className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line bg-cloud px-3 py-2.5 font-mono text-[12px] leading-[1.65] whitespace-pre-wrap text-ink [overflow-wrap:anywhere] [&>code]:bg-transparent [&>code]:p-0">{c}</pre>
+          ),
+          table: ({ children: c }) => <div className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line"><table className="w-full border-collapse text-left text-[13px]">{c}</table></div>,
+          th: ({ children: c }) => <th className="border-b border-line bg-cloud px-3 py-1.5 font-medium">{c}</th>,
+          td: ({ children: c }) => <td className="border-b border-line px-3 py-1.5 align-top [tr:last-child_&]:border-b-0">{c}</td>,
           ul: ({ children: c, className: k }) => <ul className={cn('my-1.5 flex flex-col gap-0.5', k?.includes('contains-task-list') ? 'pl-0' : 'list-disc pl-5')}>{c}</ul>,
           ol: ({ children: c }) => <ol className="my-1.5 flex list-decimal flex-col gap-0.5 pl-5">{c}</ol>,
           li: ({ children: c, className: k }) => <li className={cn(k?.includes('task-list-item') && 'flex list-none items-start gap-2')}>{c}</li>,

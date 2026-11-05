@@ -31,7 +31,7 @@ function GuideCard({ g }: { g: typeof GUIDES[number] }) {
     return t
   }
   return (
-    <div className="flex flex-col rounded-[6px] border border-line bg-paper">
+    <div className={cn('flex min-w-0 flex-col rounded-[6px] border border-line bg-paper', open && 'md:col-span-2')}>
       <div className="flex flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -51,7 +51,7 @@ function GuideCard({ g }: { g: typeof GUIDES[number] }) {
           </Button>
         </div>
       </div>
-      {open && text && <div className="anim-rise border-t border-line bg-wash px-5 py-4"><Markdown>{text}</Markdown></div>}
+      {open && text && <div className="anim-rise min-w-0 border-t border-line bg-wash px-5 py-4"><Markdown className="max-w-[720px]">{text}</Markdown></div>}
     </div>
   )
 }
@@ -87,7 +87,7 @@ export default function AiGuide() {
           </div>
           <Link to="/app/WEB/settings" className="link text-[14px] text-slate">Get your personal key in Settings</Link>
         </div>
-        <div className="mt-8 grid items-start gap-4 md:grid-cols-2">
+        <div className="mt-8 grid grid-flow-dense items-start gap-4 md:grid-cols-2">
           {GUIDES.map(g => <GuideCard key={g.file} g={g} />)}
         </div>
         <p className="mt-8 font-mono text-[11.5px] text-slate">Demo: addresses and keys on this page are examples.</p>
