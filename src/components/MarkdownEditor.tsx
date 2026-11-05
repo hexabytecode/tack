@@ -1,12 +1,11 @@
 import { useRef, useState } from 'react'
-import { AtSign, Bold, Eye, ListChecks, MessageSquareWarning, PenLine } from 'lucide-react'
+import { AtSign, Bold, ListChecks, MessageSquareWarning } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import Markdown from './Markdown'
 import { Avatar } from '@/lib/ui'
 import { cn } from '@/lib/utils'
 import type { User } from '../data/mock'
@@ -25,14 +24,16 @@ type Props = {
   open?: boolean
 }
 
-/* A quiet box: one line until you click in. Then four tools (bold, checklist, callout, mention),
-   a preview toggle and the submit button. Markdown still works if you type it. */
+/* A quiet box: one line until you click in. Then four tools (bold, checklist, callout, mention)
+   and the submit button. Markdown still works if you type it. */
 export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLabel = 'Comment', placeholder = 'Leave a comment…', people, rows = 3, onCancel, open = false }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null)
   const [focused, setFocused] = useState(open)
-  const [preview, setPreview] = useState(false)
+  const [callout, setCallout] = useState(false)
   const [mention, setMention] = useState(false)
-  const expanded = focused || open || !!value || preview
+  // A menu takes focus from the text box while it is open; keep the toolbar up until it closes.
+  const expanded = focused || open || !!value || callout || mention
+  const backToText = (e: Event) => { e.preventDefault(); ref.current?.focus() }
 
   const apply = (before: string, after = '', block = false, fallback = '') => {
     const el = ref.current
@@ -53,39 +54,35 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
   return (
     <div className={cn('rounded-[6px] border bg-paper transition-[border-color,box-shadow] duration-150',
       expanded ? 'border-line focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15' : 'border-line hover:border-slate/40')}>
-      {preview ? (
-        <div className="min-h-[76px] px-3 py-2.5">{value.trim() ? <Markdown>{value}</Markdown> : <p className="text-[13.5px] text-placeholder/70">Nothing to preview yet.</p>}</div>
-      ) : (
-        <Textarea
-          id={id}
-          ref={ref}
-          value={value}
-          rows={expanded ? rows : 1}
-          onFocus={() => setFocused(true)}
-          onBlur={e => { if (!e.currentTarget.closest('[data-editor]')?.contains(e.relatedTarget as Node)) setFocused(false) }}
-          onChange={e => onChange(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onSubmit?.() } }}
-          placeholder={placeholder}
-          className={cn('resize-none rounded-[6px] border-0 bg-transparent px-3 text-[13.5px] shadow-none placeholder:text-placeholder/70 focus-visible:border-0 focus-visible:ring-0',
-            expanded ? 'min-h-[76px] py-2.5' : 'min-h-0 py-2')}
-        />
-      )}
+      <Textarea
+        id={id}
+        ref={ref}
+        value={value}
+        rows={expanded ? rows : 1}
+        onFocus={() => setFocused(true)}
+        onBlur={e => { if (!e.currentTarget.parentElement?.querySelector('[data-editor]')?.contains(e.relatedTarget as Node)) setFocused(false) }}
+        onChange={e => onChange(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onSubmit?.() } }}
+        placeholder={placeholder}
+        className={cn('resize-none rounded-[6px] border-0 bg-transparent px-3 text-[13.5px] shadow-none placeholder:text-placeholder/70 focus-visible:border-0 focus-visible:ring-0',
+          expanded ? 'min-h-[76px] py-2.5' : 'min-h-0 py-2')}
+      />
       {expanded && (
         <div data-editor className="anim-fade flex items-center justify-between gap-2 border-t border-line px-1.5 py-1.5" onMouseDown={e => e.preventDefault()}>
           <div className="flex items-center gap-0.5">
             <Tooltip><TooltipTrigger asChild>
-              <Button type="button" variant="ghost" size="icon-sm" className={tool} onClick={() => apply('**', '**', false, 'bold text')} aria-label="Bold" disabled={preview}><Bold /></Button>
+              <Button type="button" variant="ghost" size="icon-sm" className={tool} onClick={() => apply('**', '**', false, 'bold text')} aria-label="Bold"><Bold /></Button>
             </TooltipTrigger><TooltipContent>Bold</TooltipContent></Tooltip>
             <Tooltip><TooltipTrigger asChild>
-              <Button type="button" variant="ghost" size="icon-sm" className={tool} onClick={() => apply('- [ ] ', '', true, 'To do')} aria-label="Checklist" disabled={preview}><ListChecks /></Button>
+              <Button type="button" variant="ghost" size="icon-sm" className={tool} onClick={() => apply('- [ ] ', '', true, 'To do')} aria-label="Checklist"><ListChecks /></Button>
             </TooltipTrigger><TooltipContent>Checklist</TooltipContent></Tooltip>
-            <DropdownMenu>
+            <DropdownMenu open={callout} onOpenChange={setCallout}>
               <Tooltip><TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="ghost" size="icon-sm" className={tool} aria-label="Callout" disabled={preview}><MessageSquareWarning /></Button>
+                  <Button type="button" variant="ghost" size="icon-sm" className={tool} aria-label="Callout"><MessageSquareWarning /></Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger><TooltipContent>Callout</TooltipContent></Tooltip>
-              <DropdownMenuContent align="start">
+              <DropdownMenuContent align="start" onCloseAutoFocus={backToText}>
                 {[['NOTE', 'Note'], ['TIP', 'Tip'], ['WARNING', 'Heads up'], ['DONE', 'Decision']].map(([k, l]) => (
                   <DropdownMenuItem key={k} onSelect={() => apply(`> [!${k}] `, '', true, l)}>{l}</DropdownMenuItem>
                 ))}
@@ -94,10 +91,10 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
             <Popover open={mention} onOpenChange={setMention}>
               <Tooltip><TooltipTrigger asChild>
                 <PopoverTrigger asChild>
-                  <Button type="button" variant="ghost" size="icon-sm" className={tool} aria-label="Mention someone" disabled={preview}><AtSign /></Button>
+                  <Button type="button" variant="ghost" size="icon-sm" className={tool} aria-label="Mention someone"><AtSign /></Button>
                 </PopoverTrigger>
               </TooltipTrigger><TooltipContent>Mention</TooltipContent></Tooltip>
-              <PopoverContent className="w-56 p-0" align="start">
+              <PopoverContent className="w-56 p-0" align="start" onCloseAutoFocus={backToText}>
                 <Command>
                   <CommandInput placeholder="Mention…" />
                   <CommandList>
@@ -115,11 +112,8 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
             </Popover>
           </div>
           <div className="flex items-center gap-1">
-            <Button type="button" variant="ghost" size="sm" className="text-slate" onClick={() => setPreview(p => !p)}>
-              {preview ? <><PenLine />Edit</> : <><Eye />Preview</>}
-            </Button>
-            {onCancel && <Button type="button" size="sm" variant="ghost" onClick={() => { setPreview(false); onCancel() }}>Cancel</Button>}
-            {onSubmit && <Button type="button" size="sm" onClick={() => { setPreview(false); onSubmit() }} disabled={!value.trim()}>{submitLabel}</Button>}
+            {onCancel && <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>}
+            {onSubmit && <Button type="button" size="sm" onClick={onSubmit} disabled={!value.trim()}>{submitLabel}</Button>}
           </div>
         </div>
       )}
