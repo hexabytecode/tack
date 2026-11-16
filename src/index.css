@@ -132,6 +132,10 @@ a:focus-visible, button:not([data-slot]):focus-visible { outline: 2px solid rgba
 .after-type { opacity: 0; }
 
 
+/* Landing: progress bars fill in once their section is on screen */
+.grow { transform: scaleX(0); transform-origin: left; transition: transform 0.9s var(--ease-out-soft); transition-delay: var(--d, 0ms); }
+.in .grow, .grow.in { transform: none; }
+
 /* Landing: activity ticker */
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .ticker-track { animation: ticker 38s linear infinite; }
@@ -155,6 +159,7 @@ a:focus-visible, button:not([data-slot]):focus-visible { outline: 2px solid rgba
   .illo .illo-img { clip-path: none; }
   .ticker-track { animation: none; }
   .type-on { max-width: 100%; }
+  .grow { transform: none; }
   .after-type { opacity: 1; }
 }
 
