@@ -1,20 +1,21 @@
 import { notify, type NotifyOptions } from './lib/notify'
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
-import { ME, PROJECTS, USERS, nextNumber, seed, STATUSES, type Activity, type Comment, type Issue, type IssueType, type Priority, type Project, type Status, type User } from './data/mock'
+import { ME, PROJECTS, USERS, nextNumber, seed, STATUSES, type Activity, type Comment, type Issue, type IssueType, type Priority, type Project, type Sprint, type Status, type User } from './data/mock'
 
-const KEY = 'tack-demo-v2'
+const KEY = 'tack-demo-v3'
 
 interface State {
   signedIn: boolean
   users: User[]
   projects: Project[]
   issues: Issue[]
+  sprints: Sprint[]
   comments: Comment[]
   activity: Activity[]
   flash: string | null
 }
 
-type NewIssue = { project: string; title: string; description: string; type: IssueType; priority: Priority; assignee: string | null; due: string | null; status?: Status }
+type NewIssue = { project: string; title: string; description: string; type: IssueType; priority: Priority; assignee: string | null; due: string | null; status?: Status; sprint?: string | null; points?: number | null; labels?: string[]; attachments?: { name: string; size: number }[] }
 
 type Action =
   | { t: 'signIn' } | { t: 'signOut' } | { t: 'reset' }
@@ -156,7 +157,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const now = Date.now()
     const issue: Issue = {
       ...n, key: `${n.project}-${nextNumber(stateRef.current.issues, n.project)}`,
-      status: n.status ?? 'todo', labels: [], order: 0, createdAt: now, updatedAt: now,
+      status: n.status ?? 'todo', labels: n.labels ?? [], sprint: n.sprint ?? null, points: n.points ?? null, order: 0, createdAt: now, updatedAt: now,
     }
     dispatch({ t: 'create', issue })
     return issue

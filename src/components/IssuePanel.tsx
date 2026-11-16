@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Bot, ClipboardCopy, History, Link2, MessageSquare, PenLine, Tag, X } from 'lucide-react'
+import { Bot, ClipboardCopy, History, Link2, MessageSquare, Paperclip, PenLine, Tag, X } from 'lucide-react'
 import { useStore } from '../store'
 import { ME, STATUSES, type Issue, type IssueType, type Priority, type Status } from '../data/mock'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import DatePicker from './DatePicker'
 import Markdown from './Markdown'
 import MarkdownEditor from './MarkdownEditor'
+import { POINT_STEPS } from './CreateIssue'
 import { Avatar, PRIORITY_META, StatusPill, TYPE_META, dueLabel, issueMarkdown, timeAgo } from '@/lib/ui'
 import { cn } from '@/lib/utils'
 
@@ -56,7 +57,7 @@ export default function IssuePanel() {
 
   return (
     <Sheet open={!!issue} onOpenChange={o => { if (!o) close() }}>
-      <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-[760px] [&>button.absolute]:hidden" onOpenAutoFocus={e => e.preventDefault()}>
+      <SheetContent side="right" className="w-full gap-0 p-0 outline-none sm:max-w-[760px] [&>button.absolute]:hidden" onOpenAutoFocus={e => e.preventDefault()}>
         {issue && project && (
           <>
             <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-line px-5">
@@ -109,6 +110,16 @@ export default function IssuePanel() {
                     </div>
                   )}
                 </section>
+                {!!issue.attachments?.length && (
+                  <section className="mt-5">
+                    <div className="label-mono mb-2 flex items-center gap-1.5 text-slate"><Paperclip className="size-3.5" />Attachments<span className="ml-auto">{issue.attachments.length}</span></div>
+                    <ul className="flex flex-col gap-1">
+                      {issue.attachments.map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 rounded-[4px] border border-line px-2.5 py-1.5 text-[12.5px]"><Paperclip className="size-3.5 shrink-0 text-slate" /><span className="truncate">{f.name}</span></li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
 
                 <Separator className="my-6" />
 
@@ -164,6 +175,26 @@ export default function IssuePanel() {
                   }}>
                     <SelectTrigger id="issue-status" className="h-9 w-full px-2 text-[13px]"><SelectValue /></SelectTrigger>
                     <SelectContent>{STATUSES.map(s => <SelectItem key={s.id} value={s.id}><StatusPill status={s.id} size="sm" /></SelectItem>)}</SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Sprint">
+                  <Select value={issue.sprint ?? 'backlog'} onValueChange={v => patch({ sprint: v === 'backlog' ? null : v })}>
+                    <SelectTrigger id="issue-sprint" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {state.sprints.filter(x => x.project === issue.project && x.state !== 'closed').map(x => (
+                        <SelectItem key={x.id} value={x.id}>{x.name}<span className={cn('rounded-[3px] px-1 font-mono text-[9.5px] font-medium uppercase tracking-wide', x.state === 'active' ? 'bg-tint text-brand' : 'bg-cloud text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</span></SelectItem>
+                      ))}
+                      <SelectItem value="backlog">Backlog</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Story points">
+                  <Select value={issue.points === null ? 'none' : String(issue.points)} onValueChange={v => patch({ points: v === 'none' ? null : Number(v) })}>
+                    <SelectTrigger id="issue-points" className="h-8 w-full font-mono text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Not estimated</SelectItem>
+                      {POINT_STEPS.map(n => <SelectItem key={n} value={String(n)} className="font-mono">{n} {n === 1 ? 'pt' : 'pts'}</SelectItem>)}
+                    </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Assignee">

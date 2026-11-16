@@ -15,10 +15,17 @@ export interface Issue {
   assignee: string | null
   due: string | null
   labels: string[]
+  /** Sprint id, or null when the issue is in the backlog. */
+  sprint: string | null
+  /** Story points, or null when not estimated. */
+  points: number | null
+  attachments?: Attachment[]
   order: number
   createdAt: number
   updatedAt: number
 }
+export interface Attachment { name: string; size: number }
+export interface Sprint { id: string; project: string; name: string; goal: string; start: string | null; end: string | null; state: 'active' | 'planned' | 'closed' }
 export interface Comment { id: string; issue: string; author: string; body: string; at: number; agent?: string }
 export interface Activity { id: string; issue: string; actor: string; text: string; at: number; agent?: string }
 
@@ -47,6 +54,7 @@ export const PROJECTS: Project[] = [
 ]
 
 const H = 3600_000
+const POINTS = [1, 2, 3, 5, 8]
 const D = 24 * H
 
 type Seed = [num: number, title: string, status: Status, type: IssueType, priority: Priority, assignee: string | null, dueInDays: number | null, labels: string[], ageHours: number, description?: string]
@@ -101,6 +109,7 @@ export function seed(now = Date.now()) {
       const updatedAt = now - ageH * H
       issues.push({
         key, project, title, status, type, priority, assignee, labels,
+        sprint: `${project}-active`, points: POINTS[(num * 7) % POINTS.length],
         description: description ?? '',
         due: dueIn === null ? null : new Date(now + dueIn * D).toISOString().slice(0, 10),
         order: orderBy[status],
@@ -122,7 +131,16 @@ export function seed(now = Date.now()) {
     { id: 'a2', issue: 'WEB-140', actor: 'al', text: 'moved this to In progress', at: now - 2 * H },
     { id: 'a3', issue: 'WEB-139', actor: 'jd', text: 'moved this to In progress', at: now - 7 * H },
   )
-  return { issues, comments, activity }
+  const day = (n: number) => new Date(now + n * D).toISOString().slice(0, 10)
+  const sprints: Sprint[] = [
+    { id: 'WEB-active', project: 'WEB', name: 'Sprint 14', goal: 'Ship the mobile checkout fixes and invoice VAT numbers.', start: day(-8), end: day(6), state: 'active' },
+    { id: 'WEB-next', project: 'WEB', name: 'Sprint 15', goal: '', start: null, end: null, state: 'planned' },
+    { id: 'APP-active', project: 'APP', name: 'Sprint 6', goal: 'Stable notifications and a faster start.', start: day(-4), end: day(10), state: 'active' },
+    { id: 'APP-next', project: 'APP', name: 'Sprint 7', goal: '', start: null, end: null, state: 'planned' },
+    { id: 'BO-active', project: 'BO', name: 'Sprint 3', goal: 'Refunds that explain themselves.', start: day(-2), end: day(12), state: 'active' },
+    { id: 'BO-next', project: 'BO', name: 'Sprint 4', goal: '', start: null, end: null, state: 'planned' },
+  ]
+  return { issues, comments, activity, sprints }
 }
 
 export function nextNumber(issues: Issue[], project: string) {
