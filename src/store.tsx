@@ -29,6 +29,11 @@ type Action =
   | { t: 'role'; user: string; role: User['role'] }
   | { t: 'invite'; email: string; project: string }
   | { t: 'removeMember'; user: string; project: string }
+  | { t: 'plan'; key: string; sprint: string | null; index: number }
+  | { t: 'sprintCreate'; project: string }
+  | { t: 'sprintUpdate'; id: string; patch: Partial<Sprint> }
+  | { t: 'sprintStart'; id: string; patch: Pick<Sprint, 'name' | 'start' | 'end' | 'goal'> }
+  | { t: 'sprintComplete'; id: string; moveTo: string | null }
 
 function fresh(): State {
   return { signedIn: false, users: USERS, projects: PROJECTS, ...seed(), flash: null }
@@ -56,6 +61,23 @@ function reorder(issues: Issue[], key: string, status: Status, index: number) {
     if (i.key === key) return { ...i, status, order: orders.get(key)!, updatedAt: i.status === status ? i.updatedAt : Date.now() }
     return orders.has(i.key) ? { ...i, order: orders.get(i.key)! } : i
   })
+}
+
+/* Put an issue into a sprint (or the backlog when sprint is null) at a position, renumbering that list. */
+function plan(issues: Issue[], key: string, sprint: string | null, index: number) {
+  const moving = issues.find(i => i.key === key)
+  if (!moving) return issues
+  const list = issues.filter(i => i.project === moving.project && i.sprint === sprint && i.key !== key).sort((a, b) => a.rank - b.rank)
+  list.splice(Math.max(0, Math.min(index, list.length)), 0, moving)
+  const ranks = new Map(list.map((i, n) => [i.key, n]))
+  return issues.map(i => i.key === key ? { ...i, sprint, rank: ranks.get(key)!, updatedAt: i.sprint === sprint ? i.updatedAt : Date.now() }
+    : ranks.has(i.key) ? { ...i, rank: ranks.get(i.key)! } : i)
+}
+
+const sprintNumber = (name: string) => Number(name.match(/\d+/)?.[0] ?? 0)
+function nextSprint(sprints: Sprint[], project: string): Sprint {
+  const n = Math.max(0, ...sprints.filter(x => x.project === project).map(x => sprintNumber(x.name))) + 1
+  return { id: `${project}-${uid()}`, project, name: `Sprint ${n}`, goal: '', start: null, end: null, state: 'planned' }
 }
 
 function reducer(s: State, a: Action): State {
@@ -113,6 +135,29 @@ function reducer(s: State, a: Action): State {
       }
     }
     case 'removeMember': return { ...s, projects: s.projects.map(p => p.key === a.project ? { ...p, members: p.members.filter(m => m !== a.user) } : p) }
+    case 'plan': {
+      const before = s.issues.find(i => i.key === a.key)
+      const issues = plan(s.issues, a.key, a.sprint, a.index)
+      if (!before || before.sprint === a.sprint) return { ...s, issues }
+      const to = a.sprint ? s.sprints.find(x => x.id === a.sprint)?.name : 'the backlog'
+      return { ...s, issues, activity: [...s.activity, { id: uid(), issue: a.key, actor: ME, text: `moved this to ${to}`, at: now }] }
+    }
+    case 'sprintCreate': return { ...s, sprints: [...s.sprints, nextSprint(s.sprints, a.project)] }
+    case 'sprintUpdate': return { ...s, sprints: s.sprints.map(x => x.id === a.id ? { ...x, ...a.patch } : x) }
+    case 'sprintStart': {
+      const sp = s.sprints.find(x => x.id === a.id)
+      if (!sp || s.sprints.some(x => x.project === sp.project && x.state === 'active')) return s
+      return { ...s, sprints: s.sprints.map(x => x.id === a.id ? { ...x, ...a.patch, state: 'active' } : x) }
+    }
+    case 'sprintComplete': {
+      const sp = s.sprints.find(x => x.id === a.id)
+      if (!sp) return s
+      let sprints = s.sprints.map(x => x.id === a.id ? { ...x, state: 'closed' as const } : x)
+      let issues = s.issues
+      for (const i of s.issues.filter(i => i.sprint === a.id && i.status !== 'done').sort((x, y) => x.rank - y.rank)) issues = plan(issues, i.key, a.moveTo, 1e6)
+      if (!sprints.some(x => x.project === sp.project && x.state === 'planned')) sprints = [...sprints, nextSprint(sprints, sp.project)]
+      return { ...s, sprints, issues }
+    }
   }
 }
 
@@ -157,7 +202,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const now = Date.now()
     const issue: Issue = {
       ...n, key: `${n.project}-${nextNumber(stateRef.current.issues, n.project)}`,
-      status: n.status ?? 'todo', labels: n.labels ?? [], sprint: n.sprint ?? null, points: n.points ?? null, order: 0, createdAt: now, updatedAt: now,
+      status: n.status ?? 'todo', labels: n.labels ?? [], sprint: n.sprint ?? null, points: n.points ?? null,
+      rank: Math.max(0, ...stateRef.current.issues.map(i => i.rank)) + 1, order: 0, createdAt: now, updatedAt: now,
     }
     dispatch({ t: 'create', issue })
     return issue

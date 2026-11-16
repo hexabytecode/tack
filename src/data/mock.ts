@@ -19,6 +19,8 @@ export interface Issue {
   sprint: string | null
   /** Story points, or null when not estimated. */
   points: number | null
+  /** Position inside its sprint or the backlog (lower comes first). */
+  rank: number
   attachments?: Attachment[]
   order: number
   createdAt: number
@@ -59,8 +61,18 @@ const D = 24 * H
 
 type Seed = [num: number, title: string, status: Status, type: IssueType, priority: Priority, assignee: string | null, dueInDays: number | null, labels: string[], ageHours: number, description?: string]
 
+// Planned for the next sprint, and not planned yet (the backlog). Everything else is in the active sprint.
+const NEXT = new Set(['WEB-147', 'WEB-148', 'APP-35'])
+const BACKLOG = new Set(['WEB-149', 'WEB-150', 'WEB-151', 'WEB-152', 'APP-36', 'APP-37', 'BO-15', 'BO-16'])
+
 const SEED: Record<string, Seed[]> = {
   WEB: [
+    [147, 'Cache CMS pages at the edge', 'todo', 'task', 'medium', 'jd', null, ['infra'], 60],
+    [148, 'Move DNS records to Cloudflare', 'todo', 'task', 'low', 'al', null, ['infra'], 64],
+    [149, 'Search results ignore accented letters', 'todo', 'bug', 'medium', null, null, ['search'], 80],
+    [150, 'Add a cookie settings page', 'todo', 'task', 'low', 'sk', null, ['legal'], 90],
+    [151, 'Image zoom on product photos', 'todo', 'task', 'low', null, null, ['ui'], 100],
+    [152, 'Footer links open in the same tab', 'todo', 'bug', 'low', 'mr', null, ['ui'], 110],
     [142, 'Checkout button overlaps footer on mobile', 'todo', 'bug', 'high', 'al', 9, ['checkout', 'mobile'], 4,
       'On small phones the sticky checkout bar sits on top of the footer and hides the Pay button.\n\nSteps to reproduce:\n1. Open /checkout on a phone narrower than 390px\n2. Add an item and scroll to the bottom\n3. The Pay button is covered by the footer\n\nExpected: the bar sits above the footer with enough room to tap.'],
     [138, 'Move DNS to the new host', 'todo', 'task', 'medium', 'al', 2, ['infra'], 26],
@@ -87,6 +99,9 @@ const SEED: Record<string, Seed[]> = {
     [29, 'Dark splash screen flicker', 'progress', 'bug', 'medium', 'cm', 4, ['android'], 22],
     [25, 'Rename tabs to match the website', 'done', 'task', 'low', 'pp', null, ['content'], 90],
     [26, 'Crash when photo access is denied', 'done', 'bug', 'high', 'cm', null, ['ios'], 110],
+    [35, 'Widget for today\'s orders', 'todo', 'task', 'medium', 'pp', null, ['widgets'], 70],
+    [36, 'Haptic feedback on pull to refresh', 'todo', 'task', 'low', null, null, ['ios'], 90],
+    [37, 'Tablet layout for the order list', 'todo', 'task', 'medium', 'mr', null, ['design'], 95],
   ],
   BO: [
     [12, 'Export audit log CSV times out', 'progress', 'bug', 'high', 'al', 11, ['reports'], 9],
@@ -94,6 +109,8 @@ const SEED: Record<string, Seed[]> = {
     [14, 'Add refund reason dropdown', 'todo', 'task', 'low', 'pp', 9, ['payments'], 15],
     [11, 'Show who approved a refund', 'review', 'task', 'medium', 'jd', 3, ['payments'], 30],
     [8, 'Fix date filter in payments list', 'done', 'bug', 'medium', 'jd', null, ['payments'], 130],
+    [15, 'Bulk refund for duplicate charges', 'todo', 'task', 'high', null, null, ['payments'], 60],
+    [16, 'Keyboard shortcuts in the payments list', 'todo', 'task', 'low', 'jd', null, ['ui'], 80],
   ],
 }
 
@@ -109,7 +126,8 @@ export function seed(now = Date.now()) {
       const updatedAt = now - ageH * H
       issues.push({
         key, project, title, status, type, priority, assignee, labels,
-        sprint: `${project}-active`, points: POINTS[(num * 7) % POINTS.length],
+        sprint: NEXT.has(key) ? `${project}-next` : BACKLOG.has(key) ? null : `${project}-active`,
+        points: POINTS[(num * 7) % POINTS.length], rank: issues.length,
         description: description ?? '',
         due: dueIn === null ? null : new Date(now + dueIn * D).toISOString().slice(0, 10),
         order: orderBy[status],
@@ -134,7 +152,7 @@ export function seed(now = Date.now()) {
   const day = (n: number) => new Date(now + n * D).toISOString().slice(0, 10)
   const sprints: Sprint[] = [
     { id: 'WEB-active', project: 'WEB', name: 'Sprint 14', goal: 'Ship the mobile checkout fixes and invoice VAT numbers.', start: day(-8), end: day(6), state: 'active' },
-    { id: 'WEB-next', project: 'WEB', name: 'Sprint 15', goal: '', start: null, end: null, state: 'planned' },
+    { id: 'WEB-next', project: 'WEB', name: 'Sprint 15', goal: 'Edge caching and the DNS move.', start: null, end: null, state: 'planned' },
     { id: 'APP-active', project: 'APP', name: 'Sprint 6', goal: 'Stable notifications and a faster start.', start: day(-4), end: day(10), state: 'active' },
     { id: 'APP-next', project: 'APP', name: 'Sprint 7', goal: '', start: null, end: null, state: 'planned' },
     { id: 'BO-active', project: 'BO', name: 'Sprint 3', goal: 'Refunds that explain themselves.', start: day(-2), end: day(12), state: 'active' },
