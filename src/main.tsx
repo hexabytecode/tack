@@ -15,6 +15,7 @@ import Login from './pages/Login'
 const Board = lazy(() => import('./pages/Board'))
 const List = lazy(() => import('./pages/List'))
 const Backlog = lazy(() => import('./pages/Backlog'))
+const Releases = lazy(() => import('./pages/Releases'))
 const MyIssues = lazy(() => import('./pages/MyIssues'))
 const Settings = lazy(() => import('./pages/Settings'))
 const AiGuide = lazy(() => import('./pages/AiGuide'))
@@ -26,6 +27,7 @@ const TITLES: [RegExp, string][] = [
   [/^\/ai$/, 'Tack for AI'],
   [/\/board$/, 'Board · Tack'],
   [/\/backlog$/, 'Backlog · Tack'],
+  [/\/releases$/, 'Releases · Tack'],
   [/\/list$/, 'List · Tack'],
   [/\/me$/, 'My issues · Tack'],
   [/\/settings$/, 'Settings · Tack'],
@@ -58,6 +60,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/app/:project/board" element={app(<Board />)} />
           <Route path="/app/:project/list" element={app(<List />, <ListSkeleton />)} />
           <Route path="/app/:project/backlog" element={app(<Backlog />, <ListSkeleton />)} />
+          <Route path="/app/:project/releases" element={app(<Releases />, <ListSkeleton />)} />
           <Route path="/app/:project/settings" element={app(<Settings />, <ListSkeleton />)} />
           <Route path="*" element={<Suspense fallback={<PageSkeleton />}><NotFound /></Suspense>} />
         </Routes>

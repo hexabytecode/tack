@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ChartGantt, ChevronDown, KanbanSquare, List, ListTodo, LogOut, Menu, MoreHorizontal, Plus, Rocket, Search, Settings, Star, UserRound } from 'lucide-react'
+import { ChevronDown, KanbanSquare, List, ListTodo, LogOut, Menu, MoreHorizontal, Plus, Rocket, Search, Settings, Star, UserRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '../store'
 import { Button } from '@/components/ui/button'
@@ -40,7 +40,6 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       { to: `/app/${key}/board`, label: 'Board', icon: KanbanSquare, count: c.board },
       { to: `/app/${key}/list`, label: 'List', icon: List, count: c.list },
       { to: `/app/${key}/releases`, label: 'Releases', icon: Rocket },
-      { to: `/app/${key}/roadmap`, label: 'Roadmap', icon: ChartGantt },
     ]
   }
 

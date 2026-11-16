@@ -21,11 +21,15 @@ export interface Issue {
   points: number | null
   /** Position inside its sprint or the backlog (lower comes first). */
   rank: number
+  /** Release (version) this issue ships in, if any. */
+  release: string | null
   attachments?: Attachment[]
   order: number
   createdAt: number
   updatedAt: number
 }
+export interface Release { id: string; project: string; version: string; title: string; target: string | null; state: 'active' | 'planned' | 'shipped'; shippedAt: string | null; lead: string | null; notes: string }
+export interface StarredView { id: string; name: string; project: string; view: 'board' | 'list' | 'backlog'; query: string }
 export interface Attachment { name: string; size: number }
 export interface Sprint { id: string; project: string; name: string; goal: string; start: string | null; end: string | null; state: 'active' | 'planned' | 'closed' }
 export interface Comment { id: string; issue: string; author: string; body: string; at: number; agent?: string }
@@ -60,6 +64,16 @@ const POINTS = [1, 2, 3, 5, 8]
 const D = 24 * H
 
 type Seed = [num: number, title: string, status: Status, type: IssueType, priority: Priority, assignee: string | null, dueInDays: number | null, labels: string[], ageHours: number, description?: string]
+
+// Which issues ship in which release.
+const RELEASE_OF: Record<string, string[]> = {
+  'WEB-v1.3': ['WEB-131', 'WEB-132'],
+  'WEB-v1.4': ['WEB-142', 'WEB-140', 'WEB-139', 'WEB-135', 'WEB-136', 'WEB-141', 'WEB-145', 'WEB-133', 'WEB-134'],
+  'WEB-v1.5': ['WEB-147', 'WEB-148', 'WEB-150'],
+  'APP-v2.0': ['APP-31', 'APP-28', 'APP-29', 'APP-26'],
+  'APP-v2.1': ['APP-35', 'APP-37'],
+  'BO-v0.9': ['BO-11', 'BO-12', 'BO-14', 'BO-8'],
+}
 
 // Planned for the next sprint, and not planned yet (the backlog). Everything else is in the active sprint.
 const NEXT = new Set(['WEB-147', 'WEB-148', 'APP-35'])
@@ -128,6 +142,7 @@ export function seed(now = Date.now()) {
         key, project, title, status, type, priority, assignee, labels,
         sprint: NEXT.has(key) ? `${project}-next` : BACKLOG.has(key) ? null : `${project}-active`,
         points: POINTS[(num * 7) % POINTS.length], rank: issues.length,
+        release: Object.entries(RELEASE_OF).find(([, keys]) => keys.includes(key))?.[0] ?? null,
         description: description ?? '',
         due: dueIn === null ? null : new Date(now + dueIn * D).toISOString().slice(0, 10),
         order: orderBy[status],
@@ -158,7 +173,20 @@ export function seed(now = Date.now()) {
     { id: 'BO-active', project: 'BO', name: 'Sprint 3', goal: 'Refunds that explain themselves.', start: day(-2), end: day(12), state: 'active' },
     { id: 'BO-next', project: 'BO', name: 'Sprint 4', goal: '', start: null, end: null, state: 'planned' },
   ]
-  return { issues, comments, activity, sprints }
+  const releases: Release[] = [
+    { id: 'WEB-v1.3', project: 'WEB', version: 'v1.3', title: 'Preview deployments', target: day(-10), state: 'shipped', shippedAt: day(-10), lead: 'jd',
+      notes: '## Improvements\n- Preview deployments for every pull request (WEB-131)\n\n## Fixes\n- Cookie banner no longer covers the menu (WEB-132)' },
+    { id: 'WEB-v1.4', project: 'WEB', version: 'v1.4', title: 'Mobile checkout and invoices', target: day(10), state: 'active', shippedAt: null, lead: 'al', notes: '' },
+    { id: 'WEB-v1.5', project: 'WEB', version: 'v1.5', title: 'Edge caching and DNS', target: day(31), state: 'planned', shippedAt: null, lead: 'jd', notes: '' },
+    { id: 'APP-v2.0', project: 'APP', version: 'v2.0', title: 'Reliable notifications', target: day(12), state: 'active', shippedAt: null, lead: 'cm', notes: '' },
+    { id: 'APP-v2.1', project: 'APP', version: 'v2.1', title: 'Widgets and tablets', target: day(40), state: 'planned', shippedAt: null, lead: 'pp', notes: '' },
+    { id: 'BO-v0.9', project: 'BO', version: 'v0.9', title: 'Refund clarity', target: day(14), state: 'active', shippedAt: null, lead: 'pp', notes: '' },
+  ]
+  const starred: StarredView[] = [
+    { id: 'st1', name: 'My high-priority bugs', project: 'WEB', view: 'board', query: 'who=al&type=bug&prio=high' },
+    { id: 'st2', name: 'Samira\'s work', project: 'WEB', view: 'list', query: 'who=sk' },
+  ]
+  return { issues, comments, activity, sprints, releases, starred }
 }
 
 export function nextNumber(issues: Issue[], project: string) {

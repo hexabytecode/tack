@@ -197,6 +197,15 @@ export default function IssuePanel() {
                     </SelectContent>
                   </Select>
                 </Field>
+                <Field label="Release">
+                  <Select value={issue.release ?? 'none'} onValueChange={v => patch({ release: v === 'none' ? null : v })}>
+                    <SelectTrigger id="issue-release" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No release</SelectItem>
+                      {state.releases.filter(r => r.project === issue.project).map(r => <SelectItem key={r.id} value={r.id}><span className="font-mono text-[12px]">{r.version}</span><span className="truncate text-slate">{r.title}</span></SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </Field>
                 <Field label="Assignee">
                   <Select value={issue.assignee ?? 'none'} onValueChange={v => patch({ assignee: v === 'none' ? null : v })}>
                     <SelectTrigger id="issue-assignee" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>

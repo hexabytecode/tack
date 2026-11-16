@@ -1,8 +1,8 @@
 import { notify, type NotifyOptions } from './lib/notify'
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
-import { ME, PROJECTS, USERS, nextNumber, seed, STATUSES, type Activity, type Comment, type Issue, type IssueType, type Priority, type Project, type Sprint, type Status, type User } from './data/mock'
+import { ME, PROJECTS, USERS, nextNumber, seed, STATUSES, type Activity, type Comment, type Issue, type IssueType, type Priority, type Project, type Release, type Sprint, type StarredView, type Status, type User } from './data/mock'
 
-const KEY = 'tack-demo-v3'
+const KEY = 'tack-demo-v4'
 
 interface State {
   signedIn: boolean
@@ -10,6 +10,8 @@ interface State {
   projects: Project[]
   issues: Issue[]
   sprints: Sprint[]
+  releases: Release[]
+  starred: StarredView[]
   comments: Comment[]
   activity: Activity[]
   flash: string | null
@@ -34,6 +36,11 @@ type Action =
   | { t: 'sprintUpdate'; id: string; patch: Partial<Sprint> }
   | { t: 'sprintStart'; id: string; patch: Pick<Sprint, 'name' | 'start' | 'end' | 'goal'> }
   | { t: 'sprintComplete'; id: string; moveTo: string | null }
+  | { t: 'releaseCreate'; release: Omit<Release, 'id' | 'state' | 'shippedAt' | 'notes'> }
+  | { t: 'releaseUpdate'; id: string; patch: Partial<Release> }
+  | { t: 'releaseShip'; id: string; undo?: boolean }
+  | { t: 'star'; view: Omit<StarredView, 'id'> }
+  | { t: 'unstar'; id: string }
 
 function fresh(): State {
   return { signedIn: false, users: USERS, projects: PROJECTS, ...seed(), flash: null }
@@ -142,6 +149,11 @@ function reducer(s: State, a: Action): State {
       const to = a.sprint ? s.sprints.find(x => x.id === a.sprint)?.name : 'the backlog'
       return { ...s, issues, activity: [...s.activity, { id: uid(), issue: a.key, actor: ME, text: `moved this to ${to}`, at: now }] }
     }
+    case 'releaseCreate': return { ...s, releases: [...s.releases, { ...a.release, id: `${a.release.project}-${uid()}`, state: 'planned', shippedAt: null, notes: '' }] }
+    case 'releaseUpdate': return { ...s, releases: s.releases.map(r => r.id === a.id ? { ...r, ...a.patch } : r) }
+    case 'releaseShip': return { ...s, releases: s.releases.map(r => r.id === a.id ? (a.undo ? { ...r, state: 'active', shippedAt: null } : { ...r, state: 'shipped', shippedAt: new Date().toISOString().slice(0, 10) }) : r) }
+    case 'star': return { ...s, starred: [...s.starred, { ...a.view, id: uid() }] }
+    case 'unstar': return { ...s, starred: s.starred.filter(v => v.id !== a.id) }
     case 'sprintCreate': return { ...s, sprints: [...s.sprints, nextSprint(s.sprints, a.project)] }
     case 'sprintUpdate': return { ...s, sprints: s.sprints.map(x => x.id === a.id ? { ...x, ...a.patch } : x) }
     case 'sprintStart': {
@@ -206,7 +218,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const issue: Issue = {
       ...n, key: `${n.project}-${nextNumber(stateRef.current.issues, n.project)}`,
       status: n.status ?? 'todo', labels: n.labels ?? [], sprint: n.sprint ?? null, points: n.points ?? null,
-      rank: Math.max(0, ...stateRef.current.issues.map(i => i.rank)) + 1, order: 0, createdAt: now, updatedAt: now,
+      rank: Math.max(0, ...stateRef.current.issues.map(i => i.rank)) + 1, release: null, order: 0, createdAt: now, updatedAt: now,
     }
     dispatch({ t: 'create', issue })
     return issue
