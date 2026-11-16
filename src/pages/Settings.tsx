@@ -55,7 +55,7 @@ export default function Settings() {
     <>
       <TopBar crumbs={<Crumb project={project} page="Settings" />} />
       <main className="min-h-0 flex-1 overflow-y-auto bg-wash">
-        <div className="px-4 py-6 md:px-6"><div className="max-w-[880px]">
+        <div className="mx-auto max-w-[760px] px-4 py-8 md:px-8">
           <h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Project settings</h1>
           <p className="mb-10 mt-1 text-[14px] text-slate">Name, people and connections for {p.name}.</p>
 
@@ -162,7 +162,7 @@ export default function Settings() {
               <Button variant="ghost" size="sm" onClick={() => { dispatch({ t: 'reset' }); toast('Demo data reset', { kind: 'success', description: 'Back to the original sample issues' }) }}><RotateCcw />Reset demo data</Button>
             </div>
           </Section>
-        </div></div>
+        </div>
       </main>
     </>
   )
