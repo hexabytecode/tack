@@ -13,13 +13,12 @@ export const APP_H = SCREEN_H - CHROME_H
 
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
 
-/** `show` is how much of the laptop's height is visible; the rest is cut off below.
-    While the laptop scrolls into view it grows from slightly smaller to full size. */
-export function MacBook({ children, show = 1, url = 'tack.app/website-relaunch/board' }: { children: ReactNode; show?: number; url?: string }) {
-  const s = FRAME.screen
-  const lid = useRef<HTMLDivElement>(null)
+/** Grows an element from `from` to `to` as it scrolls into view, on the same curve as the laptop,
+    so things placed around the laptop can grow with it. */
+export function useScrollScale<T extends HTMLElement>(from: number, to: number) {
+  const ref = useRef<T>(null)
   useEffect(() => {
-    const el = lid.current
+    const el = ref.current
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     let raf = 0
     const update = () => {
@@ -28,14 +27,22 @@ export function MacBook({ children, show = 1, url = 'tack.app/website-relaunch/b
       const vh = window.innerHeight
       const p = Math.min(1, Math.max(0, 1 - (r.top - vh * 0.15) / (vh * 0.6)))
       const e = 1 - (1 - p) ** 2
-      el.style.transform = `scale(${0.86 + 0.14 * e})`
+      el.style.transform = `scale(${from + (to - from) * e})`
     }
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update) }
     update()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
     return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); cancelAnimationFrame(raf) }
-  }, [])
+  }, [from, to])
+  return ref
+}
+
+/** `show` is how much of the laptop's height is visible; the rest is cut off below.
+    While the laptop scrolls into view it grows from slightly smaller to full size. */
+export function MacBook({ children, show = 1, url = 'tack.app/website-relaunch/board' }: { children: ReactNode; show?: number; url?: string }) {
+  const s = FRAME.screen
+  const lid = useScrollScale<HTMLDivElement>(0.86, 1)
   return (
     <div className="relative mx-auto w-full overflow-hidden" style={{ aspectRatio: `${FRAME.w} / ${FRAME.h * show}` }}>
       <div ref={lid} className="absolute inset-x-0 top-0 origin-top will-change-transform" style={{ aspectRatio: `${FRAME.w} / ${FRAME.h}` }}>

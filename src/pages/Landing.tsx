@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Avatar, GoogleG, LogoMark, PriorityBadge, StatusPill, TypeBadge, Wordmark, cx, useReveal } from '@/lib/ui'
 import { DragBoard, boardHeight, type DemoCard } from '../components/DragBoard'
-import { APP_H, MacBook, SCREEN_W } from '../components/MacBook'
+import { APP_H, MacBook, SCREEN_W, useScrollScale } from '../components/MacBook'
 import { USERS, type Status } from '../data/mock'
 
 const u = (id: string) => USERS.find(x => x.id === id)
@@ -160,6 +160,17 @@ function HeroBoard() {
         </div>
       </div>
     </MacBook>
+  )
+}
+
+/* Badges beside the laptop. They grow as you scroll, like the laptop, from the side that faces it. */
+function HeroTag({ side, children }: { side: 'left' | 'right'; children: ReactNode }) {
+  const ref = useScrollScale<HTMLDivElement>(0.85, 1.15)
+  return (
+    <div ref={ref} className={cx('pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full border border-line bg-paper px-3 py-1.5 text-[12.5px] shadow-[0_8px_24px_rgba(0,0,0,.08)] will-change-transform md:flex',
+      side === 'left' ? 'left-[3%] top-[6%] origin-right' : 'right-[3%] top-[2%] origin-left')}>
+      {children}
+    </div>
   )
 }
 
@@ -391,12 +402,8 @@ export default function Landing() {
         </div>
         <div className="anim-rise relative mx-auto mt-14 max-w-[1180px]" style={{ animationDelay: '240ms' }}>
           <HeroBoard />
-          <div className="pointer-events-none absolute left-[3%] top-[6%] z-10 hidden items-center gap-2 rounded-full border border-line bg-paper px-3 py-1.5 text-[12.5px] shadow-[0_8px_24px_rgba(0,0,0,.08)] md:flex">
-            <span className="size-1.5 animate-pulse rounded-full bg-brand" /><span className="font-medium">Sprint 14</span><span className="font-mono text-[11px] text-slate">6 days left</span>
-          </div>
-          <div className="pointer-events-none absolute right-[3%] top-[2%] z-10 hidden items-center gap-2 rounded-full border border-line bg-paper px-3 py-1.5 text-[12.5px] shadow-[0_8px_24px_rgba(0,0,0,.08)] md:flex">
-            <Kbd>⌘K</Kbd><span className="text-slate">Jump to any issue, release or view</span>
-          </div>
+          <HeroTag side="left"><span className="size-1.5 animate-pulse rounded-full bg-brand" /><span className="font-medium">Sprint 14</span><span className="font-mono text-[11px] text-slate">6 days left</span></HeroTag>
+          <HeroTag side="right"><Kbd>⌘K</Kbd><span className="text-slate">Jump to any issue, release or view</span></HeroTag>
         </div>
       </section>
 
