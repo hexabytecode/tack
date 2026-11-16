@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import {
   DndContext, DragOverlay, KeyboardSensor, PointerSensor, closestCorners, useDroppable, useSensor, useSensors,
   type DragEndEvent, type DragOverEvent, type DragStartEvent,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ChevronDown, Filter, Plus, X } from 'lucide-react'
+import { ChevronDown, Filter, Plus, Star, X } from 'lucide-react'
 import { useStore } from '../store'
 import { STATUSES, type Issue, type Sprint, type Status } from '../data/mock'
-import { TopBar, Crumb } from '../components/AppShell'
+import { TopBar, Crumb, sameQuery } from '../components/AppShell'
+import { matchFilters } from '@/lib/filters'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Input } from '@/components/ui/input'
 import IssueCard from '../components/IssueCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -19,22 +22,19 @@ import { Avatar, PRIORITY_META, StatusPill, TYPE_META, cx } from '@/lib/ui'
 
 type Columns = Record<Status, string[]>
 
+export { matchFilters } from '@/lib/filters'
+
 export function useFilteredIssues(project: string | undefined) {
   const { state } = useStore()
   const [params] = useSearchParams()
+  const key = params.toString()
   const q = (params.get('q') ?? '').toLowerCase()
   const who = params.get('who')
   const type = params.get('type')
-  const prio = params.get('prio')
   const issues = useMemo(() => {
-    const people = who ? who.split(',') : []
-    return state.issues.filter(i =>
-    (!project || i.project === project) &&
-    (!q || i.title.toLowerCase().includes(q) || i.key.toLowerCase().includes(q)) &&
-    (!people.length || (i.assignee !== null && people.includes(i.assignee))) &&
-    (!type || i.type === type) &&
-    (!prio || i.priority === prio))
-  }, [state.issues, project, q, who, type, prio])
+    const p = new URLSearchParams(key)
+    return state.issues.filter(i => (!project || i.project === project) && matchFilters(i, p))
+  }, [state.issues, project, key])
   return { issues, q, who, type }
 }
 
@@ -93,6 +93,41 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
   )
 }
 
+/* Star the current filtered view so it shows under Starred views (Stitch, Gate 1 round 4). */
+function StarView({ project }: { project: string }) {
+  const { state, dispatch, toast } = useStore()
+  const [params] = useSearchParams()
+  const location = useLocation()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const view = location.pathname.split('/').pop() as 'board' | 'list' | 'backlog'
+  const query = (() => { const p = new URLSearchParams(params); p.delete('issue'); p.sort(); return p.toString() })()
+  const existing = state.starred.find(v => v.project === project && v.view === view && sameQuery(v.query, query))
+  if (existing) return (
+    <button type="button" onClick={() => { dispatch({ t: 'unstar', id: existing.id }); toast('Removed from starred views', { kind: 'info', description: existing.name }) }}
+      className="hidden h-7 items-center gap-1.5 rounded-[4px] border border-warning/40 bg-[#FDF6EA] px-2 font-mono text-[10.5px] uppercase tracking-wide text-[#93500A] sm:flex">
+      <Star className="size-3.5 fill-warning text-warning" />Starred
+    </button>
+  )
+  if (!query) return null
+  return (
+    <Popover open={open} onOpenChange={o => { setOpen(o); if (o) setName('') }}>
+      <PopoverTrigger asChild>
+        <button type="button" className="hidden h-7 items-center gap-1.5 rounded-[4px] border border-line px-2 font-mono text-[10.5px] uppercase tracking-wide text-slate transition-colors hover:border-ink hover:text-ink sm:flex">
+          <Star className="size-3.5" />Star view
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-64 p-3">
+        <form className="flex flex-col gap-2" onSubmit={e => { e.preventDefault(); const n = name.trim() || 'Starred view'; dispatch({ t: 'star', view: { name: n, project, view, query } }); toast('Starred', { kind: 'create', description: `${n} is in your sidebar` }); setOpen(false) }}>
+          <label htmlFor="star-name" className="label-mono text-slate">Name this view</label>
+          <Input id="star-name" autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="e.g. My high-priority bugs" />
+          <Button type="submit" size="sm" className="self-end"><Star />Star</Button>
+        </form>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export function FilterRow({ project, count, extra }: { project: string; count: number; extra?: React.ReactNode }) {
   const { state } = useStore()
   const [params, setParams] = useSearchParams()
@@ -129,7 +164,7 @@ export function FilterRow({ project, count, extra }: { project: string; count: n
         </Select>
         {active && <Button variant="ghost" size="sm" className="text-slate" onClick={() => setParams({}, { replace: true })}><X />Clear</Button>}
       </div>
-      <span className="flex shrink-0 items-center gap-3">{extra}<span className="label-mono text-slate">{count} issues</span></span>
+      <span className="flex shrink-0 items-center gap-3">{extra}<StarView project={project} /><span className="label-mono text-slate">{count} issues</span></span>
     </div>
   )
 }

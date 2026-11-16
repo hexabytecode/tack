@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronDown, KanbanSquare, List, ListTodo, LogOut, Menu, MoreHorizontal, Plus, Rocket, Search, Settings, Star, UserRound } from 'lucide-react'
+import { ChevronDown, KanbanSquare, List, ListTodo, LogOut, Menu, MoreHorizontal, Plus, Rocket, Search, Settings, Star, UserRound, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '../store'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, Logo, LogoMark, cx } from '@/lib/ui'
 import CreateIssue from './CreateIssue'
 import IssuePanel from './IssuePanel'
+import CommandPalette from './CommandPalette'
+import { matchFilters } from '@/lib/filters'
 import { ME } from '../data/mock'
 
 /* Sidebar (Stitch, Gate 1 round 3, option 2): Create and Search at the top, then your own work,
@@ -19,6 +21,13 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { project = 'WEB' } = useParams()
   const navigate = useNavigate()
   const me = user(ME)
+  const location = useLocation()
+  const [starOpen, setStarOpen] = useState(true)
+  const starCount = (v: { project: string; view: string; query: string }) => {
+    const p = new URLSearchParams(v.query)
+    const sprint = state.sprints.find(x => x.project === v.project && x.state === 'active')?.id
+    return state.issues.filter(i => i.project === v.project && (v.view !== 'board' || i.sprint === sprint) && matchFilters(i, p)).length
+  }
   const open = (i: { status: string }) => i.status !== 'done'
   const mine = state.issues.filter(i => i.assignee === ME && open(i)).length
   const active = (key: string) => state.sprints.find(x => x.project === key && x.state === 'active')?.id
@@ -63,9 +72,28 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <span className="flex items-center gap-2"><UserRound className="size-4" strokeWidth={1.75} />My issues</span>
             <span className="rounded-[3px] border border-line bg-cloud px-1.5 font-mono text-[11px] text-slate">{mine}</span>
           </NavLink>
-          <NavLink to="/app/starred" onClick={onNavigate} className={({ isActive }) => cx(row, 'justify-start gap-2', isActive ? on : idle)}>
-            <Star className="size-4" strokeWidth={1.75} />Starred views
-          </NavLink>
+          <button type="button" onClick={() => setStarOpen(o => !o)} aria-expanded={starOpen} className={cx(row, idle)}>
+            <span className="flex items-center gap-2"><Star className="size-4" strokeWidth={1.75} />Starred views</span>
+            <ChevronDown className={cx('size-3.5 transition-transform', !starOpen && '-rotate-90')} />
+          </button>
+          {starOpen && (
+            <div className="ml-3 flex flex-col gap-0.5 border-l border-line pl-2">
+              {state.starred.map(v => {
+                const here = location.pathname === `/app/${v.project}/${v.view}` && sameQuery(location.search, v.query)
+                return (
+                  <div key={v.id} className="group relative">
+                    <Link to={`/app/${v.project}/${v.view}?${v.query}`} onClick={onNavigate} className={cx(row, 'pr-7', here ? on : idle)}>
+                      <span className="flex min-w-0 items-center gap-2"><Star className={cx('size-3.5 shrink-0', here ? 'fill-warning text-warning' : 'fill-warning/80 text-warning/80')} /><span className="truncate">{v.name}</span></span>
+                      <span className="font-mono text-[11px] text-slate group-hover:invisible">{starCount(v)}</span>
+                    </Link>
+                    <button type="button" aria-label={`Unstar ${v.name}`} onClick={() => dispatch({ t: 'unstar', id: v.id })}
+                      className="absolute right-1.5 top-1/2 hidden -translate-y-1/2 rounded-[3px] p-0.5 text-slate hover:bg-paper hover:text-ink group-hover:block"><X className="size-3.5" /></button>
+                  </div>
+                )
+              })}
+              {!state.starred.length && <p className="px-2 py-1.5 text-[12px] text-slate">Filter a board or list, then star it to keep it here.</p>}
+            </div>
+          )}
         </nav>
 
         <nav className="flex flex-col gap-1 border-t border-line pt-1.5" aria-label="Projects">
@@ -147,6 +175,12 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
+/** Same filters, ignoring order and the open issue. */
+export function sameQuery(search: string, query: string) {
+  const norm = (q: string) => { const p = new URLSearchParams(q); p.delete('issue'); p.sort(); return p.toString() }
+  return norm(search) === norm(query)
+}
+
 /* The command palette listens for this; anything can open it. */
 export const openPalette = () => window.dispatchEvent(new Event('tack:palette'))
 
@@ -220,6 +254,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </div>
       <IssuePanel />
       <CreateIssue />
+      <CommandPalette />
     </div>
   )
 }
