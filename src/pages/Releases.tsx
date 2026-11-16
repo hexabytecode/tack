@@ -14,6 +14,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import DatePicker from '../components/DatePicker'
 import { Avatar, PriorityBadge, StatusPill, TypeBadge, cx } from '@/lib/ui'
 
 /* Releases (Stitch, Gate 1 round 4): each version with its target date, lead, progress and the
@@ -47,8 +49,8 @@ function IssueRow({ issue }: { issue: Issue }) {
   const [, setParams] = useSearchParams()
   const u = user(issue.assignee)
   return (
-    <button type="button" onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
-      className="flex h-[42px] w-full items-center justify-between gap-3 px-4 text-left transition-colors hover:bg-wash">
+    <Button type="button" variant="ghost" onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
+      className="h-[42px] w-full shrink justify-between gap-3 rounded-none px-4 text-left font-normal hover:bg-wash">
       <span className="flex min-w-0 items-center gap-2.5">
         <TypeBadge type={issue.type} compact />
         <span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{issue.key}</span>
@@ -60,7 +62,7 @@ function IssueRow({ issue }: { issue: Issue }) {
         <span className="hidden w-12 text-right font-mono text-[11.5px] text-slate sm:block">{issue.points ?? '–'} pts</span>
         <span className="flex items-center gap-1.5"><Avatar user={u} size={22} /><span className="hidden w-[92px] truncate text-[12.5px] lg:block">{u?.name ?? 'Unassigned'}</span></span>
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -94,7 +96,7 @@ function ReleaseDialog({ open, release, project, onClose }: { open: boolean; rel
             <div className="flex flex-col gap-1.5"><Label htmlFor="rel-title">Name</Label><Input id="rel-title" value={title} onChange={e => setTitle(e.target.value)} placeholder="What it brings" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5"><Label htmlFor="rel-target">Target date</Label><Input id="rel-target" type="date" value={target} onChange={e => setTarget(e.target.value)} className="font-mono text-[13px]" /></div>
+            <div className="flex flex-col gap-1.5"><Label htmlFor="rel-target">Target date</Label><DatePicker id="rel-target" value={target || null} onChange={v => setTarget(v ?? '')} placeholder="Target date" className="h-9 w-full" /></div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="rel-lead">Lead</Label>
               <Select value={lead} onValueChange={setLead}>
@@ -127,18 +129,18 @@ function ManageDialog({ release, onClose }: { release: Release | null; onClose: 
           <DialogTitle>Issues in {release?.version}</DialogTitle>
           <DialogDescription>{inCount} included. Tick an issue to add it; an issue belongs to one release at a time.</DialogDescription>
         </DialogHeader>
-        <label className="relative flex items-center"><Search className="pointer-events-none absolute left-2.5 size-4 text-placeholder" /><Input value={q} onChange={e => setQ(e.target.value)} placeholder="Find an issue…" className="pl-8" /></label>
+        <div className="relative flex items-center"><Search className="pointer-events-none absolute left-2.5 size-4 text-placeholder" /><Input value={q} onChange={e => setQ(e.target.value)} aria-label="Find an issue" placeholder="Find an issue…" className="pl-8" /></div>
         <div className="max-h-[50vh] overflow-y-auto rounded-[4px] border border-line">
           {shown.map(i => {
             const other = i.release && i.release !== release?.id ? state.releases.find(r => r.id === i.release)?.version : null
             return (
-              <label key={i.key} className="flex h-10 cursor-pointer items-center gap-2.5 border-b border-line/60 px-3 last:border-b-0 hover:bg-wash">
+              <Label key={i.key} className="flex h-10 cursor-pointer items-center gap-2.5 border-b border-line/60 px-3 font-normal last:border-b-0 hover:bg-wash">
                 <Checkbox checked={i.release === release?.id} onCheckedChange={c => dispatch({ t: 'update', key: i.key, patch: { release: c ? release!.id : null } })} className="data-[state=checked]:border-brand data-[state=checked]:bg-brand" />
                 <span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{i.key}</span>
                 <span className="min-w-0 flex-1 truncate text-[13px]">{i.title}</span>
-                {other && <span className="shrink-0 rounded-[3px] border border-line px-1 font-mono text-[10px] text-slate">in {other}</span>}
+                {other && <Badge variant="outline" className="h-[18px] shrink-0 rounded-[3px] px-1 font-mono text-[10px] font-normal text-slate">in {other}</Badge>}
                 <StatusPill status={i.status} size="sm" />
-              </label>
+              </Label>
             )
           })}
         </div>
@@ -220,7 +222,7 @@ function ReleaseCard({ r, onEdit, onManage, onNotes }: { r: Release; onEdit: () 
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2.5 font-mono text-[11.5px] text-slate">
-              <span className={cx('inline-flex items-center gap-1.5 rounded-[3px] border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.cls)}><span className={cx('size-1.5 rounded-full', meta.dot)} />{meta.label}</span>
+              <Badge variant="outline" className={cx('h-[18px] gap-1.5 rounded-[3px] px-1.5 font-mono text-[10px] uppercase tracking-wider', meta.cls)}><span className={cx('size-1.5 rounded-full', meta.dot)} />{meta.label}</Badge>
               <span className="text-[13px] font-medium text-ink">{r.version}</span>
               <span className="text-line">|</span>
               {r.state === 'shipped'
@@ -265,11 +267,11 @@ function ReleaseCard({ r, onEdit, onManage, onNotes }: { r: Release; onEdit: () 
         <div className="border-t border-line">
           <div className="flex items-center justify-between bg-cloud/40 px-4 py-2">
             <span className="label-mono text-slate">{r.state === 'planned' ? 'Planned issues' : 'Included issues'} ({shown.length} of {issues.length})</span>
-            {issues.length > 5 && <button type="button" className="font-mono text-[11px] text-brand hover:underline" onClick={() => setAll(a => !a)}>{all ? 'Show fewer' : `View all ${issues.length}`}</button>}
+            {issues.length > 5 && <Button type="button" variant="link" size="xs" className="h-auto p-0 font-mono text-[11px] font-normal text-brand" onClick={() => setAll(a => !a)}>{all ? 'Show fewer' : `View all ${issues.length}`}</Button>}
           </div>
           <div className="divide-y divide-line/60">
             {shown.map(i => <IssueRow key={i.key} issue={i} />)}
-            {!issues.length && <button type="button" onClick={onManage} className="flex h-12 w-full items-center justify-center gap-1.5 font-mono text-[11px] text-slate hover:text-brand"><Plus className="size-3.5" />Add issues to this release</button>}
+            {!issues.length && <Button type="button" variant="ghost" onClick={onManage} className="h-12 w-full gap-1.5 rounded-none font-mono text-[11px] font-normal text-slate hover:text-brand"><Plus className="size-3.5" />Add issues to this release</Button>}
           </div>
         </div>
       )}
@@ -304,7 +306,7 @@ export default function Releases() {
         <div className="flex flex-col gap-5 p-4 md:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
             <div>
-              <div className="flex items-center gap-3"><h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Releases</h1><span className="rounded-[3px] border border-brand/25 bg-tint px-1.5 py-0.5 font-mono text-[11px] text-brand">{project}</span></div>
+              <div className="flex items-center gap-3"><h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Releases</h1><Badge variant="outline" className="h-[20px] rounded-[3px] border-brand/25 bg-tint px-1.5 font-mono text-[11px] font-normal text-brand">{project}</Badge></div>
               <p className="mt-1 font-mono text-[12px] text-slate">{counts.active} in progress · {counts.planned} planned · {counts.shipped} shipped · {tracked} issues tracked</p>
             </div>
             <Button variant="secondary" disabled={!unshipped.length} onClick={() => setGenOpen(true)}><Sparkles />Release notes generator</Button>
@@ -317,9 +319,9 @@ export default function Releases() {
                 <TabsTrigger value="shipped">Shipped <span className="font-mono text-[11px] opacity-70">{counts.shipped}</span></TabsTrigger>
               </TabsList>
             </Tabs>
-            <button type="button" onClick={() => setAsc(a => !a)} className="flex items-center gap-1 font-mono text-[11.5px] text-slate hover:text-ink">
+            <Button type="button" variant="ghost" size="xs" onClick={() => setAsc(a => !a)} className="gap-1 font-mono text-[11.5px] font-normal text-slate hover:text-ink">
               Sort: <span className="text-ink">Target date</span>{asc ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />}
-            </button>
+            </Button>
           </div>
           {shown.map(r => <ReleaseCard key={r.id} r={r} onEdit={() => setEditing({ release: r })} onManage={() => setManaging(r)} onNotes={mode => setNotes({ release: r, mode })} />)}
           {!shown.length && (
@@ -341,11 +343,11 @@ export default function Releases() {
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
             {unshipped.map(r => (
-              <button key={r.id} type="button" onClick={() => { setGenOpen(false); setNotes({ release: r, mode: 'generate' }) }}
-                className="flex items-center justify-between rounded-[4px] border border-line px-3 py-2.5 text-left transition-colors hover:border-ink">
+              <Button key={r.id} type="button" variant="outline" onClick={() => { setGenOpen(false); setNotes({ release: r, mode: 'generate' }) }}
+                className="h-auto justify-between rounded-[4px] px-3 py-2.5 font-normal has-[>svg]:px-3">
                 <span className="text-[13.5px]"><span className="font-mono font-medium">{r.version}</span> · {r.title}</span>
                 <Sparkles className="size-4 text-slate" />
-              </button>
+              </Button>
             ))}
           </div>
         </DialogContent>

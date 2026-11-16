@@ -1,11 +1,14 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Command as Cmd } from 'cmdk'
-import { KanbanSquare, List, ListTodo, Rocket, Search, Settings, Star, UserRound, X } from 'lucide-react'
+import { KanbanSquare, List, ListTodo, Rocket, Settings, Star, UserRound, X } from 'lucide-react'
 import { useStore } from '../store'
 import { STATUSES, type Issue } from '../data/mock'
 import { matchFilters } from '@/lib/filters'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Kbd } from '@/components/ui/kbd'
 import { PRIORITY_META, TYPE_META, cx } from '@/lib/ui'
 
 /* Search / jump to (Stitch, Gate 1 round 4): one ⌘K box for issues, project pages and starred views.
@@ -17,10 +20,8 @@ function Highlight({ text, q }: { text: string; q: string }) {
   if (!q) return <>{text}</>
   const i = text.toLowerCase().indexOf(q.toLowerCase())
   if (i < 0) return <>{text}</>
-  return <>{text.slice(0, i)}<mark className="bg-transparent font-semibold text-brand">{text.slice(i, i + q.length)}</mark>{text.slice(i + q.length)}</>
+  return <>{text.slice(0, i)}<span className="font-semibold text-brand">{text.slice(i, i + q.length)}</span>{text.slice(i + q.length)}</>
 }
-
-const Kbd = ({ children }: { children: React.ReactNode }) => <kbd className="rounded-[3px] border border-line bg-paper px-1 font-mono text-[10px] leading-[16px] text-slate">{children}</kbd>
 
 export default function CommandPalette() {
   const { state, user } = useStore()
@@ -87,84 +88,82 @@ export default function CommandPalette() {
     }
   }
 
-  const heading = 'px-3 pb-1.5 pt-3 font-mono text-[11px] uppercase tracking-[0.06em] text-slate'
-  const item = 'flex cursor-pointer items-center gap-3 rounded-[4px] border-l-2 border-transparent px-3 py-2 data-[selected=true]:border-brand data-[selected=true]:bg-tint'
+  const item = 'cursor-pointer gap-3 rounded-[4px] border-l-2 border-transparent px-3 py-2 data-[selected=true]:border-brand'
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="top-[14%] block w-[calc(100%-2rem)] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-[640px] [&>button.absolute]:hidden">
         <DialogTitle className="sr-only">Search or jump to</DialogTitle>
         <DialogDescription className="sr-only">Find an issue by key or title, or jump to a page or starred view.</DialogDescription>
-        <Cmd shouldFilter={false} value={value} onValueChange={setValue} onKeyDown={onKeyDown} loop className="w-full min-w-0">
-          <div className="flex items-center gap-3 border-b border-line px-4">
-            <Search className="size-[18px] shrink-0 text-slate" />
-            <Cmd.Input value={q} onValueChange={setQ} placeholder="Search issues, pages and starred views…" className="h-14 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-placeholder" />
-            {q && <button type="button" onClick={() => setQ('')} aria-label="Clear" className="text-slate hover:text-ink"><X className="size-4" /></button>}
+        <Command shouldFilter={false} value={value} onValueChange={setValue} onKeyDown={onKeyDown} loop className="w-full min-w-0 rounded-none [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.06em] [&_[cmdk-group-heading]]:text-slate">
+          <div className="flex items-center gap-2 border-b border-line pr-4 [&_[data-slot=command-input-wrapper]]:h-14 [&_[data-slot=command-input-wrapper]]:flex-1 [&_[data-slot=command-input-wrapper]]:border-0 [&_[data-slot=command-input-wrapper]]:px-4 [&_[data-slot=command-input-wrapper]_svg]:size-[18px] [&_[data-slot=command-input-wrapper]_svg]:opacity-100 [&_[data-slot=command-input-wrapper]_svg]:text-slate">
+            <CommandInput value={q} onValueChange={setQ} placeholder="Search issues, pages and starred views…" className="h-14 text-[16px] placeholder:text-placeholder" />
+            {q && <Button variant="ghost" size="icon-sm" onClick={() => setQ('')} aria-label="Clear" className="text-slate"><X /></Button>}
             <Kbd>Esc</Kbd>
           </div>
-          <Cmd.List className="max-h-[min(60vh,440px)] overflow-y-auto px-1.5 pb-2 scrollbar-thin">
-            <Cmd.Empty className="px-4 py-10 text-center text-[13.5px] text-slate">Nothing matches “{q}”.</Cmd.Empty>
+          <CommandList className="max-h-[min(60vh,440px)] px-1.5 pb-2 scrollbar-thin">
+            <CommandEmpty className="px-4 py-10 text-center text-[13.5px] text-slate">Nothing matches “{q}”.</CommandEmpty>
             {issues.length > 0 && (
-              <Cmd.Group heading={<div className={heading}>{needle ? `Issues (${issues.length})` : 'Recent issues'}</div>}>
+              <CommandGroup heading={needle ? `Issues (${issues.length})` : 'Recent issues'}>
                 {issues.map(i => {
                   const T = TYPE_META[i.type]; const P = PRIORITY_META[i.priority]; const u = user(i.assignee)
                   return (
-                    <Cmd.Item key={i.key} value={`issue:${i.key}`} onSelect={() => openIssue(i, false)} className={cx(item, 'group')}>
+                    <CommandItem key={i.key} value={`issue:${i.key}`} onSelect={() => openIssue(i, false)} className={cx(item, 'group')}>
                       <span className={cx('size-1.5 shrink-0 rounded-full', DOT[i.status])} />
                       <span className="w-[62px] shrink-0 font-mono text-[12px] text-ink group-data-[selected=true]:text-brand">{i.key}</span>
                       <span className="min-w-0 flex-1 truncate text-[14px]"><Highlight text={i.title} q={q.trim()} /></span>
                       <span className="hidden shrink-0 items-center gap-1.5 sm:flex">
-                        <span className={cx('rounded-[3px] border px-1 font-mono text-[10px] uppercase', T.cls)}>{T.label}</span>
-                        <span className={cx('rounded-[3px] border px-1 font-mono text-[10px] uppercase', P.cls)}>{P.short}</span>
+                        <Badge variant="outline" className={cx('h-[18px] rounded-[3px] px-1 font-mono text-[10px] uppercase', T.cls)}>{T.label}</Badge>
+                        <Badge variant="outline" className={cx('h-[18px] rounded-[3px] px-1 font-mono text-[10px] uppercase', P.cls)}>{P.short}</Badge>
                         <span className="hidden w-[78px] font-mono text-[10.5px] uppercase text-slate md:inline">{STATUSES.find(s => s.id === i.status)?.label}</span>
-                        <span className="flex size-5 items-center justify-center rounded-[3px] border border-line font-mono text-[9.5px]">{u?.initials ?? '–'}</span>
+                        <Badge variant="outline" className="size-5 justify-center rounded-[3px] p-0 font-mono text-[9.5px]">{u?.initials ?? '–'}</Badge>
                       </span>
-                      <span className="hidden shrink-0 rounded-[3px] border border-brand/30 bg-paper px-1.5 font-mono text-[10.5px] text-brand group-data-[selected=true]:inline">↵ to open</span>
-                    </Cmd.Item>
+                      <Badge variant="outline" className="hidden h-[20px] shrink-0 rounded-[3px] border-brand/30 bg-paper px-1.5 font-mono text-[10.5px] text-brand group-data-[selected=true]:inline-flex">↵ to open</Badge>
+                    </CommandItem>
                   )
                 })}
-              </Cmd.Group>
+              </CommandGroup>
             )}
             {pages.length > 0 && (
-              <Cmd.Group heading={<div className={heading}>Projects &amp; views</div>}>
+              <CommandGroup heading="Projects & views">
                 {pages.map(p => (
-                  <Cmd.Item key={p.id} value={`page:${p.id}`} onSelect={() => go(p.to)} className={item}>
+                  <CommandItem key={p.id} value={`page:${p.id}`} onSelect={() => go(p.to)} className={item}>
                     <p.icon className="size-4 shrink-0 text-slate" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[14px]">{p.label.split(' → ').map((part, n, all) => <Fragment key={n}>{n === all.length - 1 && all.length > 1 ? <span className="text-brand">{part}</span> : part}{n < all.length - 1 && ' → '}</Fragment>)}</span>
                       <span className="block truncate font-mono text-[11px] text-slate">{p.sub}</span>
                     </span>
-                    <span className="shrink-0 rounded-[3px] border border-line px-1 font-mono text-[10px] text-slate">VIEW</span>
-                  </Cmd.Item>
+                    <Badge variant="outline" className="h-[18px] shrink-0 rounded-[3px] px-1 font-mono text-[10px] text-slate">VIEW</Badge>
+                  </CommandItem>
                 ))}
-              </Cmd.Group>
+              </CommandGroup>
             )}
             {starred.length > 0 && (
-              <Cmd.Group heading={<div className={heading}>Starred views</div>}>
+              <CommandGroup heading="Starred views">
                 {starred.map(v => {
                   const p = state.projects.find(x => x.key === v.project)
                   const n = count(v.query, v.project, v.view)
                   return (
-                    <Cmd.Item key={v.id} value={`star:${v.id}`} onSelect={() => go(`/app/${v.project}/${v.view}?${v.query}`)} className={item}>
+                    <CommandItem key={v.id} value={`star:${v.id}`} onSelect={() => go(`/app/${v.project}/${v.view}?${v.query}`)} className={item}>
                       <Star className="size-4 shrink-0 fill-warning text-warning" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[14px]">{v.name}</span>
                         <span className="block truncate font-mono text-[11px] capitalize text-slate">{v.view} · {p?.name}</span>
                       </span>
-                      <span className="shrink-0 rounded-[3px] bg-cloud px-1.5 font-mono text-[10.5px] text-slate">{n} {n === 1 ? 'issue' : 'issues'}</span>
-                    </Cmd.Item>
+                      <Badge variant="secondary" className="h-[20px] shrink-0 rounded-[3px] px-1.5 font-mono text-[10.5px] text-slate">{n} {n === 1 ? 'issue' : 'issues'}</Badge>
+                    </CommandItem>
                   )
                 })}
-              </Cmd.Group>
+              </CommandGroup>
             )}
-          </Cmd.List>
+          </CommandList>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-wash px-4 py-2.5 text-[11.5px] text-slate">
             <span className="flex items-center gap-1.5"><Kbd>↑↓</Kbd>Navigate</span>
             <span className="flex items-center gap-1.5"><Kbd>↵</Kbd>Open</span>
             <span className="flex items-center gap-1.5"><Kbd>⌘↵</Kbd>Open in side panel</span>
             <span className="ml-auto flex items-center gap-1.5"><Kbd>Esc</Kbd>Close</span>
           </div>
-        </Cmd>
+        </Command>
       </DialogContent>
     </Dialog>
   )

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store'
 import { STATUSES, type Issue } from '../data/mock'
@@ -31,13 +33,13 @@ export default function List() {
   const open = (key: string) => setParams(p => { p.set('issue', key); return p })
 
   const Th = ({ k, children, className }: { k?: SortKey; children: string; className?: string }) => (
-    <th className={cx('label-mono h-9 whitespace-nowrap px-3 text-left font-medium text-slate', className)}>
+    <TableHead className={cx('label-mono h-9 px-3 font-medium text-slate', className)}>
       {k ? (
-        <button onClick={() => setSort(k)} className={cx('inline-flex items-center gap-1 uppercase hover:text-ink', sort === k && 'text-ink')}>
+        <Button variant="ghost" size="xs" onClick={() => setSort(k)} className={cx('-mx-1 h-6 gap-1 px-1 font-mono text-[11px] uppercase tracking-[0.08em] text-slate hover:bg-transparent hover:text-ink', sort === k && 'text-ink')}>
           {children}{sort === k && <ArrowDown className="size-3" />}
-        </button>
+        </Button>
       ) : children}
-    </th>
+    </TableHead>
   )
 
   return (
@@ -45,41 +47,41 @@ export default function List() {
       <TopBar crumbs={<Crumb project={project} page="List" />} />
       <FilterRow project={project} count={issues.length} />
       <main className="min-h-0 flex-1 overflow-auto scrollbar-thin">
-        <table className="hidden w-full border-collapse md:table">
-          <thead className="sticky top-0 z-10 border-b border-line bg-[#F6F6F9]">
-            <tr>
+        <Table className="hidden md:table">
+          <TableHeader className="sticky top-0 z-10 bg-[#F6F6F9]">
+            <TableRow className="border-line hover:bg-transparent">
               <Th className="pl-6">Key</Th><Th>Title</Th><Th k="status">Status</Th><Th k="priority">Type · priority</Th>
               <Th>Assignee</Th><Th k="due">Due</Th><Th k="updated" className="pr-6">Updated</Th>
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {rows.map(i => {
               const due = dueLabel(i.due)
               const a = user(i.assignee)
               return (
-                <tr key={i.key} onClick={() => open(i.key)} className={cx('h-11 cursor-pointer border-b border-line transition-colors hover:bg-[#F7F7FA]', state.flash === i.key && 'flash')}>
-                  <td className="whitespace-nowrap pl-6 pr-3 font-mono text-[12px] text-slate">{i.key}</td>
-                  <td className="max-w-[420px] px-3"><button className="block w-full truncate text-left text-[13.5px] font-medium" onClick={e => { e.stopPropagation(); open(i.key) }}>{i.title}</button></td>
-                  <td className="whitespace-nowrap px-3"><StatusPill status={i.status} size="sm" /></td>
-                  <td className="whitespace-nowrap px-3"><span className="flex gap-1.5"><IssueChips issue={i} /></span></td>
-                  <td className="whitespace-nowrap px-3"><span className="flex items-center gap-2 text-[13px]"><Avatar user={a} />{a?.name.split(' ')[0] ?? <span className="text-slate">—</span>}</span></td>
-                  <td className={cx('whitespace-nowrap px-3 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-warning' : 'text-slate')}>{due?.text ?? '—'}</td>
-                  <td className="whitespace-nowrap pl-3 pr-6 font-mono text-[12px] text-slate">{timeAgo(i.updatedAt)}</td>
-                </tr>
+                <TableRow key={i.key} onClick={() => open(i.key)} className={cx('h-11 cursor-pointer border-line hover:bg-[#F7F7FA]', state.flash === i.key && 'flash')}>
+                  <TableCell className="pl-6 pr-3 font-mono text-[12px] text-slate">{i.key}</TableCell>
+                  <TableCell className="max-w-[420px] px-3"><Button variant="link" className="block h-auto w-full shrink truncate p-0 text-left text-[13.5px] font-medium text-ink hover:no-underline" onClick={e => { e.stopPropagation(); open(i.key) }}>{i.title}</Button></TableCell>
+                  <TableCell className="px-3"><StatusPill status={i.status} size="sm" /></TableCell>
+                  <TableCell className="px-3"><span className="flex gap-1.5"><IssueChips issue={i} /></span></TableCell>
+                  <TableCell className="px-3"><span className="flex items-center gap-2 text-[13px]"><Avatar user={a} />{a?.name.split(' ')[0] ?? <span className="text-slate">—</span>}</span></TableCell>
+                  <TableCell className={cx('px-3 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-warning' : 'text-slate')}>{due?.text ?? '—'}</TableCell>
+                  <TableCell className="pl-3 pr-6 font-mono text-[12px] text-slate">{timeAgo(i.updatedAt)}</TableCell>
+                </TableRow>
               )
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         <ul className="md:hidden">
           {rows.map(i => (
             <li key={i.key} className="border-b border-line">
-              <button onClick={() => open(i.key)} className="flex w-full flex-col gap-2 px-4 py-3 text-left">
+              <Button variant="ghost" onClick={() => open(i.key)} className="h-auto w-full flex-col items-stretch gap-2 whitespace-normal rounded-none px-4 py-3 text-left font-normal">
                 <span className="text-[14px] font-medium leading-snug">{i.title}</span>
                 <span className="flex items-center justify-between">
                   <span className="flex items-center gap-2"><span className="font-mono text-[11.5px] text-slate">{i.key}</span><StatusPill status={i.status} size="sm" /></span>
                   <Avatar user={user(i.assignee)} />
                 </span>
-              </button>
+              </Button>
             </li>
           ))}
         </ul>

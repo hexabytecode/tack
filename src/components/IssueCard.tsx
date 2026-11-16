@@ -1,4 +1,5 @@
 import { forwardRef, type HTMLAttributes } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { Bot, CalendarClock, MessageSquare } from 'lucide-react'
 import type { Issue, User } from '../data/mock'
 import { Avatar, IssueChips, cx, dueLabel } from '@/lib/ui'
@@ -23,9 +24,9 @@ const IssueCard = forwardRef<HTMLDivElement, Props>(function IssueCard({ issue, 
       )}
     >
       {byAgent && (
-        <span className="anim-rise mb-1.5 inline-flex items-center gap-1 rounded-[3px] border border-brand bg-paper px-1 py-px font-mono text-[9.5px] uppercase tracking-[0.04em] text-brand">
+        <Badge variant="outline" className="anim-rise mb-1.5 h-[18px] gap-1 rounded-[3px] border-brand bg-paper px-1 font-mono text-[9.5px] uppercase tracking-[0.04em] text-brand">
           <Bot className="size-3" />By agent · Claude
-        </span>
+        </Badge>
       )}
       <p className={cx('line-clamp-2 text-[13.5px] font-medium leading-snug', issue.status === 'done' && 'text-slate')}>{issue.title}</p>
       <div className="mt-3 flex items-center justify-between gap-2">

@@ -1,4 +1,6 @@
 import { Children, isValidElement, type ReactNode } from 'react'
+import { Button } from '@/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useSearchParams } from 'react-router-dom'
@@ -51,8 +53,8 @@ export default function Markdown({ children, className }: { children: string; cl
             if (href.startsWith('issue:')) {
               const key = href.slice(6)
               return (
-                <button type="button" onClick={() => setParams(p => { p.set('issue', key); return p })}
-                  className="inline-flex items-center rounded-[4px] border border-line bg-wash px-1 font-mono text-[12px] text-ink hover:border-ink">{c}</button>
+                <Button type="button" variant="outline" size="xs" onClick={() => setParams(p => { p.set('issue', key); return p })}
+                  className="h-auto rounded-[4px] bg-wash px-1 py-0 align-baseline font-mono text-[12px] font-normal text-ink">{c}</Button>
               )
             }
             return <a href={href} target="_blank" rel="noreferrer" className="text-ink underline decoration-line underline-offset-2 hover:decoration-ink">{c}</a>
@@ -81,9 +83,12 @@ export default function Markdown({ children, className }: { children: string; cl
           pre: ({ children: c }) => (
             <pre className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line bg-cloud px-3 py-2.5 font-mono text-[12px] leading-[1.65] whitespace-pre-wrap text-ink [overflow-wrap:anywhere] [&>code]:bg-transparent [&>code]:p-0">{c}</pre>
           ),
-          table: ({ children: c }) => <div className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line"><table className="w-full border-collapse text-left text-[13px]">{c}</table></div>,
-          th: ({ children: c }) => <th className="border-b border-line bg-cloud px-3 py-1.5 font-medium">{c}</th>,
-          td: ({ children: c }) => <td className="border-b border-line px-3 py-1.5 align-top [tr:last-child_&]:border-b-0">{c}</td>,
+          table: ({ children: c }) => <div className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line"><Table className="text-[13px]">{c}</Table></div>,
+          thead: ({ children: c }) => <TableHeader>{c}</TableHeader>,
+          tbody: ({ children: c }) => <TableBody>{c}</TableBody>,
+          tr: ({ children: c }) => <TableRow className="border-line hover:bg-transparent">{c}</TableRow>,
+          th: ({ children: c }) => <TableHead className="h-8 bg-cloud px-3 font-medium text-ink">{c}</TableHead>,
+          td: ({ children: c }) => <TableCell className="whitespace-normal px-3 py-1.5 align-top">{c}</TableCell>,
           ul: ({ children: c, className: k }) => <ul className={cn('my-1.5 flex flex-col gap-0.5', k?.includes('contains-task-list') ? 'pl-0' : 'list-disc pl-5')}>{c}</ul>,
           ol: ({ children: c }) => <ol className="my-1.5 flex list-decimal flex-col gap-0.5 pl-5">{c}</ol>,
           li: ({ children: c, className: k }) => <li className={cn(k?.includes('task-list-item') && 'flex list-none items-start gap-2')}>{c}</li>,

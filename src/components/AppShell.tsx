@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { useStore } from '../store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Kbd } from '@/components/ui/kbd'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Avatar, Logo, LogoMark, cx } from '@/lib/ui'
@@ -59,23 +60,23 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
         <div className="flex flex-col gap-1.5">
           <Button className="h-8 w-full" onClick={() => { onNavigate?.(); setCreateOpen(true, project) }}><Plus />Create issue</Button>
-          <button type="button" onClick={() => { onNavigate?.(); openPalette() }}
-            className="relative flex h-7 w-full items-center rounded-[4px] border border-line bg-cloud/60 pl-7 pr-9 text-left text-[12px] text-placeholder transition-colors hover:bg-cloud">
+          <Button type="button" variant="outline" size="sm" onClick={() => { onNavigate?.(); openPalette() }}
+            className="relative h-7 w-full justify-start rounded-[4px] border-line bg-cloud/60 pl-7 pr-9 text-[12px] font-normal text-placeholder hover:border-line hover:bg-cloud has-[>svg]:pl-7">
             <Search className="absolute left-2 size-3.5 text-slate" />Search / jump to…
-            <kbd className="absolute right-1.5 rounded-[3px] border border-line bg-paper px-1 font-mono text-[9px] leading-[14px] text-slate">⌘K</kbd>
-          </button>
+            <Kbd className="absolute right-1.5 text-[9px]">⌘K</Kbd>
+          </Button>
         </div>
 
         <nav className="flex flex-col gap-0.5 pt-1" aria-label="Personal">
           <div className="label-mono px-2 py-0.5 text-slate">Personal</div>
           <NavLink to="/app/me" onClick={onNavigate} className={({ isActive }) => cx(row, isActive ? on : idle)}>
             <span className="flex items-center gap-2"><UserRound className="size-4" strokeWidth={1.75} />My issues</span>
-            <span className="rounded-[3px] border border-line bg-cloud px-1.5 font-mono text-[11px] text-slate">{mine}</span>
+            <Badge variant="outline" className="h-[18px] rounded-[3px] bg-cloud px-1.5 font-mono text-[11px] font-normal text-slate">{mine}</Badge>
           </NavLink>
-          <button type="button" onClick={() => setStarOpen(o => !o)} aria-expanded={starOpen} className={cx(row, idle)}>
+          <Button type="button" variant="ghost" onClick={() => setStarOpen(o => !o)} aria-expanded={starOpen} className={cx(row, idle, 'h-auto font-normal')}>
             <span className="flex items-center gap-2"><Star className="size-4" strokeWidth={1.75} />Starred views</span>
             <ChevronDown className={cx('size-3.5 transition-transform', !starOpen && '-rotate-90')} />
-          </button>
+          </Button>
           {starOpen && (
             <div className="ml-3 flex flex-col gap-0.5 border-l border-line pl-2">
               {state.starred.map(v => {
@@ -86,8 +87,8 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                       <span className="flex min-w-0 items-center gap-2"><Star className={cx('size-3.5 shrink-0', here ? 'fill-warning text-warning' : 'fill-warning/80 text-warning/80')} /><span className="truncate">{v.name}</span></span>
                       <span className="font-mono text-[11px] text-slate group-hover:invisible">{starCount(v)}</span>
                     </Link>
-                    <button type="button" aria-label={`Unstar ${v.name}`} onClick={() => dispatch({ t: 'unstar', id: v.id })}
-                      className="absolute right-1.5 top-1/2 hidden -translate-y-1/2 rounded-[3px] p-0.5 text-slate hover:bg-paper hover:text-ink group-hover:block"><X className="size-3.5" /></button>
+                    <Button type="button" variant="ghost" size="icon-xs" aria-label={`Unstar ${v.name}`} onClick={() => dispatch({ t: 'unstar', id: v.id })}
+                      className="absolute right-1 top-1/2 hidden size-5 -translate-y-1/2 rounded-[3px] text-slate hover:bg-paper hover:text-ink group-hover:inline-flex"><X className="size-3.5" /></Button>
                   </div>
                 )
               })}
@@ -105,7 +106,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   <span className="size-2 shrink-0 rounded-full bg-brand ring-2 ring-brand/20" />
                   <span className="truncate text-[12.5px] font-semibold">{p.name}</span>
                 </span>
-                <span className="flex shrink-0 items-center gap-1"><span className="rounded-[3px] border border-line bg-cloud px-1 font-mono text-[9px] text-slate">{p.key}</span><ChevronDown className="size-3.5 text-slate" /></span>
+                <span className="flex shrink-0 items-center gap-1"><Badge variant="outline" className="h-4 rounded-[3px] bg-cloud px-1 font-mono text-[9px] font-normal text-slate">{p.key}</Badge><ChevronDown className="size-3.5 text-slate" /></span>
               </Link>
               <div className="flex flex-col gap-0.5 bg-wash/40 p-1">
                 {views(p.key).map(v => (
@@ -129,7 +130,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 <span className="truncate text-[13px] font-medium">{p.name}</span>
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
-                <span className="rounded-[3px] border border-line bg-cloud px-1 font-mono text-[9px] text-slate">{p.key}</span>
+                <Badge variant="outline" className="h-4 rounded-[3px] bg-cloud px-1 font-mono text-[9px] font-normal text-slate">{p.key}</Badge>
                 <span className="font-mono text-[11px] text-slate">{counts(p.key).list}</span>
               </span>
             </Link>
@@ -197,16 +198,17 @@ export function TopBar({ crumbs, actions }: { crumbs: ReactNode; actions?: React
       <div className="flex min-w-0 items-center gap-2 text-[13px]">{crumbs}</div>
       <div className="flex items-center gap-2">
         {searchable && (
-          <label className="relative hidden w-[300px] items-center lg:flex">
+          <div className="relative hidden w-[300px] items-center lg:flex">
             <Search className="pointer-events-none absolute left-2.5 size-4 text-placeholder" />
             <Input
               id="search"
+              aria-label="Search issues"
               value={q}
               onChange={e => { const v = e.target.value; setParams(p => { if (v) p.set('q', v); else p.delete('q'); return p }, { replace: true }) }}
               placeholder="Search issues…"
               className="h-[34px] pl-8 text-[13px]"
             />
-          </label>
+          </div>
         )}
         {actions}
         <Button className="md:hidden" size="icon" onClick={() => setCreateOpen(true, project)} aria-label="Create issue"><Plus /></Button>

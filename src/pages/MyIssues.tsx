@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { useSearchParams } from 'react-router-dom'
 import { useStore } from '../store'
 import { ME } from '../data/mock'
@@ -39,20 +40,20 @@ export default function MyIssues() {
             if (!rows.length) return null
             return (
               <section key={p.key} className="mt-8">
-                <h2 className="label-mono mb-2 flex items-center gap-2 text-slate">{p.name}<span className="rounded-[3px] bg-cloud px-1.5 py-0.5 text-[10px]">{rows.length}</span></h2>
+                <h2 className="label-mono mb-2 flex items-center gap-2 text-slate">{p.name}<Badge variant="secondary" className="h-[18px] rounded-[3px] px-1.5 font-mono text-[10px] font-normal">{rows.length}</Badge></h2>
                 <ul className="border-t border-line">
                   {rows.map(i => {
                     const due = dueLabel(i.due)
                     return (
                       <li key={i.key}>
-                        <button onClick={() => setParams(prm => { prm.set('issue', i.key); return prm })}
-                          className={cx('grid w-full grid-cols-[72px_1fr_auto] items-center gap-3 border-b border-line px-2 py-3 text-left transition-colors hover:bg-[#F7F7FA] md:grid-cols-[80px_1fr_150px_120px_90px]', state.flash === i.key && 'flash')}>
+                        <Button variant="ghost" onClick={() => setParams(prm => { prm.set('issue', i.key); return prm })}
+                          className={cx('grid h-auto w-full grid-cols-[72px_1fr_auto] items-center gap-3 rounded-none border-b border-line px-2 py-3 text-left font-normal hover:bg-[#F7F7FA] md:grid-cols-[80px_1fr_150px_120px_90px]', state.flash === i.key && 'flash')}>
                           <span className="font-mono text-[12px] text-slate">{i.key}</span>
                           <span className={cx('truncate text-[14px]', i.status === 'done' && 'text-slate')}>{i.title}</span>
                           <span className="hidden md:block"><StatusPill status={i.status} size="sm" /></span>
                           <span className="hidden gap-1.5 md:flex"><TypeBadge type={i.type} compact /><PriorityBadge priority={i.priority} /></span>
                           <span className={cx('inline-flex items-center justify-end gap-1 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-[#B42318]' : 'text-slate')}>{due && <CalendarClock className="size-3" />}{due?.text ?? '—'}</span>
-                        </button>
+                        </Button>
                       </li>
                     )
                   })}

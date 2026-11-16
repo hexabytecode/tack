@@ -106,7 +106,7 @@ export default function IssuePanel() {
                       onCancel={() => { setDesc(issue.description); setEditingDesc(false) }} />
                   ) : (
                     <div className="rounded-[4px] px-1">
-                      {issue.description ? <Markdown>{issue.description}</Markdown> : <button className="text-[13.5px] text-placeholder" onClick={() => setEditingDesc(true)}>Add a description…</button>}
+                      {issue.description ? <Markdown>{issue.description}</Markdown> : <Button variant="link" className="h-auto p-0 text-[13.5px] font-normal text-placeholder" onClick={() => setEditingDesc(true)}>Add a description…</Button>}
                     </div>
                   )}
                 </section>
@@ -182,7 +182,7 @@ export default function IssuePanel() {
                     <SelectTrigger id="issue-sprint" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {state.sprints.filter(x => x.project === issue.project && x.state !== 'closed').map(x => (
-                        <SelectItem key={x.id} value={x.id}>{x.name}<span className={cn('rounded-[3px] px-1 font-mono text-[9.5px] font-medium uppercase tracking-wide', x.state === 'active' ? 'bg-tint text-brand' : 'bg-cloud text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</span></SelectItem>
+                        <SelectItem key={x.id} value={x.id}>{x.name}<Badge variant="outline" className={cn('h-4 rounded-[3px] border-transparent px-1 font-mono text-[9.5px] uppercase tracking-wide', x.state === 'active' ? 'bg-tint text-brand' : 'bg-cloud text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</Badge></SelectItem>
                       ))}
                       <SelectItem value="backlog">Backlog</SelectItem>
                     </SelectContent>

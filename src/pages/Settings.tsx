@@ -120,7 +120,7 @@ export default function Settings() {
               <div className="rounded-[4px] bg-ink p-4">
                 <div className="label-mono mb-2 flex items-center justify-between text-[#8E93A8]">
                   <span className="flex items-center gap-1.5"><Terminal className="size-3.5" />Connect Claude Code</span>
-                  <button className="flex items-center gap-1 normal-case tracking-normal hover:text-paper" onClick={async () => toast(await copy(command) ? 'Command copied' : 'Copy blocked by the browser', { kind: 'copy', description: 'Paste it into your terminal' })}><Copy className="size-3.5" />Copy</button>
+                  <Button variant="ghost" size="xs" className="h-6 gap-1 px-1.5 font-mono text-[11px] normal-case tracking-normal text-[#8E93A8] hover:bg-white/10 hover:text-paper" onClick={async () => toast(await copy(command) ? 'Command copied' : 'Copy blocked by the browser', { kind: 'copy', description: 'Paste it into your terminal' })}><Copy className="size-3.5" />Copy</Button>
                 </div>
                 <code className="block whitespace-pre-wrap break-all font-mono text-[12.5px] leading-relaxed text-brand-soft">{command}</code>
               </div>

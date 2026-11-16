@@ -13,6 +13,7 @@ import { TopBar, Crumb, sameQuery } from '../components/AppShell'
 import { matchFilters } from '@/lib/filters'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import IssueCard from '../components/IssueCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -56,12 +57,12 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
           return (
             <Tooltip key={id}>
               <TooltipTrigger asChild>
-                <button type="button" onClick={() => toggle(id)} aria-pressed={on} aria-label={u?.name}
-                  className={cx('relative flex size-7 items-center justify-center rounded-full border-2 border-paper font-mono text-[10px] transition-all',
-                    on ? 'z-20 -translate-y-0.5 bg-ink font-semibold text-paper shadow-sm ring-2 ring-brand'
-                      : 'z-10 bg-cloud font-medium text-ink hover:z-30 hover:border-slate')}>
+                <Button type="button" variant="ghost" size="icon" onClick={() => toggle(id)} aria-pressed={on} aria-label={u?.name}
+                  className={cx('relative size-7 rounded-full border-2 border-paper font-mono text-[10px] transition-all',
+                    on ? 'z-20 -translate-y-0.5 bg-ink font-semibold text-paper shadow-sm ring-2 ring-brand hover:bg-ink hover:text-paper'
+                      : 'z-10 bg-cloud font-medium text-ink hover:z-30 hover:border-slate hover:bg-cloud')}>
                   {u?.initials}
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>{u?.name}</TooltipContent>
             </Tooltip>
@@ -70,11 +71,11 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
         {rest.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button type="button" aria-label={`${rest.length} more people`}
-                className={cx('relative z-0 flex h-7 items-center gap-0.5 rounded-full border-2 border-paper pl-3.5 pr-2 font-mono text-[10px] font-medium shadow-sm transition-colors',
-                  restPicked ? 'bg-tint text-brand' : 'bg-wash text-slate hover:bg-cloud hover:text-ink')}>
+              <Button type="button" variant="ghost" size="sm" aria-label={`${rest.length} more people`}
+                className={cx('relative z-0 h-7 gap-0.5 rounded-full border-2 border-paper pl-3.5 pr-2 font-mono text-[10px] font-medium shadow-sm has-[>svg]:pl-3.5 has-[>svg]:pr-2',
+                  restPicked ? 'bg-tint text-brand hover:bg-tint hover:text-brand' : 'bg-wash text-slate hover:bg-cloud hover:text-ink')}>
                 +{rest.length}<ChevronDown className="size-3" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">
               {rest.map(id => {
@@ -104,22 +105,22 @@ function StarView({ project }: { project: string }) {
   const query = (() => { const p = new URLSearchParams(params); p.delete('issue'); p.sort(); return p.toString() })()
   const existing = state.starred.find(v => v.project === project && v.view === view && sameQuery(v.query, query))
   if (existing) return (
-    <button type="button" onClick={() => { dispatch({ t: 'unstar', id: existing.id }); toast('Removed from starred views', { kind: 'info', description: existing.name }) }}
-      className="hidden h-7 items-center gap-1.5 rounded-[4px] border border-warning/40 bg-[#FDF6EA] px-2 font-mono text-[10.5px] uppercase tracking-wide text-[#93500A] sm:flex">
+    <Button type="button" variant="outline" size="sm" onClick={() => { dispatch({ t: 'unstar', id: existing.id }); toast('Removed from starred views', { kind: 'info', description: existing.name }) }}
+      className="hidden h-7 gap-1.5 rounded-[4px] border-warning/40 bg-[#FDF6EA] px-2 font-mono text-[10.5px] uppercase tracking-wide text-[#93500A] hover:border-warning hover:bg-[#FDF6EA] sm:inline-flex has-[>svg]:px-2">
       <Star className="size-3.5 fill-warning text-warning" />Starred
-    </button>
+    </Button>
   )
   if (!query) return null
   return (
     <Popover open={open} onOpenChange={o => { setOpen(o); if (o) setName('') }}>
       <PopoverTrigger asChild>
-        <button type="button" className="hidden h-7 items-center gap-1.5 rounded-[4px] border border-line px-2 font-mono text-[10.5px] uppercase tracking-wide text-slate transition-colors hover:border-ink hover:text-ink sm:flex">
+        <Button type="button" variant="outline" size="sm" className="hidden h-7 gap-1.5 rounded-[4px] px-2 font-mono text-[10.5px] uppercase tracking-wide text-slate hover:text-ink sm:inline-flex has-[>svg]:px-2">
           <Star className="size-3.5" />Star view
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-64 p-3">
         <form className="flex flex-col gap-2" onSubmit={e => { e.preventDefault(); const n = name.trim() || 'Starred view'; dispatch({ t: 'star', view: { name: n, project, view, query } }); toast('Starred', { kind: 'create', description: `${n} is in your sidebar` }); setOpen(false) }}>
-          <label htmlFor="star-name" className="label-mono text-slate">Name this view</label>
+          <Label htmlFor="star-name" className="label-mono text-slate">Name this view</Label>
           <Input id="star-name" autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="e.g. My high-priority bugs" />
           <Button type="submit" size="sm" className="self-end"><Star />Star</Button>
         </form>

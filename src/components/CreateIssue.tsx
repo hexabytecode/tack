@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { CornerDownLeft, Eye, Paperclip, Plus, Tag, X } from 'lucide-react'
 import { useStore } from '../store'
@@ -6,6 +7,7 @@ import { ME, STATUSES, type Attachment, type IssueType, type Priority, type Stat
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { Kbd } from '@/components/ui/kbd'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -102,7 +104,7 @@ export default function CreateIssue() {
               <SheetDescription className="sr-only">Create an issue. Only the title is required.</SheetDescription>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="hidden rounded-[3px] border border-line bg-cloud px-1.5 py-0.5 font-mono text-[10.5px] text-slate sm:inline">Esc</kbd>
+              <Kbd className="hidden sm:inline-flex">Esc</Kbd>
               <Tooltip><TooltipTrigger asChild>
                 <Button type="button" size="icon-sm" variant="ghost" aria-label="Close" onClick={() => setCreateOpen(false)}><X /></Button>
               </TooltipTrigger><TooltipContent>Close · Esc</TooltipContent></Tooltip>
@@ -117,15 +119,15 @@ export default function CreateIssue() {
               <MarkdownEditor id="new-description" value={description} onChange={setDescription} people={members} placeholder="Add a description (optional)" rows={7} open />
 
               <div>
-                <input ref={fileRef} type="file" multiple className="sr-only" aria-label="Attach files"
+                <Input ref={fileRef} type="file" multiple className="sr-only" aria-label="Attach files"
                   onChange={e => { const list = Array.from(e.target.files ?? []).map(f => ({ name: f.name, size: f.size })); setFiles(fs => [...fs, ...list]); e.target.value = '' }} />
-                <button type="button" onClick={() => fileRef.current?.click()}
+                <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}
                   onDragOver={e => e.preventDefault()}
                   onDrop={e => { e.preventDefault(); const list = Array.from(e.dataTransfer.files).map(f => ({ name: f.name, size: f.size })); setFiles(fs => [...fs, ...list]) }}
-                  className="flex w-full items-center justify-between rounded-[4px] border border-dashed border-line bg-wash px-3 py-3 text-left text-slate transition-colors hover:border-slate/50 hover:text-ink">
+                  className="h-auto w-full justify-between rounded-[4px] border-dashed border-line bg-wash px-3 py-3 font-normal text-slate hover:border-slate/50 hover:text-ink">
                   <span className="flex items-center gap-2 text-[13px]"><Paperclip className="size-4" />Attach files or drop screenshots here</span>
                   <span className="font-mono text-[10.5px] uppercase tracking-wide">Max 25 MB</span>
-                </button>
+                </Button>
                 {files.length > 0 && (
                   <ul className="mt-2 flex flex-col gap-1">
                     {files.map((f, i) => (
@@ -150,8 +152,8 @@ export default function CreateIssue() {
                 <Select value={sprint} onValueChange={setSprint}>
                   <SelectTrigger id="new-sprint" className={trigger}><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {active && <SelectItem value={active.id}>{active.name}<span className="rounded-[3px] bg-tint px-1 font-mono text-[9.5px] font-medium uppercase tracking-wide text-brand">Active</span></SelectItem>}
-                    {sprints.filter(s => s.state === 'planned').map(s => <SelectItem key={s.id} value={s.id}>{s.name}<span className="rounded-[3px] bg-cloud px-1 font-mono text-[9.5px] font-medium uppercase tracking-wide text-slate">Planned</span></SelectItem>)}
+                    {active && <SelectItem value={active.id}>{active.name}<Badge variant="outline" className="h-4 rounded-[3px] border-transparent bg-tint px-1 font-mono text-[9.5px] uppercase tracking-wide text-brand">Active</Badge></SelectItem>}
+                    {sprints.filter(s => s.state === 'planned').map(s => <SelectItem key={s.id} value={s.id}>{s.name}<Badge variant="outline" className="h-4 rounded-[3px] border-transparent bg-cloud px-1 font-mono text-[9.5px] uppercase tracking-wide text-slate">Planned</Badge></SelectItem>)}
                     <SelectItem value="backlog">Backlog</SelectItem>
                   </SelectContent>
                 </Select>
@@ -194,13 +196,13 @@ export default function CreateIssue() {
                   {labels.map(l => (
                     <span key={l} className="flex items-center gap-1 rounded-[3px] border border-line bg-cloud py-0.5 pl-1.5 pr-0.5 font-mono text-[11px]">
                       <Tag className="size-3 text-slate" />{l}
-                      <button type="button" className="rounded-[2px] p-0.5 text-slate hover:bg-paper hover:text-ink" aria-label={`Remove label ${l}`} onClick={() => setLabels(labels.filter(x => x !== l))}><X className="size-3" /></button>
+                      <Button type="button" variant="ghost" size="icon-xs" className="size-4 rounded-[2px] text-slate hover:bg-paper hover:text-ink" aria-label={`Remove label ${l}`} onClick={() => setLabels(labels.filter(x => x !== l))}><X className="size-3" /></Button>
                     </span>
                   ))}
                   {labelDraft === null ? (
-                    <button ref={addLabelRef} type="button" onClick={() => setLabelDraft('')} className="flex h-6 items-center gap-0.5 rounded-[3px] border border-dashed border-line px-1.5 font-mono text-[10.5px] text-slate hover:border-slate hover:text-ink">
+                    <Button ref={addLabelRef} type="button" variant="outline" size="xs" onClick={() => setLabelDraft('')} className="h-6 gap-0.5 rounded-[3px] border-dashed px-1.5 font-mono text-[10.5px] font-normal text-slate hover:border-slate hover:text-ink has-[>svg]:px-1.5">
                       <Plus className="size-3" />Add
-                    </button>
+                    </Button>
                   ) : (
                     <Input autoFocus aria-label="New label" value={labelDraft} onChange={e => setLabelDraft(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); addLabel() } if (e.key === 'Escape') { e.stopPropagation(); setLabelDraft(null) } }}

@@ -19,6 +19,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import DatePicker from '../components/DatePicker'
 import { Avatar, PriorityBadge, StatusPill, TypeBadge, cx } from '@/lib/ui'
 
 /* Backlog (Stitch, Gate 1 round 3): the running sprint's progress on top, then each sprint
@@ -45,14 +47,14 @@ function Row({ issue, picked, onPick }: { issue: Issue; picked: boolean; onPick:
     <div ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cx('group flex h-[42px] items-center justify-between gap-3 bg-paper px-3 transition-colors hover:bg-wash md:px-4', isDragging && 'opacity-40', picked && 'bg-tint/60')}>
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        <button type="button" className="hidden cursor-grab touch-none text-placeholder group-hover:text-slate active:cursor-grabbing sm:block" aria-label={`Drag ${issue.key}`} {...attributes} {...listeners}>
+        <Button type="button" variant="ghost" size="icon-xs" className="hidden size-5 cursor-grab touch-none text-placeholder hover:bg-transparent group-hover:text-slate active:cursor-grabbing sm:inline-flex" aria-label={`Drag ${issue.key}`} {...attributes} {...listeners}>
           <GripVertical className="size-4" />
-        </button>
+        </Button>
         <Checkbox checked={picked} onCheckedChange={onPick} aria-label={`Select ${issue.key}`} className="data-[state=checked]:border-brand data-[state=checked]:bg-brand" />
         <span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{issue.key}</span>
         <span className="hidden sm:inline-flex"><TypeBadge type={issue.type} compact /></span>
-        <button type="button" onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
-          className={cx('min-w-0 truncate text-left text-[13px] font-medium hover:text-brand', issue.status === 'done' && 'text-slate')}>{issue.title}</button>
+        <Button type="button" variant="link" onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
+          className={cx('block h-auto min-w-0 shrink truncate p-0 text-left text-[13px] font-medium text-ink hover:text-brand hover:no-underline', issue.status === 'done' && 'text-slate')}>{issue.title}</Button>
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <span className="hidden w-[104px] md:block"><StatusPill status={issue.status} size="sm" /></span>
@@ -74,9 +76,9 @@ function Section({ id, keys, byKey, picked, onPick, header, goal, footer }: {
     <section className={cx('overflow-hidden rounded-[6px] border bg-paper transition-colors', isOver ? 'border-brand/50' : 'border-line')}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-cloud/50 px-3 py-2.5 md:px-4">
         <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-          <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-label={open ? 'Collapse' : 'Expand'} className="rounded-[3px] text-slate hover:text-ink">
+          <Button type="button" variant="ghost" size="icon-xs" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-label={open ? 'Collapse' : 'Expand'} className="rounded-[3px] text-slate hover:text-ink">
             <ChevronDown className={cx('size-4 transition-transform', !open && '-rotate-90')} />
-          </button>
+          </Button>
           {header}
         </div>
       </div>
@@ -99,12 +101,12 @@ function Goal({ sprint }: { sprint: Sprint }) {
   const [v, setV] = useState(sprint.goal)
   useEffect(() => setV(sprint.goal), [sprint.goal])
   return (
-    <label className="flex items-center gap-2 border-b border-line/70 bg-paper px-4 py-2 text-[13px]">
-      <span className="label-mono shrink-0 text-slate">Goal</span>
-      <input value={v} onChange={e => setV(e.target.value)} onBlur={() => v !== sprint.goal && dispatch({ t: 'sprintUpdate', id: sprint.id, patch: { goal: v.trim() } })}
+    <div className="flex items-center gap-2 border-b border-line/70 bg-paper px-4 py-1.5 text-[13px]">
+      <Label htmlFor={`goal-${sprint.id}`} className="label-mono shrink-0 text-slate">Goal</Label>
+      <Input id={`goal-${sprint.id}`} value={v} onChange={e => setV(e.target.value)} onBlur={() => v !== sprint.goal && dispatch({ t: 'sprintUpdate', id: sprint.id, patch: { goal: v.trim() } })}
         onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
-        placeholder="What should this sprint achieve?" className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-placeholder" />
-    </label>
+        placeholder="What should this sprint achieve?" className="h-7 min-w-0 flex-1 border-transparent bg-transparent px-1.5 text-[13px] shadow-none hover:border-line focus-visible:border-line focus-visible:ring-0" />
+    </div>
   )
 }
 
@@ -137,7 +139,7 @@ function SprintDialog({ sprint, mode, onClose }: { sprint: Sprint | null; mode: 
         <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); submit() }}>
           <div className="flex flex-col gap-1.5"><Label htmlFor="sprint-name">Name</Label><Input id="sprint-name" value={name} onChange={e => setName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5"><Label htmlFor="sprint-start">Starts</Label><Input id="sprint-start" type="date" value={start} onChange={e => setStart(e.target.value)} className="font-mono text-[13px]" /></div>
+            <div className="flex flex-col gap-1.5"><Label htmlFor="sprint-start">Starts</Label><DatePicker id="sprint-start" value={start} onChange={v => setStart(v ?? iso(Date.now()))} placeholder="Start date" className="h-9 w-full" /></div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="sprint-length">Length</Label>
               <Select value={weeks} onValueChange={setWeeks}>
@@ -299,16 +301,16 @@ export default function Backlog() {
       <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2.5">
           <span className="text-[15px] font-semibold">{x.name}</span>
-          <span className={cx('rounded-[3px] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider', x.state === 'active' ? 'bg-brand text-paper' : 'border border-line bg-paper text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</span>
+          <Badge variant={x.state === 'active' ? 'default' : 'outline'} className={cx('h-[18px] rounded-[3px] px-1.5 font-mono text-[10px] uppercase tracking-wider', x.state === 'active' ? 'border-brand bg-brand text-paper' : 'bg-paper text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</Badge>
           <span className="hidden text-line sm:inline">|</span>
           {x.start ? (
-            <button type="button" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="flex items-center gap-1.5 font-mono text-[11.5px] text-slate hover:text-ink">
+            <Button type="button" variant="ghost" size="xs" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="gap-1.5 px-1 font-mono text-[11.5px] font-normal text-slate hover:text-ink has-[>svg]:px-1">
               <CalendarDays className="size-3.5" />{day(x.start)} – {day(x.end)}{x.state === 'active' && <> · <Remaining end={x.end} /></>}
-            </button>
+            </Button>
           ) : (
-            <button type="button" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="flex items-center gap-1.5 font-mono text-[11.5px] text-slate underline decoration-dotted underline-offset-2 hover:text-ink">
+            <Button type="button" variant="ghost" size="xs" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="gap-1.5 px-1 font-mono text-[11.5px] font-normal text-slate underline decoration-dotted underline-offset-2 hover:text-ink has-[>svg]:px-1">
               <CalendarDays className="size-3.5" />Set dates
-            </button>
+            </Button>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -317,7 +319,7 @@ export default function Backlog() {
               {STATUSES.filter(s => s.id !== 'done').map(s => <span key={s.id} className="flex items-center gap-1.5"><span className={cx('size-2 rounded-full', STATUS_BAR[s.id])} />{count(s.id)} {s.label}</span>)}
             </span>
           )}
-          <span className="rounded-[3px] border border-line bg-paper px-2 py-0.5 font-mono text-[11px] font-medium">{items.length} issues · {pts(items)} pts</span>
+          <Badge variant="outline" className="h-[20px] rounded-[3px] bg-paper px-2 font-mono text-[11px]">{items.length} issues · {pts(items)} pts</Badge>
           <MoveMenu from={x.id} />
           {x.state === 'active'
             ? <Button size="sm" variant="secondary" onClick={() => setCompleting(x)}>Complete</Button>
@@ -328,10 +330,10 @@ export default function Backlog() {
   }
 
   const addRow = (label: string, sprint: string | null) => (
-    <button type="button" onClick={() => setCreateOpen(true, project, 'todo', sprint)}
-      className="flex h-9 w-full items-center gap-1.5 border-t border-line/60 bg-cloud/30 px-4 font-mono text-[11px] text-slate transition-colors hover:bg-tint/50 hover:text-brand">
+    <Button type="button" variant="ghost" onClick={() => setCreateOpen(true, project, 'todo', sprint)}
+      className="h-9 w-full justify-start gap-1.5 rounded-none border-t border-line/60 bg-cloud/30 px-4 font-mono text-[11px] font-normal text-slate hover:bg-tint/50 hover:text-brand has-[>svg]:px-4">
       <Plus className="size-3.5" />{label}
-    </button>
+    </Button>
   )
 
   const dragIssue = dragging ? byKey.get(dragging) : undefined
@@ -346,7 +348,7 @@ export default function Backlog() {
           {active && (
             <div className="flex flex-wrap items-center justify-between gap-4 rounded-[6px] border border-line bg-paper p-4">
               <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-[6px] bg-brand font-mono text-[11px] font-medium text-paper">S{active.name.match(/\d+/)?.[0]}</span>
+                <Badge className="size-9 justify-center rounded-[6px] border-brand bg-brand p-0 font-mono text-[11px] text-paper">S{active.name.match(/\d+/)?.[0]}</Badge>
                 <div>
                   <div className="flex flex-wrap items-center gap-2"><span className="text-[15px] font-semibold">{active.name}</span><StatusPill status="progress" size="sm" /></div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[11.5px] text-slate">{day(active.start)} – {day(active.end)}<span>·</span><Remaining end={active.end} /></div>
@@ -383,7 +385,7 @@ export default function Backlog() {
                 <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <span className="text-[15px] font-semibold">Backlog</span>
-                    <span className="rounded-[3px] border border-line bg-paper px-2 py-0.5 font-mono text-[10.5px] text-slate">{backlogCount} issues</span>
+                    <Badge variant="outline" className="h-[20px] rounded-[3px] bg-paper px-2 font-mono text-[10.5px] font-normal text-slate">{backlogCount} issues</Badge>
                     <span className="hidden text-line sm:inline">|</span>
                     <span className="font-mono text-[11.5px] text-slate">Estimate: {pts(all(BACKLOG).filter(i => i.status !== 'done'))} pts</span>
                   </div>
