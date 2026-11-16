@@ -209,7 +209,7 @@ export default function Board() {
       <main className="min-h-0 flex-1 overflow-auto bg-wash scrollbar-thin">
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onStart} onDragOver={onOver} onDragEnd={onEnd} onDragCancel={() => { setActive(null); setCols(fromStore) }}>
           <div className="flex min-h-full snap-x gap-3 p-4 md:gap-4 md:p-6">
-            {STATUSES.map(s => <Column key={s.id} status={s.id} keys={cols[s.id]} byKey={byKey} onAdd={() => setCreateOpen(true, project)} />)}
+            {STATUSES.map(s => <Column key={s.id} status={s.id} keys={cols[s.id]} byKey={byKey} onAdd={() => setCreateOpen(true, project, s.id)} />)}
           </div>
           <DragOverlay dropAnimation={{ duration: 220, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
             {activeIssue && <IssueCard issue={activeIssue} assignee={user(activeIssue.assignee)} comments={state.comments.filter(c => c.issue === activeIssue.key).length} lifted />}

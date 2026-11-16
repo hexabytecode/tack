@@ -14,7 +14,7 @@ interface State {
   flash: string | null
 }
 
-type NewIssue = { project: string; title: string; description: string; type: IssueType; priority: Priority; assignee: string | null; due: string | null }
+type NewIssue = { project: string; title: string; description: string; type: IssueType; priority: Priority; assignee: string | null; due: string | null; status?: Status }
 
 type Action =
   | { t: 'signIn' } | { t: 'signOut' } | { t: 'reset' }
@@ -85,7 +85,7 @@ function reducer(s: State, a: Action): State {
       return { ...s, issues, activity: [...s.activity, ...notes] }
     }
     case 'create': {
-      const issues = s.issues.map(i => i.project === a.issue.project && i.status === 'todo' ? { ...i, order: i.order + 1 } : i)
+      const issues = s.issues.map(i => i.project === a.issue.project && i.status === a.issue.status ? { ...i, order: i.order + 1 } : i)
       return { ...s, issues: [...issues, a.issue], activity: [...s.activity, { id: uid(), issue: a.issue.key, actor: ME, text: 'created this issue', at: now }], flash: a.issue.key }
     }
     case 'comment':
@@ -122,8 +122,9 @@ interface Ctx {
   create: (n: NewIssue) => Issue
   toast: (text: string, opts?: NotifyOptions) => void
   createOpen: boolean
-  setCreateOpen: (open: boolean, project?: string) => void
+  setCreateOpen: (open: boolean, project?: string, status?: Status) => void
   createProject: string | null
+  createStatus: Status
 }
 
 const StoreCtx = createContext<Ctx | null>(null)
@@ -132,6 +133,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, load)
   const [createOpen, setOpen] = useState(false)
   const [createProject, setCreateProject] = useState<string | null>(null)
+  const [createStatus, setCreateStatus] = useState<Status>('todo')
   const stateRef = useRef(state)
   stateRef.current = state
 
@@ -154,7 +156,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const now = Date.now()
     const issue: Issue = {
       ...n, key: `${n.project}-${nextNumber(stateRef.current.issues, n.project)}`,
-      status: 'todo', labels: [], order: 0, createdAt: now, updatedAt: now,
+      status: n.status ?? 'todo', labels: [], order: 0, createdAt: now, updatedAt: now,
     }
     dispatch({ t: 'create', issue })
     return issue
@@ -164,9 +166,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     state, dispatch, toast, create,
     user: (id) => state.users.find(u => u.id === id),
     createOpen,
-    setCreateOpen: (open, project) => { setOpen(open); if (project) setCreateProject(project) },
+    setCreateOpen: (open, project, status) => { if (open) setCreateStatus(status ?? 'todo'); setOpen(open); if (project) setCreateProject(project) },
     createProject,
-  }), [state, toast, create, createOpen, createProject])
+    createStatus,
+  }), [state, toast, create, createOpen, createProject, createStatus])
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>
 }

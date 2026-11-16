@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CornerDownLeft, FolderKanban } from 'lucide-react'
 import { useStore } from '../store'
-import { ME, type IssueType, type Priority } from '../data/mock'
+import { ME, STATUSES, type IssueType, type Priority, type Status } from '../data/mock'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -11,11 +11,11 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import DatePicker from './DatePicker'
 import MarkdownEditor from './MarkdownEditor'
-import { Avatar, PRIORITY_META, TYPE_META } from '@/lib/ui'
+import { Avatar, PRIORITY_META, StatusPill, TYPE_META } from '@/lib/ui'
 import { cn } from '@/lib/utils'
 
 export default function CreateIssue() {
-  const { createOpen, setCreateOpen, createProject, state, create, toast } = useStore()
+  const { createOpen, setCreateOpen, createProject, createStatus, state, create, toast } = useStore()
   const navigate = useNavigate()
   const [project, setProject] = useState('WEB')
   const [title, setTitle] = useState('')
@@ -24,19 +24,22 @@ export default function CreateIssue() {
   const [priority, setPriority] = useState<Priority>('medium')
   const [assignee, setAssignee] = useState<string>(ME)
   const [due, setDue] = useState<string | null>(null)
+  const [status, setStatus] = useState<Status>('todo')
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (createOpen) setProject(createProject && state.projects.some(p => p.key === createProject) ? createProject : 'WEB')
-  }, [createOpen, createProject, state.projects])
+    if (!createOpen) return
+    setProject(createProject && state.projects.some(p => p.key === createProject) ? createProject : 'WEB')
+    setStatus(createStatus)
+  }, [createOpen, createProject, createStatus, state.projects])
 
   const p = state.projects.find(x => x.key === project)!
   const members = state.users.filter(u => p.members.includes(u.id))
 
   const submit = () => {
     if (!title.trim()) { titleRef.current?.focus(); return }
-    const issue = create({ project, title: title.trim(), description: description.trim(), type, priority, assignee: assignee === 'none' ? null : assignee, due })
-    toast(`Created ${issue.key}`, { kind: 'create', status: 'todo', description: issue.title })
+    const issue = create({ project, title: title.trim(), description: description.trim(), type, priority, assignee: assignee === 'none' ? null : assignee, due, status })
+    toast(`Created ${issue.key}`, { kind: 'create', status: issue.status, description: issue.title })
     setTitle(''); setDescription(''); setDue(null)
     setCreateOpen(false)
     navigate(`/app/${project}/board`)
@@ -56,6 +59,10 @@ export default function CreateIssue() {
               <SelectContent>
                 {state.projects.map(x => <SelectItem key={x.key} value={x.key}><span className="font-mono text-[11px] text-slate">{x.key}</span>{x.name}</SelectItem>)}
               </SelectContent>
+            </Select>
+            <Select value={status} onValueChange={v => setStatus(v as Status)}>
+              <SelectTrigger size="sm" className="h-7 border-0 bg-transparent px-1 shadow-none" aria-label="Status"><SelectValue /></SelectTrigger>
+              <SelectContent>{STATUSES.map(x => <SelectItem key={x.id} value={x.id}><StatusPill status={x.id} size="sm" /></SelectItem>)}</SelectContent>
             </Select>
           </DialogHeader>
 
