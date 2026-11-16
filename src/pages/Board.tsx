@@ -6,13 +6,14 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Filter, Plus, X } from 'lucide-react'
+import { ChevronDown, Filter, Plus, X } from 'lucide-react'
 import { useStore } from '../store'
 import { STATUSES, type Issue, type Status } from '../data/mock'
 import { TopBar, Crumb } from '../components/AppShell'
 import IssueCard from '../components/IssueCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Avatar, PRIORITY_META, StatusPill, TYPE_META, cx } from '@/lib/ui'
 
@@ -25,19 +26,82 @@ export function useFilteredIssues(project: string | undefined) {
   const who = params.get('who')
   const type = params.get('type')
   const prio = params.get('prio')
-  const issues = useMemo(() => state.issues.filter(i =>
+  const issues = useMemo(() => {
+    const people = who ? who.split(',') : []
+    return state.issues.filter(i =>
     (!project || i.project === project) &&
     (!q || i.title.toLowerCase().includes(q) || i.key.toLowerCase().includes(q)) &&
-    (!who || i.assignee === who) &&
+    (!people.length || (i.assignee !== null && people.includes(i.assignee))) &&
     (!type || i.type === type) &&
-    (!prio || i.priority === prio)), [state.issues, project, q, who, type, prio])
+    (!prio || i.priority === prio))
+  }, [state.issues, project, q, who, type, prio])
   return { issues, q, who, type }
 }
 
+/* People filter (Stitch, Gate 1 round 2, option A): an overlapping stack of the first few people
+   and a "+N" menu for the rest. Picked people fill in black, get a blue ring and lift above the stack. */
+const STACK = 4
+function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: string[]; toggle: (id: string) => void }) {
+  const { user } = useStore()
+  const shown = members.slice(0, STACK)
+  const rest = members.slice(STACK)
+  const restPicked = rest.filter(id => picked.includes(id)).length
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="label-mono hidden text-slate sm:inline">People</span>
+      <div className="flex items-center -space-x-2" role="group" aria-label="Filter by person">
+        {shown.map(id => {
+          const u = user(id)
+          const on = picked.includes(id)
+          return (
+            <Tooltip key={id}>
+              <TooltipTrigger asChild>
+                <button type="button" onClick={() => toggle(id)} aria-pressed={on} aria-label={u?.name}
+                  className={cx('relative flex size-7 items-center justify-center rounded-full border-2 border-paper font-mono text-[10px] transition-all',
+                    on ? 'z-20 -translate-y-0.5 bg-ink font-semibold text-paper shadow-sm ring-2 ring-brand'
+                      : 'z-10 bg-cloud font-medium text-ink hover:z-30 hover:border-slate')}>
+                  {u?.initials}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{u?.name}</TooltipContent>
+            </Tooltip>
+          )
+        })}
+        {rest.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" aria-label={`${rest.length} more people`}
+                className={cx('relative z-0 flex h-7 items-center gap-0.5 rounded-full border-2 border-paper pl-3.5 pr-2 font-mono text-[10px] font-medium shadow-sm transition-colors',
+                  restPicked ? 'bg-tint text-brand' : 'bg-wash text-slate hover:bg-cloud hover:text-ink')}>
+                +{rest.length}<ChevronDown className="size-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              {rest.map(id => {
+                const u = user(id)
+                return (
+                  <DropdownMenuCheckboxItem key={id} checked={picked.includes(id)} onCheckedChange={() => toggle(id)} onSelect={e => e.preventDefault()}>
+                    <Avatar user={u} size={20} />{u?.name}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function FilterRow({ project, count }: { project: string; count: number }) {
-  const { state, user } = useStore()
+  const { state } = useStore()
   const [params, setParams] = useSearchParams()
   const who = params.get('who')
+  const picked = who ? who.split(',') : []
+  const toggle = (id: string) => {
+    const next = picked.includes(id) ? picked.filter(x => x !== id) : [...picked, id]
+    set('who', next.length ? next.join(',') : null)
+  }
   const type = params.get('type') ?? 'all'
   const prio = params.get('prio') ?? 'all'
   const p = state.projects.find(x => x.key === project)
@@ -47,22 +111,7 @@ export function FilterRow({ project, count }: { project: string; count: number }
   return (
     <div className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2 md:px-6">
       <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-        <div className="flex items-center -space-x-1" role="group" aria-label="Filter by person">
-          {p?.members.slice(0, 6).map(id => {
-            const on = who === id
-            return (
-              <Tooltip key={id}>
-                <TooltipTrigger asChild>
-                  <button onClick={() => set('who', on ? null : id)} aria-pressed={on} aria-label={`Only ${user(id)?.name}`}
-                    className={cx('rounded-full ring-2 transition-transform hover:z-10 hover:-translate-y-0.5', on ? 'z-10 ring-brand' : 'ring-paper')}>
-                    <Avatar user={user(id)} size={24} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{user(id)?.name}</TooltipContent>
-              </Tooltip>
-            )
-          })}
-        </div>
+        <PeopleFilter members={p?.members ?? []} picked={picked} toggle={toggle} />
         <span className="hidden h-4 w-px bg-line sm:block" />
         <Select value={type} onValueChange={v => set('type', v)}>
           <SelectTrigger size="sm" className="h-8 gap-1.5 text-[12.5px]" aria-label="Type"><Filter className="size-3.5 text-slate" /><SelectValue /></SelectTrigger>
