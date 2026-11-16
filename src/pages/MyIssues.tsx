@@ -20,7 +20,7 @@ export default function MyIssues() {
     <>
       <TopBar crumbs={<span className="font-medium">My issues</span>} />
       <main className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[1040px] px-4 py-8 md:px-8">
+        <div className="p-4 md:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">My issues</h1>

@@ -25,7 +25,7 @@ const kb = (n: number) => n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))
 /* New issue opens as a side panel, in the same place and shape as an open issue
    (Stitch, Gate 1 round 2): writing on the left, the fields in a rail on the right. */
 export default function CreateIssue() {
-  const { createOpen, setCreateOpen, createProject, createStatus, state, create, toast } = useStore()
+  const { createOpen, setCreateOpen, createProject, createStatus, createSprint, state, create, toast } = useStore()
   const navigate = useNavigate()
   const [project, setProject] = useState('WEB')
   const [title, setTitle] = useState('')
@@ -52,8 +52,8 @@ export default function CreateIssue() {
     const key = createProject && state.projects.some(p => p.key === createProject) ? createProject : 'WEB'
     setProject(key)
     setStatus(createStatus)
-    setSprint(state.sprints.find(s => s.project === key && s.state === 'active')?.id ?? 'backlog')
-  }, [createOpen, createProject, createStatus, state.projects, state.sprints])
+    setSprint(createSprint === null ? 'backlog' : createSprint ?? state.sprints.find(s => s.project === key && s.state === 'active')?.id ?? 'backlog')
+  }, [createOpen, createProject, createStatus, createSprint, state.projects, state.sprints])
 
   const p = state.projects.find(x => x.key === project)!
   const members = state.users.filter(u => p.members.includes(u.id))

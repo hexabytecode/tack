@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronsUpDown, KanbanSquare, List, LogOut, Menu, Plus, Search, Settings, UserRound } from 'lucide-react'
+import { ChartGantt, ChevronDown, KanbanSquare, List, ListTodo, LogOut, Menu, MoreHorizontal, Plus, Rocket, Search, Settings, Star, UserRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '../store'
 import { Button } from '@/components/ui/button'
@@ -12,65 +12,116 @@ import CreateIssue from './CreateIssue'
 import IssuePanel from './IssuePanel'
 import { ME } from '../data/mock'
 
+/* Sidebar (Stitch, Gate 1 round 3, option 2): Create and Search at the top, then your own work,
+   then every project as an accordion; the open project lists its planning views and settings. */
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const { state, user, dispatch } = useStore()
+  const { state, user, dispatch, setCreateOpen } = useStore()
   const { project = 'WEB' } = useParams()
   const navigate = useNavigate()
   const me = user(ME)
-  const counts = (key: string) => state.issues.filter(i => i.project === key && i.status !== 'done').length
-
-  const views = [
-    { to: `/app/${project}/board`, label: 'Board', icon: KanbanSquare },
-    { to: `/app/${project}/list`, label: 'List', icon: List },
-    { to: '/app/me', label: 'My issues', icon: UserRound },
-    { to: `/app/${project}/settings`, label: 'Settings', icon: Settings },
-  ]
+  const open = (i: { status: string }) => i.status !== 'done'
+  const mine = state.issues.filter(i => i.assignee === ME && open(i)).length
+  const active = (key: string) => state.sprints.find(x => x.project === key && x.state === 'active')?.id
+  const counts = (key: string) => {
+    const all = state.issues.filter(i => i.project === key)
+    return {
+      backlog: all.filter(i => i.sprint === null && open(i)).length,
+      board: all.filter(i => i.sprint !== null && i.sprint === active(key) && open(i)).length,
+      list: all.filter(open).length,
+    }
+  }
+  const row = 'flex items-center justify-between rounded-[4px] px-2 py-1.5 text-[13px] transition-colors duration-150'
+  const idle = 'text-slate hover:bg-cloud hover:text-ink'
+  const on = 'border border-brand/20 bg-tint font-medium text-brand'
+  const views = (key: string) => {
+    const c = counts(key)
+    return [
+      { to: `/app/${key}/backlog`, label: 'Backlog', icon: ListTodo, count: c.backlog },
+      { to: `/app/${key}/board`, label: 'Board', icon: KanbanSquare, count: c.board },
+      { to: `/app/${key}/list`, label: 'List', icon: List, count: c.list },
+      { to: `/app/${key}/releases`, label: 'Releases', icon: Rocket },
+      { to: `/app/${key}/roadmap`, label: 'Roadmap', icon: ChartGantt },
+    ]
+  }
 
   return (
-    <div className="flex h-full flex-col justify-between p-4">
-      <div className="flex flex-col gap-6">
+    <div className="flex h-full flex-col justify-between gap-4 overflow-y-auto p-3">
+      <div className="flex flex-col gap-3">
         <Link to="/" className="px-1 pt-1" onClick={onNavigate} aria-label="Tack home"><Logo sub="Engineering workspace" /></Link>
-        <nav className="flex flex-col gap-0.5" aria-label="Projects">
-          <div className="label-mono px-2 py-1 text-slate">Projects</div>
-          {state.projects.map(p => {
-            const active = p.key === project
-            return (
-              <Link key={p.key} to={`/app/${p.key}/board`} onClick={onNavigate}
-                className={cx('flex items-center justify-between rounded-[4px] px-2.5 py-1.5 text-[13px] transition-colors duration-150',
-                  active ? 'bg-tint font-medium text-brand' : 'text-ink hover:bg-tint-hover')}>
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className={cx('rounded-[3px] px-1 font-mono text-[10px]', active ? 'bg-brand text-paper' : 'bg-cloud text-slate')}>{p.key}</span>
-                  <span className="truncate">{p.name}</span>
-                </span>
-                <span className={cx('font-mono text-[11px]', active ? 'text-brand' : 'text-slate')}>{counts(p.key)}</span>
-              </Link>
-            )
-          })}
+
+        <div className="flex flex-col gap-1.5">
+          <Button className="h-8 w-full" onClick={() => { onNavigate?.(); setCreateOpen(true, project) }}><Plus />Create issue</Button>
+          <button type="button" onClick={() => { onNavigate?.(); openPalette() }}
+            className="relative flex h-7 w-full items-center rounded-[4px] border border-line bg-cloud/60 pl-7 pr-9 text-left text-[12px] text-placeholder transition-colors hover:bg-cloud">
+            <Search className="absolute left-2 size-3.5 text-slate" />Search / jump to…
+            <kbd className="absolute right-1.5 rounded-[3px] border border-line bg-paper px-1 font-mono text-[9px] leading-[14px] text-slate">⌘K</kbd>
+          </button>
+        </div>
+
+        <nav className="flex flex-col gap-0.5 pt-1" aria-label="Personal">
+          <div className="label-mono px-2 py-0.5 text-slate">Personal</div>
+          <NavLink to="/app/me" onClick={onNavigate} className={({ isActive }) => cx(row, isActive ? on : idle)}>
+            <span className="flex items-center gap-2"><UserRound className="size-4" strokeWidth={1.75} />My issues</span>
+            <span className="rounded-[3px] border border-line bg-cloud px-1.5 font-mono text-[11px] text-slate">{mine}</span>
+          </NavLink>
+          <NavLink to="/app/starred" onClick={onNavigate} className={({ isActive }) => cx(row, 'justify-start gap-2', isActive ? on : idle)}>
+            <Star className="size-4" strokeWidth={1.75} />Starred views
+          </NavLink>
         </nav>
-        <nav className="flex flex-col gap-0.5 border-t border-line pt-4" aria-label="Views">
-          <div className="label-mono px-2 py-1 text-slate">Views</div>
-          {views.map(v => (
-            <NavLink key={v.label} to={v.to} onClick={onNavigate}
-              className={({ isActive }) => cx('flex items-center gap-2.5 rounded-[4px] px-2.5 py-1.5 text-[13px] transition-colors duration-150',
-                isActive ? 'bg-tint font-medium text-brand' : 'text-slate hover:bg-tint-hover hover:text-ink')}>
-              <v.icon className="size-4" strokeWidth={1.75} />
-              {v.label}
-            </NavLink>
+
+        <nav className="flex flex-col gap-1 border-t border-line pt-1.5" aria-label="Projects">
+          <div className="label-mono px-2 py-0.5 text-slate">Projects</div>
+          {state.projects.map(p => p.key === project ? (
+            <div key={p.key} className="overflow-hidden rounded-[4px] border border-line bg-paper">
+              <Link to={`/app/${p.key}/board`} onClick={onNavigate} className="flex items-center justify-between border-b border-line/60 px-2.5 py-2 transition-colors hover:bg-wash">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="size-2 shrink-0 rounded-full bg-brand ring-2 ring-brand/20" />
+                  <span className="truncate text-[12.5px] font-semibold">{p.name}</span>
+                </span>
+                <span className="flex shrink-0 items-center gap-1"><span className="rounded-[3px] border border-line bg-cloud px-1 font-mono text-[9px] text-slate">{p.key}</span><ChevronDown className="size-3.5 text-slate" /></span>
+              </Link>
+              <div className="flex flex-col gap-0.5 bg-wash/40 p-1">
+                {views(p.key).map(v => (
+                  <NavLink key={v.label} to={v.to} onClick={onNavigate} className={({ isActive }) => cx(row, isActive ? on : idle)}>
+                    {({ isActive }) => (<>
+                      <span className="flex items-center gap-2"><v.icon className="size-4" strokeWidth={1.75} />{v.label}</span>
+                      {v.count !== undefined && <span className={cx('font-mono text-[11px]', isActive ? 'font-medium text-brand' : 'text-slate')}>{v.count}</span>}
+                    </>)}
+                  </NavLink>
+                ))}
+                <NavLink to={`/app/${p.key}/settings`} onClick={onNavigate} className={({ isActive }) => cx(row, 'mt-0.5 justify-start gap-2 border-t border-line/50', isActive ? on : idle)}>
+                  <Settings className="size-4" strokeWidth={1.75} />Project settings
+                </NavLink>
+              </div>
+            </div>
+          ) : (
+            <Link key={p.key} to={`/app/${p.key}/board`} onClick={onNavigate}
+              className="group flex items-center justify-between rounded-[4px] border border-transparent px-2.5 py-1.5 transition-colors hover:border-line hover:bg-cloud/60">
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="size-1.5 shrink-0 rounded-full bg-slate/40 group-hover:bg-slate" />
+                <span className="truncate text-[13px] font-medium">{p.name}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                <span className="rounded-[3px] border border-line bg-cloud px-1 font-mono text-[9px] text-slate">{p.key}</span>
+                <span className="font-mono text-[11px] text-slate">{counts(p.key).list}</span>
+              </span>
+            </Link>
           ))}
         </nav>
       </div>
-      <div className="border-t border-line pt-3">
+
+      <div className="border-t border-line pt-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-auto w-full justify-between gap-2 px-2 py-1.5 data-[state=open]:bg-tint">
-              <span className="flex min-w-0 items-center gap-2.5">
-                <Avatar user={me} size={30} />
+            <Button variant="ghost" className="h-auto w-full justify-between gap-2 px-1.5 py-1.5 data-[state=open]:bg-tint">
+              <span className="flex min-w-0 items-center gap-2">
+                <Avatar user={me} size={24} />
                 <span className="min-w-0 text-left">
-                  <span className="block truncate text-[13px] font-medium leading-tight">{me?.name}</span>
-                  <span className="block truncate text-[11.5px] font-normal text-slate">{me?.title}</span>
+                  <span className="block truncate text-[12px] font-medium leading-tight">{me?.name}</span>
+                  <span className="block truncate font-mono text-[10px] font-normal text-slate">{me?.title}</span>
                 </span>
               </span>
-              <ChevronsUpDown className="size-4 text-slate" />
+              <MoreHorizontal className="size-4 text-slate" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-[232px] p-1.5">
@@ -97,13 +148,16 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-export function TopBar({ crumbs }: { crumbs: ReactNode }) {
+/* The command palette listens for this; anything can open it. */
+export const openPalette = () => window.dispatchEvent(new Event('tack:palette'))
+
+export function TopBar({ crumbs, actions }: { crumbs: ReactNode; actions?: ReactNode }) {
   const { setCreateOpen } = useStore()
   const { project } = useParams()
   const [params, setParams] = useSearchParams()
   const q = params.get('q') ?? ''
   const location = useLocation()
-  const searchable = /\/(board|list)$|\/me$/.test(location.pathname)
+  const searchable = /\/(board|list|backlog)$|\/me$/.test(location.pathname)
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-line bg-paper px-4 md:px-6">
@@ -121,7 +175,8 @@ export function TopBar({ crumbs }: { crumbs: ReactNode }) {
             />
           </label>
         )}
-        <Button onClick={() => setCreateOpen(true, project)}><Plus /><span className="hidden sm:inline">Create issue</span></Button>
+        {actions}
+        <Button className="md:hidden" size="icon" onClick={() => setCreateOpen(true, project)} aria-label="Create issue"><Plus /></Button>
       </div>
     </header>
   )

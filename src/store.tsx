@@ -168,9 +168,11 @@ interface Ctx {
   create: (n: NewIssue) => Issue
   toast: (text: string, opts?: NotifyOptions) => void
   createOpen: boolean
-  setCreateOpen: (open: boolean, project?: string, status?: Status) => void
+  setCreateOpen: (open: boolean, project?: string, status?: Status, sprint?: string | null) => void
   createProject: string | null
   createStatus: Status
+  /** Sprint to preset in New issue; undefined means the active sprint, null the backlog. */
+  createSprint: string | null | undefined
 }
 
 const StoreCtx = createContext<Ctx | null>(null)
@@ -180,6 +182,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [createOpen, setOpen] = useState(false)
   const [createProject, setCreateProject] = useState<string | null>(null)
   const [createStatus, setCreateStatus] = useState<Status>('todo')
+  const [createSprint, setCreateSprint] = useState<string | null | undefined>(undefined)
   const stateRef = useRef(state)
   stateRef.current = state
 
@@ -213,10 +216,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     state, dispatch, toast, create,
     user: (id) => state.users.find(u => u.id === id),
     createOpen,
-    setCreateOpen: (open, project, status) => { if (open) setCreateStatus(status ?? 'todo'); setOpen(open); if (project) setCreateProject(project) },
+    setCreateOpen: (open, project, status, sprint) => { if (open) { setCreateStatus(status ?? 'todo'); setCreateSprint(sprint) } setOpen(open); if (project) setCreateProject(project) },
     createProject,
     createStatus,
-  }), [state, toast, create, createOpen, createProject, createStatus])
+    createSprint,
+  }), [state, toast, create, createOpen, createProject, createStatus, createSprint])
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>
 }

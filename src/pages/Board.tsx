@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   DndContext, DragOverlay, KeyboardSensor, PointerSensor, closestCorners, useDroppable, useSensor, useSensors,
   type DragEndEvent, type DragOverEvent, type DragStartEvent,
@@ -8,7 +8,7 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from '@dnd-kit/utilities'
 import { ChevronDown, Filter, Plus, X } from 'lucide-react'
 import { useStore } from '../store'
-import { STATUSES, type Issue, type Status } from '../data/mock'
+import { STATUSES, type Issue, type Sprint, type Status } from '../data/mock'
 import { TopBar, Crumb } from '../components/AppShell'
 import IssueCard from '../components/IssueCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -93,7 +93,7 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
   )
 }
 
-export function FilterRow({ project, count }: { project: string; count: number }) {
+export function FilterRow({ project, count, extra }: { project: string; count: number; extra?: React.ReactNode }) {
   const { state } = useStore()
   const [params, setParams] = useSearchParams()
   const who = params.get('who')
@@ -129,7 +129,7 @@ export function FilterRow({ project, count }: { project: string; count: number }
         </Select>
         {active && <Button variant="ghost" size="sm" className="text-slate" onClick={() => setParams({}, { replace: true })}><X />Clear</Button>}
       </div>
-      <span className="label-mono shrink-0 text-slate">{count} issues</span>
+      <span className="flex shrink-0 items-center gap-3">{extra}<span className="label-mono text-slate">{count} issues</span></span>
     </div>
   )
 }
@@ -180,10 +180,28 @@ function Column({ status, keys, byKey, onAdd }: { status: Status; keys: string[]
   )
 }
 
+export function daysLeft(end: string | null) {
+  if (!end) return null
+  return Math.ceil((new Date(end + 'T23:59:59').getTime() - Date.now()) / 86400000)
+}
+
+function SprintTag({ sprint }: { sprint: Sprint }) {
+  const left = daysLeft(sprint.end)
+  return (
+    <span className="hidden items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-slate sm:flex">
+      <span className="size-1.5 rounded-full bg-brand" />{sprint.name}
+      {left !== null && <><span className="text-line">·</span><span className={left < 0 ? 'text-destructive' : ''}>{left < 0 ? `${-left} days over` : left === 0 ? 'Ends today' : `${left} days left`}</span></>}
+    </span>
+  )
+}
+
 export default function Board() {
   const { project = 'WEB' } = useParams()
   const { state, dispatch, user, setCreateOpen, toast } = useStore()
-  const { issues } = useFilteredIssues(project)
+  const { issues: all } = useFilteredIssues(project)
+  // The board shows the active sprint, like Jira; everything else lives in the backlog.
+  const sprint = state.sprints.find(x => x.project === project && x.state === 'active')
+  const issues = useMemo(() => all.filter(i => sprint && i.sprint === sprint.id), [all, sprint])
   const byKey = useMemo(() => new Map(state.issues.map(i => [i.key, i])), [state.issues])
   const fromStore = useMemo<Columns>(() => {
     const cols = { todo: [], progress: [], review: [], done: [] } as Columns
@@ -254,7 +272,14 @@ export default function Board() {
   return (
     <>
       <TopBar crumbs={<Crumb project={project} page="Board" />} />
-      <FilterRow project={project} count={issues.length} />
+      <FilterRow project={project} count={issues.length} extra={sprint && <SprintTag sprint={sprint} />} />
+      {!sprint ? (
+        <main className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 bg-wash p-8 text-center">
+          <p className="text-[15px] font-medium">No sprint is running</p>
+          <p className="max-w-[40ch] text-[13.5px] text-slate">Plan issues into a sprint and start it from the backlog. The board shows the sprint while it runs.</p>
+          <Button asChild variant="secondary"><Link to={`/app/${project}/backlog`}>Go to the backlog</Link></Button>
+        </main>
+      ) : (
       <main className="min-h-0 flex-1 overflow-auto bg-wash scrollbar-thin">
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onStart} onDragOver={onOver} onDragEnd={onEnd} onDragCancel={() => { setActive(null); setCols(fromStore) }}>
           <div className="flex min-h-full snap-x gap-3 p-4 md:gap-4 md:p-6">
@@ -265,6 +290,7 @@ export default function Board() {
           </DragOverlay>
         </DndContext>
       </main>
+      )}
     </>
   )
 }
