@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CornerDownLeft, FolderKanban } from 'lucide-react'
 import { useStore } from '../store'
-import { ME, STATUSES, type IssueType, type Priority, type Status } from '../data/mock'
+import { ME, type IssueType, type Priority, type Status } from '../data/mock'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import DatePicker from './DatePicker'
 import MarkdownEditor from './MarkdownEditor'
-import { Avatar, PRIORITY_META, StatusPill, TYPE_META } from '@/lib/ui'
+import { Avatar, PRIORITY_META, TYPE_META } from '@/lib/ui'
 import { cn } from '@/lib/utils'
 
 export default function CreateIssue() {
@@ -59,10 +59,6 @@ export default function CreateIssue() {
               <SelectContent>
                 {state.projects.map(x => <SelectItem key={x.key} value={x.key}><span className="font-mono text-[11px] text-slate">{x.key}</span>{x.name}</SelectItem>)}
               </SelectContent>
-            </Select>
-            <Select value={status} onValueChange={v => setStatus(v as Status)}>
-              <SelectTrigger size="sm" className="h-7 border-0 bg-transparent px-1 shadow-none" aria-label="Status"><SelectValue /></SelectTrigger>
-              <SelectContent>{STATUSES.map(x => <SelectItem key={x.id} value={x.id}><StatusPill status={x.id} size="sm" /></SelectItem>)}</SelectContent>
             </Select>
           </DialogHeader>
 
