@@ -53,7 +53,7 @@ export function Wordmark({ height = 24, className, label = 'Tack' }: { height?: 
 export function Logo({ sub, size = 'md' }: { sub?: string; size?: 'sm' | 'md' | 'lg' }) {
   const h = size === 'lg' ? 30 : size === 'sm' ? 20 : 24
   return (
-    <span className="flex flex-col items-start gap-1.5">
+    <span className="flex flex-col items-start gap-2">
       <Wordmark height={h} />
       {sub && <span className="font-mono text-[10px] uppercase leading-none tracking-[0.06em] text-slate">{sub}</span>}
     </span>
@@ -61,12 +61,10 @@ export function Logo({ sub, size = 'md' }: { sub?: string; size?: 'sm' | 'md' | 
 }
 
 /* ── People ───────────────────────────────────────────────────────── */
-const TONES = ['#E8ECFB', '#FBEDE6', '#E6F4EE', '#F4ECFA', '#FBF4E2', '#EAF2F8']
 export function Avatar({ user, size = 22, className }: { user?: User; size?: number; className?: string }) {
-  const tone = user ? TONES[user.name.charCodeAt(0) % TONES.length] : '#EEEEF2'
   return (
     <UIAvatar title={user?.name ?? 'Unassigned'} className={cn('shrink-0 border border-line', className)} style={{ width: size, height: size }}>
-      <AvatarFallback className="font-mono font-medium text-ink" style={{ background: tone, fontSize: size < 24 ? 9.5 : 11 }}>
+      <AvatarFallback className="font-mono font-medium text-ink" style={{ background: '#EEEEF2', fontSize: size < 24 ? 10 : 11 }}>
         {user ? user.initials : '–'}
       </AvatarFallback>
     </UIAvatar>
@@ -74,7 +72,8 @@ export function Avatar({ user, size = 22, className }: { user?: User; size?: num
 }
 
 /* ── Status, type and priority ──────────────────────────────────────
-   Each gets its own icon and colour, so a card reads at a glance. */
+   Each gets its own icon. Colour is kept for what needs attention
+   (status, bugs, high priority); everything else stays neutral. */
 export const statusMeta = (s: Status) => STATUSES.find(x => x.id === s)!
 export const STATUS_ICON: Record<Status, LucideIcon> = { todo: Circle, progress: CircleDashed, review: CircleDot, done: CircleCheck }
 
@@ -89,7 +88,7 @@ export function StatusDot({ status, size = 8 }: { status: Status; size?: number 
 
 export function StatusLabel({ status }: { status: Status }) {
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: statusMeta(status).color }}>
+    <span className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: statusMeta(status).color }}>
       <StatusIcon status={status} />
       {statusMeta(status).label}
     </span>
@@ -97,20 +96,20 @@ export function StatusLabel({ status }: { status: Status }) {
 }
 
 export const TYPE_META: Record<IssueType, { label: string; icon: LucideIcon; cls: string; iconCls: string }> = {
-  task: { label: 'Task', icon: SquareCheck, cls: 'border-[#C9D3F6] bg-[#F1F4FD] text-brand', iconCls: 'text-brand' },
+  task: { label: 'Task', icon: SquareCheck, cls: 'border-line bg-paper text-slate', iconCls: 'text-slate' },
   bug: { label: 'Bug', icon: Bug, cls: 'border-[#F5C9C9] bg-[#FDF1F1] text-[#B42318]', iconCls: 'text-[#D92D20]' },
 }
 
 export const PRIORITY_META: Record<Priority, { label: string; short: string; icon: LucideIcon; cls: string; iconCls: string }> = {
   high: { label: 'High', short: 'High', icon: ChevronsUp, cls: 'border-[#F5C9C9] bg-[#FDF1F1] text-[#B42318]', iconCls: 'text-[#D92D20]' },
-  medium: { label: 'Medium', short: 'Med', icon: ChevronUp, cls: 'border-[#F3DDB8] bg-[#FDF6EA] text-[#93500A]', iconCls: 'text-warning' },
-  low: { label: 'Low', short: 'Low', icon: ChevronDown, cls: 'border-line bg-wash text-slate', iconCls: 'text-slate' },
+  medium: { label: 'Medium', short: 'Med', icon: ChevronUp, cls: 'border-line bg-paper text-slate', iconCls: 'text-slate' },
+  low: { label: 'Low', short: 'Low', icon: ChevronDown, cls: 'border-line bg-paper text-slate', iconCls: 'text-slate' },
 }
 
 export function TypeBadge({ type, compact }: { type: IssueType; compact?: boolean }) {
   const m = TYPE_META[type]
   return (
-    <Badge variant="outline" className={cn('h-[20px] gap-1 rounded-[4px] px-1.5 font-mono text-[10.5px] font-medium', m.cls)}>
+    <Badge variant="outline" className={cn('h-[20px] gap-1 rounded-[4px] px-2 font-mono text-[11px] font-medium', m.cls)}>
       <m.icon className={cn('!size-3', m.iconCls)} strokeWidth={2.25} />
       {!compact && m.label}
     </Badge>
@@ -120,7 +119,7 @@ export function TypeBadge({ type, compact }: { type: IssueType; compact?: boolea
 export function PriorityBadge({ priority, compact }: { priority: Priority; compact?: boolean }) {
   const m = PRIORITY_META[priority]
   return (
-    <Badge variant="outline" className={cn('h-[20px] gap-0.5 rounded-[4px] px-1.5 font-mono text-[10.5px] font-medium', m.cls)} title={`${m.label} priority`}>
+    <Badge variant="outline" className={cn('h-[20px] gap-0.5 rounded-[4px] px-2 font-mono text-[11px] font-medium', m.cls)} title={`${m.label} priority`}>
       <m.icon className={cn('!size-3', m.iconCls)} strokeWidth={2.5} />
       {!compact && m.short}
     </Badge>
@@ -196,7 +195,7 @@ export const STATUS_PILL: Record<Status, string> = {
 }
 export function StatusPill({ status, className, size = 'md' }: { status: Status; className?: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full border font-medium whitespace-nowrap', size === 'sm' ? 'h-[20px] px-2 text-[11px]' : 'h-6 px-2.5 text-[12px]', STATUS_PILL[status], className)}>
+    <span className={cn('inline-flex shrink-0 items-center gap-2 rounded-full border font-medium whitespace-nowrap', size === 'sm' ? 'h-[20px] px-2 text-[11px]' : 'h-6 px-3 text-[12.5px]', STATUS_PILL[status], className)}>
       <StatusIcon status={status} className={size === 'sm' ? 'size-3' : 'size-3.5'} />
       {statusMeta(status).label}
     </span>

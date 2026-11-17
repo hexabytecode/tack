@@ -40,7 +40,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       list: all.filter(open).length,
     }
   }
-  const row = 'flex items-center justify-between rounded-[4px] px-2 py-1.5 text-[13px] transition-colors duration-150'
+  const row = 'flex items-center justify-between rounded-[4px] px-2 py-2 text-[13px] transition-colors duration-150'
   const idle = 'text-slate hover:bg-cloud hover:text-ink'
   const on = 'border border-brand/20 bg-tint font-medium text-brand'
   const views = (key: string) => {
@@ -58,10 +58,10 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex flex-col gap-3">
         <Link to="/" className="px-1 pt-1" onClick={onNavigate} aria-label="Tack home"><Logo sub="Engineering workspace" /></Link>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <Button className="h-8 w-full" onClick={() => { onNavigate?.(); setCreateOpen(true, project) }}><Plus />Create issue</Button>
           <Button type="button" variant="outline" size="sm" onClick={() => { onNavigate?.(); openPalette() }}
-            className="relative h-7 w-full justify-start rounded-[4px] border-line bg-cloud/60 pl-7 pr-9 text-[12px] font-normal text-placeholder hover:border-line hover:bg-cloud has-[>svg]:pl-7">
+            className="relative h-7 w-full justify-start rounded-[4px] border-line bg-cloud/60 pl-7 pr-9 text-[12.5px] font-normal text-placeholder hover:border-line hover:bg-cloud has-[>svg]:pl-7">
             <Search className="absolute left-2 size-3.5 text-slate" />Search / jump to…
             <Kbd className="absolute right-1.5 text-[9px]">⌘K</Kbd>
           </Button>
@@ -71,7 +71,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           <div className="label-mono px-2 py-0.5 text-slate">Personal</div>
           <NavLink to="/app/me" onClick={onNavigate} className={({ isActive }) => cx(row, isActive ? on : idle)}>
             <span className="flex items-center gap-2"><UserRound className="size-4" strokeWidth={1.75} />My issues</span>
-            <Badge variant="outline" className="h-[18px] rounded-[3px] bg-cloud px-1.5 font-mono text-[11px] font-normal text-slate">{mine}</Badge>
+            <Badge variant="outline" className="h-[18px] rounded-[3px] bg-cloud px-2 font-mono text-[11px] font-normal text-slate">{mine}</Badge>
           </NavLink>
           <Button type="button" variant="ghost" onClick={() => setStarOpen(o => !o)} aria-expanded={starOpen} className={cx(row, idle, 'h-auto font-normal')}>
             <span className="flex items-center gap-2"><Star className="size-4" strokeWidth={1.75} />Starred views</span>
@@ -92,16 +92,16 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   </div>
                 )
               })}
-              {!state.starred.length && <p className="px-2 py-1.5 text-[12px] text-slate">Filter a board or list, then star it to keep it here.</p>}
+              {!state.starred.length && <p className="px-2 py-2 text-[12.5px] text-slate">Filter a board or list, then star it to keep it here.</p>}
             </div>
           )}
         </nav>
 
-        <nav className="flex flex-col gap-1 border-t border-line pt-1.5" aria-label="Projects">
+        <nav className="flex flex-col gap-1 border-t border-line pt-2" aria-label="Projects">
           <div className="label-mono px-2 py-0.5 text-slate">Projects</div>
           {state.projects.map(p => p.key === project ? (
             <div key={p.key} className="overflow-hidden rounded-[4px] border border-line bg-paper">
-              <Link to={`/app/${p.key}/board`} onClick={onNavigate} className="flex items-center justify-between border-b border-line/60 px-2.5 py-2 transition-colors hover:bg-wash">
+              <Link to={`/app/${p.key}/board`} onClick={onNavigate} className="flex items-center justify-between border-b border-line/60 px-3 py-2 transition-colors hover:bg-wash">
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="size-2 shrink-0 rounded-full bg-brand ring-2 ring-brand/20" />
                   <span className="truncate text-[12.5px] font-semibold">{p.name}</span>
@@ -124,12 +124,12 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             </div>
           ) : (
             <Link key={p.key} to={`/app/${p.key}/board`} onClick={onNavigate}
-              className="group flex items-center justify-between rounded-[4px] border border-transparent px-2.5 py-1.5 transition-colors hover:border-line hover:bg-cloud/60">
+              className="group flex items-center justify-between rounded-[4px] border border-transparent px-3 py-2 transition-colors hover:border-line hover:bg-cloud/60">
               <span className="flex min-w-0 items-center gap-2">
                 <span className="size-1.5 shrink-0 rounded-full bg-slate/40 group-hover:bg-slate" />
                 <span className="truncate text-[13px] font-medium">{p.name}</span>
               </span>
-              <span className="flex shrink-0 items-center gap-1.5">
+              <span className="flex shrink-0 items-center gap-2">
                 <Badge variant="outline" className="h-4 rounded-[3px] bg-cloud px-1 font-mono text-[9px] font-normal text-slate">{p.key}</Badge>
                 <span className="font-mono text-[11px] text-slate">{counts(p.key).list}</span>
               </span>
@@ -141,26 +141,26 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-line pt-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-auto w-full justify-between gap-2 px-1.5 py-1.5 data-[state=open]:bg-tint">
+            <Button variant="ghost" className="h-auto w-full justify-between gap-2 px-2 py-2 data-[state=open]:bg-tint">
               <span className="flex min-w-0 items-center gap-2">
                 <Avatar user={me} size={24} />
                 <span className="min-w-0 text-left">
-                  <span className="block truncate text-[12px] font-medium leading-tight">{me?.name}</span>
+                  <span className="block truncate text-[12.5px] font-medium leading-tight">{me?.name}</span>
                   <span className="block truncate font-mono text-[10px] font-normal text-slate">{me?.title}</span>
                 </span>
               </span>
               <MoreHorizontal className="size-4 text-slate" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-[232px] p-1.5">
+          <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-[232px] p-2">
             <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2 font-normal">
               <Avatar user={me} size={36} />
               <span className="min-w-0">
-                <span className="block truncate text-[13.5px] font-medium">{me?.name}</span>
+                <span className="block truncate text-[14px] font-medium">{me?.name}</span>
                 <span className="block truncate font-mono text-[11px] text-slate">{me?.email}</span>
               </span>
             </DropdownMenuLabel>
-            <div className="mx-2 mb-1.5 flex items-center gap-1.5">
+            <div className="mx-2 mb-2 flex items-center gap-2">
               <Badge variant="outline" className="h-5 rounded-[4px] border-[#C9D3F6] bg-[#EEF2FD] font-mono text-[10px] text-brand">{me?.role}</Badge>
               <Badge variant="outline" className="h-5 gap-1 rounded-[4px] font-mono text-[10px] font-normal text-slate"><span className="size-1.5 rounded-full bg-success" />Online</Badge>
             </div>

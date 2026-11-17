@@ -38,7 +38,7 @@ function GuideCard({ g }: { g: typeof GUIDES[number] }) {
             <span className="flex size-9 items-center justify-center rounded-[6px] border border-[#C9D3F6] bg-[#EEF2FD]"><g.icon className="size-4 text-brand" /></span>
             <div>
               <h3 className="text-[16px] font-medium">{g.title}</h3>
-              <span className="font-mono text-[11.5px] text-slate">{url}</span>
+              <span className="font-mono text-[11px] text-slate">{url}</span>
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function AiGuide() {
       <Nav />
       <section className="border-b border-line bg-wash">
         <div className="mx-auto max-w-[960px] px-4 py-16 md:px-6 md:py-20">
-          <Badge variant="outline" className="gap-1.5 rounded-[4px] bg-paper font-mono text-[10.5px] uppercase tracking-[0.06em] text-slate"><span className="size-1.5 rounded-full bg-slate" />Optional</Badge>
+          <Badge variant="outline" className="gap-2 rounded-[4px] bg-paper font-mono text-[11px] uppercase tracking-[0.06em] text-slate"><span className="size-1.5 rounded-full bg-slate" />Optional</Badge>
           <h1 className="mt-5 text-[38px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[52px]">Hand Tack to your AI.</h1>
           <p className="mt-4 max-w-[600px] text-[17px] leading-relaxed text-slate">If you use Claude, Cursor or ChatGPT, give it this one line. It reads a short index, then only the guide it needs.</p>
           <div className="mt-8 flex flex-col gap-3 rounded-[6px] border border-line bg-paper p-2 pl-4 sm:flex-row sm:items-center">
@@ -90,7 +90,7 @@ export default function AiGuide() {
         <div className="mt-8 grid grid-flow-dense items-start gap-4 md:grid-cols-2">
           {GUIDES.map(g => <GuideCard key={g.file} g={g} />)}
         </div>
-        <p className="mt-8 font-mono text-[11.5px] text-slate">Demo: addresses and keys on this page are examples.</p>
+        <p className="mt-8 font-mono text-[11px] text-slate">Demo: addresses and keys on this page are examples.</p>
       </section>
     </div>
   )

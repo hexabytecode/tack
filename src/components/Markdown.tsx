@@ -40,7 +40,7 @@ export default function Markdown({ children, className }: { children: string; cl
   const names = state.users.map(u => ({ first: u.name.split(' ')[0], id: u.id }))
 
   return (
-    <div className={cn('md min-w-0 text-[13.5px] leading-relaxed', className)}>
+    <div className={cn('md min-w-0 text-[14px] leading-relaxed', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         urlTransform={u => u}
@@ -54,7 +54,7 @@ export default function Markdown({ children, className }: { children: string; cl
               const key = href.slice(6)
               return (
                 <Button type="button" variant="outline" size="xs" onClick={() => setParams(p => { p.set('issue', key); return p })}
-                  className="h-auto rounded-[4px] bg-wash px-1 py-0 align-baseline font-mono text-[12px] font-normal text-ink">{c}</Button>
+                  className="h-auto rounded-[4px] bg-wash px-1 py-0 align-baseline font-mono text-[12.5px] font-normal text-ink">{c}</Button>
               )
             }
             return <a href={href} target="_blank" rel="noreferrer" className="text-ink underline decoration-line underline-offset-2 hover:decoration-ink">{c}</a>
@@ -67,10 +67,10 @@ export default function Markdown({ children, className }: { children: string; cl
               const meta = CALLOUTS[m[1]]
               const body = first.replace(m[0], '')
               return (
-                <div className={cn('my-2 flex gap-2.5 rounded-[4px] border px-3 py-2.5', meta.cls)}>
+                <div className={cn('my-2 flex gap-3 rounded-[4px] border px-3 py-3', meta.cls)}>
                   <meta.icon className={cn('mt-0.5 size-4 shrink-0', meta.iconCls)} />
                   <div className="min-w-0">
-                    <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.06em] text-slate">{meta.label}</div>
+                    <div className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-slate">{meta.label}</div>
                     <div>{body}</div>
                     {kids.slice(1)}
                   </div>
@@ -79,24 +79,24 @@ export default function Markdown({ children, className }: { children: string; cl
             }
             return <blockquote className="my-2 border-l-2 border-line pl-3 text-slate">{c}</blockquote>
           },
-          code: ({ children: c }) => <code className="rounded-[3px] bg-cloud px-1 py-px font-mono text-[12px] [overflow-wrap:anywhere]">{c}</code>,
+          code: ({ children: c }) => <code className="rounded-[3px] bg-cloud px-1 py-px font-mono text-[12.5px] [overflow-wrap:anywhere]">{c}</code>,
           pre: ({ children: c }) => (
-            <pre className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line bg-cloud px-3 py-2.5 font-mono text-[12px] leading-[1.65] whitespace-pre-wrap text-ink [overflow-wrap:anywhere] [&>code]:bg-transparent [&>code]:p-0">{c}</pre>
+            <pre className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line bg-cloud px-3 py-3 font-mono text-[12.5px] leading-[1.65] whitespace-pre-wrap text-ink [overflow-wrap:anywhere] [&>code]:bg-transparent [&>code]:p-0">{c}</pre>
           ),
           table: ({ children: c }) => <div className="my-2 max-w-full overflow-x-auto rounded-[4px] border border-line"><Table className="text-[13px]">{c}</Table></div>,
           thead: ({ children: c }) => <TableHeader>{c}</TableHeader>,
           tbody: ({ children: c }) => <TableBody>{c}</TableBody>,
           tr: ({ children: c }) => <TableRow className="border-line hover:bg-transparent">{c}</TableRow>,
           th: ({ children: c }) => <TableHead className="h-8 bg-cloud px-3 font-medium text-ink">{c}</TableHead>,
-          td: ({ children: c }) => <TableCell className="whitespace-normal px-3 py-1.5 align-top">{c}</TableCell>,
-          ul: ({ children: c, className: k }) => <ul className={cn('my-1.5 flex flex-col gap-0.5', k?.includes('contains-task-list') ? 'pl-0' : 'list-disc pl-5')}>{c}</ul>,
-          ol: ({ children: c }) => <ol className="my-1.5 flex list-decimal flex-col gap-0.5 pl-5">{c}</ol>,
+          td: ({ children: c }) => <TableCell className="whitespace-normal px-3 py-2 align-top">{c}</TableCell>,
+          ul: ({ children: c, className: k }) => <ul className={cn('my-2 flex flex-col gap-0.5', k?.includes('contains-task-list') ? 'pl-0' : 'list-disc pl-5')}>{c}</ul>,
+          ol: ({ children: c }) => <ol className="my-2 flex list-decimal flex-col gap-0.5 pl-5">{c}</ol>,
           li: ({ children: c, className: k }) => <li className={cn(k?.includes('task-list-item') && 'flex list-none items-start gap-2')}>{c}</li>,
           input: ({ checked }) => <Checkbox checked={!!checked} disabled className="mt-1 disabled:cursor-default disabled:opacity-100 data-[state=checked]:border-brand data-[state=checked]:bg-brand" />,
           p: ({ children: c }) => <p className="my-1">{c}</p>,
           h1: ({ children: c }) => <h4 className="mb-1 mt-3 text-[15px] font-medium">{c}</h4>,
           h2: ({ children: c }) => <h4 className="mb-1 mt-3 text-[14px] font-medium">{c}</h4>,
-          h3: ({ children: c }) => <h4 className="mb-1 mt-2 text-[13.5px] font-medium">{c}</h4>,
+          h3: ({ children: c }) => <h4 className="mb-1 mt-2 text-[14px] font-medium">{c}</h4>,
           strong: ({ children: c }) => <strong className="font-semibold">{c}</strong>,
         }}
       >

@@ -61,7 +61,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex items-center justify-center gap-1.5 rounded-[3px] px-3 py-1 text-[13px] font-medium whitespace-nowrap text-slate outline-none transition-colors duration-150 hover:text-ink focus-visible:ring-2 focus-visible:ring-brand/30 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
+        "relative inline-flex items-center justify-center gap-2 rounded-[3px] px-3 py-1 text-[13px] font-medium whitespace-nowrap text-slate outline-none transition-colors duration-150 hover:text-ink focus-visible:ring-2 focus-visible:ring-brand/30 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
         "group-data-[variant=default]/tabs-list:data-[state=active]:bg-ink group-data-[variant=default]/tabs-list:data-[state=active]:text-paper",
         "group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:px-1 group-data-[variant=line]/tabs-list:data-[state=active]:text-ink group-data-[variant=line]/tabs-list:data-[state=active]:shadow-[inset_0_-2px_0_var(--color-ink)]",
         className

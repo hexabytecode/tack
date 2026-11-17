@@ -64,11 +64,11 @@ export default function MarkdownEditor({ id, value, onChange, onSubmit, submitLa
         onChange={e => onChange(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onSubmit?.() } }}
         placeholder={placeholder}
-        className={cn('resize-none rounded-[6px] border-0 bg-transparent px-3 text-[13.5px] shadow-none placeholder:text-placeholder/70 focus-visible:border-0 focus-visible:ring-0',
-          expanded ? 'min-h-[76px] py-2.5' : 'min-h-0 py-2')}
+        className={cn('resize-none rounded-[6px] border-0 bg-transparent px-3 text-[14px] shadow-none placeholder:text-placeholder/70 focus-visible:border-0 focus-visible:ring-0',
+          expanded ? 'min-h-[76px] py-3' : 'min-h-0 py-2')}
       />
       {expanded && (
-        <div data-editor className="anim-fade flex items-center justify-between gap-2 border-t border-line px-1.5 py-1.5" onMouseDown={e => e.preventDefault()}>
+        <div data-editor className="anim-fade flex items-center justify-between gap-2 border-t border-line px-2 py-2" onMouseDown={e => e.preventDefault()}>
           <div className="flex items-center gap-0.5">
             <Tooltip><TooltipTrigger asChild>
               <Button type="button" variant="ghost" size="icon-sm" className={tool} onClick={() => apply('**', '**', false, 'bold text')} aria-label="Bold"><Bold /></Button>

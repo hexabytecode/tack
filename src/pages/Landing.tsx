@@ -44,22 +44,22 @@ export function Nav() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-auto gap-1 p-0 text-[14px] font-normal hover:bg-transparent data-[state=open]:[&>svg]:rotate-180">Product<ChevronDown className="size-3.5 transition-transform" /></Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px] p-1.5">
+              <DropdownMenuContent align="start" className="w-[300px] p-2">
                 {PRODUCT_MENU.map(([I, t, s, href]) => (
-                  <DropdownMenuItem key={t} asChild className="items-start gap-3 px-2.5 py-2">
-                    <a href={`/${href}`}><I className="mt-0.5 size-4 text-brand" /><span><span className="block text-[13.5px] font-medium text-ink">{t}</span><span className="block text-[12.5px] text-slate">{s}</span></span></a>
+                  <DropdownMenuItem key={t} asChild className="items-start gap-3 px-3 py-2">
+                    <a href={`/${href}`}><I className="mt-0.5 size-4 text-brand" /><span><span className="block text-[14px] font-medium text-ink">{t}</span><span className="block text-[12.5px] text-slate">{s}</span></span></a>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link to="/ai" className="link flex items-center gap-1.5">For AI<Badge variant="outline" className="h-[18px] rounded-[4px] px-1 font-mono text-[9.5px] font-normal uppercase tracking-[0.06em] text-slate">Optional</Badge></Link>
+            <Link to="/ai" className="link flex items-center gap-2">For AI<Badge variant="outline" className="h-[18px] rounded-[4px] px-1 font-mono text-[10px] font-normal uppercase tracking-[0.06em] text-slate">Optional</Badge></Link>
             <a href="/#pricing" className="link">Pricing</a>
             <a href="/#faq" className="link">FAQ</a>
           </nav>
         </div>
         <div className="flex items-center gap-5">
           <Link to="/login" className="link hidden text-[14px] sm:inline">Sign in</Link>
-          <Button onClick={open}>Open Tack<ArrowRight /></Button>
+          <Button variant="outline" onClick={open}>Open Tack<ArrowRight /></Button>
         </div>
       </div>
     </header>
@@ -70,7 +70,7 @@ function Announcement() {
   return (
     <div className="bg-ink text-paper">
       <div className="mx-auto flex max-w-[1232px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 text-center text-[13px] md:px-6">
-        <Badge className="rounded-[4px] bg-paper px-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-ink">New</Badge>
+        <Badge className="rounded-[4px] bg-paper px-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink">New</Badge>
         <span className="text-[#B6BACB]">Sprints, releases with release notes, and ⌘K search are now in Tack.</span>
         <a href="#sprints" className="link inline-flex items-center gap-1 font-medium">See what’s new<ArrowRight className="size-3.5" /></a>
       </div>
@@ -83,7 +83,7 @@ function SignUp({ dark, cta = 'Start free' }: { dark?: boolean; cta?: string }) 
   const navigate = useNavigate()
   const go = (e?: FormEvent) => { e?.preventDefault(); navigate('/login') }
   return (
-    <form onSubmit={go} className={cx('mx-auto flex w-full max-w-[460px] flex-col gap-2 rounded-[8px] border p-1.5 sm:flex-row', dark ? 'border-white/15 bg-white/5' : 'border-line bg-wash')}>
+    <form onSubmit={go} className={cx('mx-auto flex w-full max-w-[460px] flex-col gap-2 rounded-[8px] border p-2 sm:flex-row', dark ? 'border-white/15 bg-white/5' : 'border-line bg-wash')}>
       <Input type="email" aria-label="Work email" placeholder="you@company.com"
         className={cx('h-10 flex-1 border-0 shadow-none focus-visible:ring-0', dark ? 'text-paper placeholder:text-[#8E93A8]' : 'bg-paper')} />
       <Button type="submit" size="lg" className={cx('h-10', dark && 'bg-brand hover:bg-brand/90')}>{cta}<ArrowRight /></Button>
@@ -117,9 +117,9 @@ const HERO_ROWS = Math.floor((APP_H - 48 - boardHeight(0)) / (boardHeight(1) - b
 
 function SideRow({ icon: I, label, count, on }: { icon: typeof Star; label: string; count?: ReactNode; on?: boolean }) {
   return (
-    <div className={cx('flex items-center justify-between rounded-[4px] px-2 py-1.5 text-[12.5px]', on ? 'bg-tint font-medium text-brand' : 'text-slate')}>
+    <div className={cx('flex items-center justify-between rounded-[4px] px-2 py-2 text-[12.5px]', on ? 'bg-tint font-medium text-brand' : 'text-slate')}>
       <span className="flex items-center gap-2"><I className="size-3.5" />{label}</span>
-      {count != null && <span className="font-mono text-[10.5px] text-slate">{count}</span>}
+      {count != null && <span className="font-mono text-[11px] text-slate">{count}</span>}
     </div>
   )
 }
@@ -138,23 +138,23 @@ function HeroBoard() {
           <div className="flex flex-col gap-0.5 border-t border-line pt-3">
             <div className="label-mono px-2 py-1 text-[10px] text-slate">Projects</div>
             <div className="rounded-[6px] border border-line p-1">
-              <div className="flex items-center gap-1.5 px-1.5 py-1 text-[12.5px] font-medium"><span className="rounded-[3px] bg-brand px-1 font-mono text-[9.5px] text-paper">WEB</span>Website relaunch</div>
+              <div className="flex items-center gap-2 px-2 py-1 text-[12.5px] font-medium"><span className="rounded-[3px] bg-brand px-1 font-mono text-[10px] text-paper">WEB</span>Website relaunch</div>
               <SideRow icon={KanbanSquare} label="Board" on />
               <SideRow icon={ListChecks} label="Backlog" count={9} />
               <SideRow icon={Rocket} label="Releases" count="v1.4" />
             </div>
             {[['APP', 'Mobile app', 8], ['BO', 'Back office', 5]].map(([k, l, c]) => (
-              <div key={k} className="flex items-center justify-between px-2 py-1.5 text-[12.5px]">
-                <span className="flex items-center gap-1.5"><span className="rounded-[3px] bg-cloud px-1 font-mono text-[9.5px] text-slate">{k}</span>{l}</span>
-                <span className="font-mono text-[10.5px] text-slate">{c}</span>
+              <div key={k} className="flex items-center justify-between px-2 py-2 text-[12.5px]">
+                <span className="flex items-center gap-2"><span className="rounded-[3px] bg-cloud px-1 font-mono text-[10px] text-slate">{k}</span>{l}</span>
+                <span className="font-mono text-[11px] text-slate">{c}</span>
               </div>
             ))}
           </div>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex h-12 items-center justify-between border-b border-line px-4">
-            <span className="flex items-center gap-2 text-[13px]"><span className="text-slate">Website relaunch</span><span className="text-line">/</span><span className="font-medium">Board</span><Badge variant="outline" className="h-[18px] rounded-[4px] border-line px-1.5 font-mono text-[10px] font-normal text-slate">Sprint 14</Badge></span>
-            <span className="flex h-7 items-center gap-1 rounded-[4px] bg-ink px-2.5 text-[12px] font-medium text-paper"><Plus className="size-3.5" />Create issue</span>
+            <span className="flex items-center gap-2 text-[13px]"><span className="text-slate">Website relaunch</span><span className="text-line">/</span><span className="font-medium">Board</span><Badge variant="outline" className="h-[18px] rounded-[4px] border-line px-2 font-mono text-[10px] font-normal text-slate">Sprint 14</Badge></span>
+            <span className="flex h-7 items-center gap-1 rounded-[4px] bg-ink px-3 text-[12.5px] font-medium text-paper"><Plus className="size-3.5" />Create issue</span>
           </div>
           <div className="h-[calc(100%-48px)] bg-wash"><DragBoard columns={['todo', 'progress', 'review', 'done']} initial={HERO_CARDS} hops={HERO_HOPS} width={BOARD_W} rows={HERO_ROWS} interval={3600} startDelay={1200} /></div>
         </div>
@@ -167,7 +167,7 @@ function HeroBoard() {
 function HeroTag({ side, children }: { side: 'left' | 'right'; children: ReactNode }) {
   const ref = useScrollScale<HTMLDivElement>(0.85, 1.15)
   return (
-    <div ref={ref} className={cx('pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full border border-line bg-paper px-3 py-1.5 text-[12.5px] shadow-[0_8px_24px_rgba(0,0,0,.08)] will-change-transform md:flex',
+    <div ref={ref} className={cx('pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full border border-line bg-paper px-3 py-2 text-[12.5px] shadow-[0_8px_24px_rgba(0,0,0,.08)] will-change-transform md:flex',
       side === 'left' ? 'left-[3%] top-[6%] origin-right' : 'right-[3%] top-[2%] origin-left')}>
       {children}
     </div>
@@ -181,10 +181,10 @@ const TICKER = [
 ]
 function Ticker() {
   const row = TICKER.map(([who, verb, key, rest], i) => (
-    <span key={i} className="flex shrink-0 items-center gap-2 px-6 font-mono text-[12px] text-slate">
+    <span key={i} className="flex shrink-0 items-center gap-2 px-6 font-mono text-[12.5px] text-slate">
       {who === 'agent'
         ? <span className="flex items-center gap-1 text-brand"><Bot className="size-3.5" />Claude</span>
-        : <span className="flex items-center gap-1.5 text-ink"><Avatar user={u(who)} size={18} />{u(who)?.name.split(' ')[0]}</span>}
+        : <span className="flex items-center gap-2 text-ink"><Avatar user={u(who)} size={18} />{u(who)?.name.split(' ')[0]}</span>}
       {verb} <span className="text-ink">{key}</span> {rest}
       <span className="pl-6 text-line">·</span>
     </span>
@@ -226,7 +226,7 @@ function Eyebrow({ children, className }: { children: ReactNode; className?: str
 }
 
 function Tag({ children }: { children: ReactNode }) {
-  return <Badge variant="outline" className="rounded-[4px] border-line bg-wash px-1.5 font-mono text-[10px] font-normal uppercase tracking-[0.06em] text-slate">{children}</Badge>
+  return <Badge variant="outline" className="rounded-[4px] border-line bg-wash px-2 font-mono text-[10px] font-normal uppercase tracking-[0.06em] text-slate">{children}</Badge>
 }
 
 /* ── Feature mocks. They reuse the app's own chips; buttons inside them are pictures, not controls. */
@@ -239,8 +239,8 @@ function SprintMock() {
     <div className="flex flex-col gap-3">
       <div className="rounded-[6px] border border-line bg-paper p-4 shadow-[0_8px_24px_rgba(0,0,0,.05)]">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-[13.5px]"><Badge className="rounded-[4px] bg-brand px-1.5 font-mono text-[10px]">S14</Badge><span className="font-medium">Sprint 14</span><span className="font-mono text-[11px] text-slate">6 days left</span></span>
-          <span className="flex items-center gap-2"><span className="font-mono text-[11px] text-slate">14 / 24 pts</span><Button size="sm" tabIndex={-1} aria-hidden className="pointer-events-none h-7 text-[12px]">Complete sprint</Button></span>
+          <span className="flex items-center gap-2 text-[14px]"><Badge className="rounded-[4px] bg-brand px-2 font-mono text-[10px]">S14</Badge><span className="font-medium">Sprint 14</span><span className="font-mono text-[11px] text-slate">6 days left</span></span>
+          <span className="flex items-center gap-2"><span className="font-mono text-[11px] text-slate">14 / 24 pts</span><Button size="sm" tabIndex={-1} aria-hidden className="pointer-events-none h-7 text-[12.5px]">Complete sprint</Button></span>
         </div>
         <div className="mt-3 flex h-1.5 overflow-hidden rounded-full bg-cloud">
           <span className="grow h-full w-[42%] bg-success" style={d(200)} />
@@ -249,7 +249,7 @@ function SprintMock() {
         </div>
         <div className="mt-3 flex flex-col divide-y divide-line border-t border-line">
           {rows.map(([k, t, s, pts], i) => (
-            <div key={k} className="reveal flex items-center gap-3 py-2.5" style={d(300 + i * 120)}>
+            <div key={k} className="reveal flex items-center gap-3 py-3" style={d(300 + i * 120)}>
               <span className="w-14 shrink-0 font-mono text-[11px] text-slate">{k}</span>
               <span className="min-w-0 flex-1 truncate text-[13px]">{t}</span>
               <span className="hidden sm:inline-flex"><StatusPill status={s} size="sm" /></span>
@@ -259,8 +259,8 @@ function SprintMock() {
         </div>
       </div>
       <div className="reveal flex items-center justify-between gap-2 rounded-[6px] border border-dashed border-line bg-paper px-4 py-3" style={d(600)}>
-        <span className="flex items-center gap-2 text-[13px]"><Badge variant="outline" className="rounded-[4px] px-1.5 font-mono text-[10px] text-slate">S15</Badge><span className="whitespace-nowrap">Sprint 15</span><span className="hidden font-mono text-[11px] text-slate sm:inline">planned · 2 issues · 4 pts</span></span>
-        <Button size="sm" variant="secondary" tabIndex={-1} aria-hidden className="pointer-events-none h-7 text-[12px]">Start sprint</Button>
+        <span className="flex items-center gap-2 text-[13px]"><Badge variant="outline" className="rounded-[4px] px-2 font-mono text-[10px] text-slate">S15</Badge><span className="whitespace-nowrap">Sprint 15</span><span className="hidden font-mono text-[11px] text-slate sm:inline">planned · 2 issues · 4 pts</span></span>
+        <Button size="sm" variant="secondary" tabIndex={-1} aria-hidden className="pointer-events-none h-7 text-[12.5px]">Start sprint</Button>
       </div>
     </div>
   )
@@ -270,13 +270,13 @@ function ReleaseMock() {
   return (
     <div className="rounded-[6px] border border-line bg-paper p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-[13.5px]"><span className="size-1.5 rounded-full bg-brand" /><span className="font-mono font-medium">v1.4</span><span className="font-mono text-[11px] text-slate">target 28 Nov</span></span>
-        <Button size="sm" tabIndex={-1} aria-hidden className="pointer-events-none h-7 text-[12px]"><Rocket />Ship v1.4</Button>
+        <span className="flex items-center gap-2 text-[14px]"><span className="size-1.5 rounded-full bg-brand" /><span className="font-mono font-medium">v1.4</span><span className="font-mono text-[11px] text-slate">target 28 Nov</span></span>
+        <Button size="sm" tabIndex={-1} aria-hidden className="pointer-events-none h-7 text-[12.5px]"><Rocket />Ship v1.4</Button>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-cloud"><span className="grow block h-full w-3/4 bg-success" style={d(200)} /></div>
       <div className="mt-3 rounded-[4px] border border-line bg-wash p-3">
-        <div className="label-mono flex items-center gap-1.5 text-[10px] text-slate"><FileText className="size-3" />Release notes</div>
-        <ul className="mt-2 flex flex-col gap-1 font-mono text-[11.5px]">
+        <div className="label-mono flex items-center gap-2 text-[10px] text-slate"><FileText className="size-3" />Release notes</div>
+        <ul className="mt-2 flex flex-col gap-1 font-mono text-[11px]">
           {['Improvements · Multi-currency checkout (WEB-145)', 'Fixes · Checkout button on small phones (WEB-142)', 'Note · 2 issues still open'].map((t, i) => (
             <li key={t} className="reveal" style={d(400 + i * 150)}>• {t}</li>
           ))}
@@ -289,12 +289,12 @@ function ReleaseMock() {
 function SearchMock() {
   return (
     <div className="overflow-hidden rounded-[6px] border border-line bg-paper">
-      <div className="flex h-11 items-center gap-2 border-b border-line px-3 text-[13.5px]">
+      <div className="flex h-11 items-center gap-2 border-b border-line px-3 text-[14px]">
         <Search className="size-4 text-slate" />
         <span className="type-on">checkout</span><span className="h-4 w-px animate-pulse bg-ink" />
         <Kbd className="ml-auto">Esc</Kbd>
       </div>
-      <div className="after-type p-1.5">
+      <div className="after-type p-2">
         <div className="label-mono px-2 py-1 text-[10px] text-slate">Issues</div>
         <div className="flex items-center gap-2 rounded-[4px] bg-tint px-2 py-2 text-[13px]"><span className="font-mono text-[11px] text-brand">WEB-142</span><span className="min-w-0 flex-1 truncate">Checkout button overlaps footer</span><Kbd>↵</Kbd></div>
         <div className="flex items-center gap-2 px-2 py-2 text-[13px]"><span className="font-mono text-[11px] text-slate">WEB-145</span><span className="min-w-0 flex-1 truncate">Multi-currency checkout</span><TypeBadge type="task" compact /></div>
@@ -319,7 +319,7 @@ function PeopleMock() {
       <span className="label-mono text-[10px] text-slate">People</span>
       <span className="flex">
         {ids.map((id, i) => (
-          <span key={id} className={cx('-ml-1.5 rounded-full ring-2 ring-paper transition-transform duration-300 first:ml-0', i === on && 'z-10 -translate-y-0.5 ring-brand')}><Avatar user={u(id)} size={28} /></span>
+          <span key={id} className={cx('-ml-2 rounded-full ring-2 ring-paper transition-transform duration-300 first:ml-0', i === on && 'z-10 -translate-y-0.5 ring-brand')}><Avatar user={u(id)} size={28} /></span>
         ))}
       </span>
     </div>
@@ -330,8 +330,8 @@ function PanelMock() {
   return (
     <div className="w-full max-w-[280px] rounded-[6px] border border-line bg-paper p-3 text-left shadow-[0_8px_24px_rgba(0,0,0,.06)]">
       <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-brand">WEB-142</span><PriorityBadge priority="high" compact /></div>
-      <div className="mt-1.5 text-[13px] font-medium">Checkout button overlaps footer</div>
-      <div className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-slate"><MessageSquare className="size-3" />2 comments · @Samira</div>
+      <div className="mt-2 text-[13px] font-medium">Checkout button overlaps footer</div>
+      <div className="mt-2 flex items-center gap-2 font-mono text-[11px] text-slate"><MessageSquare className="size-3" />2 comments · @Samira</div>
     </div>
   )
 }
@@ -341,7 +341,7 @@ function SmallCard({ title, body, mock, delay }: { title: string; body: string; 
     <div className="reveal flex flex-col rounded-[8px] border border-line bg-paper p-4" style={d(delay)}>
       <div className="flex h-[132px] items-center justify-center rounded-[6px] bg-wash px-4">{mock}</div>
       <h3 className="mt-4 text-[16px] font-medium">{title}</h3>
-      <p className="mt-1 text-[13.5px] leading-relaxed text-slate">{body}</p>
+      <p className="mt-1 text-[14px] leading-relaxed text-slate">{body}</p>
     </div>
   )
 }
@@ -384,7 +384,7 @@ export default function Landing() {
 
       <section className="relative mx-auto max-w-[1232px] overflow-hidden px-4 pt-14 text-center md:px-6 md:pt-20">
         <Badge variant="outline" className="anim-rise gap-2 rounded-full border-line px-3 py-1 font-normal">
-          <span className="size-1.5 rounded-full bg-brand" /><span className="label-mono text-[10.5px] text-ink">Tack</span><span className="text-line">|</span><span className="text-[12.5px] text-slate">A calm alternative to Jira</span>
+          <span className="size-1.5 rounded-full bg-brand" /><span className="label-mono text-[11px] text-ink">Tack</span><span className="text-line">|</span><span className="text-[12.5px] text-slate">A calm alternative to Jira</span>
         </Badge>
         <h1 className="anim-rise mx-auto mt-6 max-w-[860px] text-[40px] font-medium leading-[1.04] tracking-[-0.03em] [text-wrap:balance] md:text-[64px]" style={{ animationDelay: '60ms' }}>
           All the engineering rigor.<br className="hidden sm:inline" /> None of the Jira ceremony.
@@ -423,7 +423,7 @@ export default function Landing() {
           ] as const).map(([num, unit, sub], i) => (
             <div key={unit} className="reveal rounded-[8px] border border-line bg-paper px-5 py-6 text-center" style={d(i * 100)}>
               <div className="font-mono text-[34px] font-medium tracking-tight">{num}</div>
-              <div className="label-mono mt-1 text-[10.5px] text-ink">{unit}</div>
+              <div className="label-mono mt-1 text-[11px] text-ink">{unit}</div>
               <p className="mt-2 text-[13px] text-slate">{sub}</p>
             </div>
           ))}
@@ -454,14 +454,14 @@ export default function Landing() {
             <div id="releases" className="reveal flex scroll-mt-24 flex-col rounded-[10px] border border-line bg-paper p-6" style={d(100)}>
               <Tag>Releases</Tag>
               <h3 className="mt-4 text-[22px] font-medium tracking-[-0.01em]">Versions with release notes written for you.</h3>
-              <p className="mt-2 text-[14.5px] leading-relaxed text-slate">Group finished work into a version with a target date and a lead. When you ship, Tack drafts the notes from the issues inside.</p>
+              <p className="mt-2 text-[14px] leading-relaxed text-slate">Group finished work into a version with a target date and a lead. When you ship, Tack drafts the notes from the issues inside.</p>
               <div className="mt-6 flex-1"><ReleaseMock /></div>
               <div className="mt-5 flex justify-between border-t border-line pt-4 font-mono text-[11px] text-slate"><span>Ship with undo</span><span>Changelog for every version</span></div>
             </div>
             <div id="search" className="reveal flex scroll-mt-24 flex-col rounded-[10px] border border-line bg-paper p-6" style={d(200)}>
               <Tag>Search & starred views</Tag>
               <h3 className="mt-4 text-[22px] font-medium tracking-[-0.01em]">⌘K to jump anywhere. Star the views you use.</h3>
-              <p className="mt-2 text-[14.5px] leading-relaxed text-slate">Find any issue, project or view from the keyboard. Save a filter, like your high-priority bugs, and it sits in the sidebar with a live count.</p>
+              <p className="mt-2 text-[14px] leading-relaxed text-slate">Find any issue, project or view from the keyboard. Save a filter, like your high-priority bugs, and it sits in the sidebar with a live count.</p>
               <div className="mt-6 flex-1"><SearchMock /></div>
               <div className="mt-5 flex justify-between border-t border-line pt-4 font-mono text-[11px] text-slate"><span>↑ ↓ to move, ↵ to open</span><span>⌘↵ opens beside you</span></div>
             </div>
@@ -470,23 +470,23 @@ export default function Landing() {
           <div className="mt-6 grid gap-6 md:grid-cols-3">
             <SmallCard delay={100} title="Issues open beside the board" body="Click a card and its details slide in from the side: Markdown comments, @mentions and history, without losing your place." mock={<PanelMock />} />
             <SmallCard delay={200} title="Filter by people" body="Tap one or more faces to see only their work. Handy for standups and one-to-ones." mock={<PeopleMock />} />
-            <SmallCard delay={300} title="Company Google sign-in" body="No passwords to forget. Your team signs in with their work Google account, and only they can get in." mock={<span className="flex items-center gap-2 rounded-full border border-line bg-paper px-3 py-1.5 text-[13px]"><GoogleG />you@company.com<span className="size-1.5 rounded-full bg-success" /></span>} />
+            <SmallCard delay={300} title="Company Google sign-in" body="No passwords to forget. Your team signs in with their work Google account, and only they can get in." mock={<span className="flex items-center gap-2 rounded-full border border-line bg-paper px-3 py-2 text-[13px]"><GoogleG />you@company.com<span className="size-1.5 rounded-full bg-success" /></span>} />
           </div>
         </div>
       </section>
 
       <section id="ai" ref={ai} className="scroll-mt-16 bg-ink text-paper">
         <div className="mx-auto max-w-[1232px] px-4 py-24 text-center md:px-6">
-          <Badge variant="outline" className="reveal gap-2 rounded-full border-white/15 px-3 py-1 font-mono text-[10.5px] font-normal uppercase tracking-[0.06em] text-[#B6BACB]"><span className="size-1.5 rounded-full bg-brand" />Optional · people come first</Badge>
+          <Badge variant="outline" className="reveal gap-2 rounded-full border-white/15 px-3 py-1 font-mono text-[11px] font-normal uppercase tracking-[0.06em] text-[#B6BACB]"><span className="size-1.5 rounded-full bg-brand" />Optional · people come first</Badge>
           <h2 className="reveal mx-auto mt-5 max-w-[760px] font-mono text-[30px] font-medium leading-tight tracking-[-0.02em] md:text-[44px]" style={d(80)}>Works with your AI,<br /><span className="text-[#8E93A8]">if and when you want it.</span></h2>
           <p className="reveal mx-auto mt-5 max-w-[560px] text-[16px] leading-relaxed text-[#B6BACB]" style={d(160)}>No bots tagging you, no summaries cluttering the screen. When someone does want help from Claude or Cursor, it reads and updates issues the way you do, and every change it makes is labelled.</p>
           <div className="mt-12 grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
             {AI_CARDS.map(([I, e, t, b, code], i) => (
               <div key={e} className="reveal flex flex-col justify-between gap-6 rounded-[8px] border border-white/10 bg-white/[0.04] p-5" style={d(200 + i * 100)}>
                 <div>
-                  <div className="label-mono flex items-center gap-1.5 text-[#8E93A8]"><I className="size-3.5 text-brand-soft" />{e}</div>
+                  <div className="label-mono flex items-center gap-2 text-[#8E93A8]"><I className="size-3.5 text-brand-soft" />{e}</div>
                   <h3 className="mt-3 text-[17px] font-medium">{t}</h3>
-                  <p className="mt-2 text-[13.5px] leading-relaxed text-[#B6BACB]">{b}</p>
+                  <p className="mt-2 text-[14px] leading-relaxed text-[#B6BACB]">{b}</p>
                 </div>
                 <code className="truncate border-t border-white/10 pt-3 font-mono text-[11px] text-brand-soft">{code}</code>
               </div>
@@ -510,9 +510,9 @@ export default function Landing() {
             <div key={p.name} className={cx('reveal relative flex flex-col rounded-[8px] border bg-paper p-6 transition-transform duration-200 hover:-translate-y-1', p.featured ? 'border-ink shadow-[0_24px_60px_-30px_rgba(0,0,0,.3)]' : 'border-line')} style={d(i * 100)}>
               {p.featured && <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-ink font-mono text-[10px] uppercase tracking-[0.06em]">Most teams</Badge>}
               <div className={cx('label-mono', p.featured ? 'text-brand' : 'text-slate')}>{p.name}</div>
-              <div className="mt-3 flex items-baseline gap-1.5"><span className="font-mono text-[40px] font-medium tracking-tight">${p.price}</span><span className="text-[13px] text-slate">per person / month</span></div>
-              <p className="mt-2 text-[13.5px] text-slate">{p.blurb}</p>
-              <ul className="mt-6 flex flex-1 flex-col gap-2.5 border-t border-line pt-5 text-[14px]">
+              <div className="mt-3 flex items-baseline gap-2"><span className="font-mono text-[40px] font-medium tracking-tight">${p.price}</span><span className="text-[13px] text-slate">per person / month</span></div>
+              <p className="mt-2 text-[14px] text-slate">{p.blurb}</p>
+              <ul className="mt-6 flex flex-1 flex-col gap-3 border-t border-line pt-5 text-[14px]">
                 {p.features.map(f => <li key={f} className="flex items-start gap-2"><Check className={cx('mt-0.5 size-4 shrink-0', p.featured ? 'text-brand' : 'text-ink')} />{f}</li>)}
               </ul>
               <Button className="mt-8 w-full" variant={p.featured ? 'default' : 'secondary'} onClick={open}>Try {p.name}</Button>
@@ -523,15 +523,15 @@ export default function Landing() {
         <div className="reveal mx-auto mt-6 grid max-w-[1040px] grid-cols-[minmax(0,1fr)] items-center gap-6 rounded-[8px] border border-line bg-wash p-6 md:grid-cols-[minmax(0,1fr)_auto]" style={d(300)}>
           <div>
             <div className="label-mono text-ink">Switching from Jira</div>
-            <p className="mt-2 max-w-[520px] text-[14.5px] leading-relaxed text-slate">We move your open issues over once, when you switch. Closed ones can stay where they are. For a 28-person team, here’s the difference:</p>
+            <p className="mt-2 max-w-[520px] text-[14px] leading-relaxed text-slate">We move your open issues over once, when you switch. Closed ones can stay where they are. For a 28-person team, here’s the difference:</p>
           </div>
           <div className="grid grid-cols-2 gap-6 border-line md:border-l md:pl-6">
             <div>
-              <div className="label-mono text-[10.5px] text-slate">Jira today</div>
+              <div className="label-mono text-[11px] text-slate">Jira today</div>
               <div className="mt-1 font-mono text-[20px] text-slate sm:text-[24px]"><span className="relative inline-block whitespace-nowrap">$1,120 / mo<span className="strike-line" /></span></div>
             </div>
             <div>
-              <div className="label-mono text-[10.5px] text-brand">Tack Team</div>
+              <div className="label-mono text-[11px] text-brand">Tack Team</div>
               <div className="zero mt-1 whitespace-nowrap font-mono text-[20px] text-ink sm:text-[24px]">$140 / mo</div>
             </div>
           </div>
@@ -565,8 +565,8 @@ export default function Landing() {
           <Accordion type="single" collapsible className="reveal mt-10 flex flex-col gap-3">
             {FAQ.map(([q, a], i) => (
               <AccordionItem key={q} value={`q${i}`} className="rounded-[8px] border border-line px-5 last:border-b">
-                <AccordionTrigger className="py-4 text-[15.5px] font-medium hover:no-underline">{q}</AccordionTrigger>
-                <AccordionContent className="pb-4 text-[14.5px] leading-relaxed text-slate">{a}</AccordionContent>
+                <AccordionTrigger className="py-4 text-[16px] font-medium hover:no-underline">{q}</AccordionTrigger>
+                <AccordionContent className="pb-4 text-[14px] leading-relaxed text-slate">{a}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -580,8 +580,8 @@ export default function Landing() {
           <p className="reveal mx-auto mt-4 max-w-[480px] text-[16px] text-[#B6BACB]" style={d(160)}>A board, sprints and releases, without Jira’s weight. Open it and move your first card.</p>
           <div className="reveal mt-8" style={d(240)}><SignUp dark cta="Get started" /></div>
           <div className="reveal mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-[13px] text-[#B6BACB]" style={d(300)}>
-            <span className="flex items-center gap-1.5"><Check className="size-3.5 text-brand-soft" />Google sign-in</span>
-            <span className="flex items-center gap-1.5"><Check className="size-3.5 text-brand-soft" />No card required</span>
+            <span className="flex items-center gap-2"><Check className="size-3.5 text-brand-soft" />Google sign-in</span>
+            <span className="flex items-center gap-2"><Check className="size-3.5 text-brand-soft" />No card required</span>
           </div>
         </div>
       </section>
@@ -590,11 +590,11 @@ export default function Landing() {
         <div className="mx-auto grid max-w-[1232px] gap-10 rounded-[10px] border border-line bg-paper p-8 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
           <div>
             <Wordmark height={26} />
-            <p className="mt-3 max-w-[300px] text-[13.5px] text-slate">The calm issue tracker for product teams.</p>
+            <p className="mt-3 max-w-[300px] text-[14px] text-slate">The calm issue tracker for product teams.</p>
           </div>
-          <div className="flex flex-col gap-2 text-[13.5px]"><div className="label-mono mb-1">Product</div><Link to="/app/WEB/board" className="link w-fit text-slate">Board</Link><Link to="/app/WEB/backlog" className="link w-fit text-slate">Backlog & sprints</Link><Link to="/app/WEB/releases" className="link w-fit text-slate">Releases</Link><Link to="/app/me" className="link w-fit text-slate">My issues</Link></div>
-          <div className="flex flex-col gap-2 text-[13.5px]"><div className="label-mono mb-1">AI</div><Link to="/ai" className="link w-fit text-slate">AI guide</Link><a href="/llms.txt" className="link w-fit text-slate">llms.txt</a><a href="#ai" className="link w-fit text-slate">MCP and API</a></div>
-          <div className="flex flex-col gap-2 text-[13.5px]"><div className="label-mono mb-1">Tack</div><a href="#pricing" className="link w-fit text-slate">Pricing</a><a href="#faq" className="link w-fit text-slate">FAQ</a><Link to="/login" className="link w-fit text-slate">Sign in</Link></div>
+          <div className="flex flex-col gap-2 text-[14px]"><div className="label-mono mb-1">Product</div><Link to="/app/WEB/board" className="link w-fit text-slate">Board</Link><Link to="/app/WEB/backlog" className="link w-fit text-slate">Backlog & sprints</Link><Link to="/app/WEB/releases" className="link w-fit text-slate">Releases</Link><Link to="/app/me" className="link w-fit text-slate">My issues</Link></div>
+          <div className="flex flex-col gap-2 text-[14px]"><div className="label-mono mb-1">AI</div><Link to="/ai" className="link w-fit text-slate">AI guide</Link><a href="/llms.txt" className="link w-fit text-slate">llms.txt</a><a href="#ai" className="link w-fit text-slate">MCP and API</a></div>
+          <div className="flex flex-col gap-2 text-[14px]"><div className="label-mono mb-1">Tack</div><a href="#pricing" className="link w-fit text-slate">Pricing</a><a href="#faq" className="link w-fit text-slate">FAQ</a><Link to="/login" className="link w-fit text-slate">Sign in</Link></div>
         </div>
         <div className="mx-auto mt-5 max-w-[1232px] px-2 font-mono text-[11px] text-slate">© 2026 Tack. A product vision demo.</div>
       </footer>

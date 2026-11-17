@@ -15,7 +15,7 @@ export default function DatePicker({ id, value, onChange, placeholder = 'Due dat
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button id={id} type="button" variant="outline" className={cn('h-8 justify-start gap-2 px-2.5 font-normal', !date && 'text-slate', warn && 'text-warning', className)}>
+        <Button id={id} type="button" variant="outline" className={cn('h-8 justify-start gap-2 px-3 font-normal', !date && 'text-slate', warn && 'text-warning', className)}>
           <CalendarDays className="size-3.5" />
           {date ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : placeholder}
           {date && (

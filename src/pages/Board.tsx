@@ -48,7 +48,7 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
   const rest = members.slice(STACK)
   const restPicked = rest.filter(id => picked.includes(id)).length
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-3">
       <span className="label-mono hidden text-slate sm:inline">People</span>
       <div className="flex items-center -space-x-2" role="group" aria-label="Filter by person">
         {shown.map(id => {
@@ -58,7 +58,7 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
             <Tooltip key={id}>
               <TooltipTrigger asChild>
                 <Button type="button" variant="ghost" size="icon" onClick={() => toggle(id)} aria-pressed={on} aria-label={u?.name}
-                  className={cx('relative size-7 rounded-full border-2 border-paper font-mono text-[10px] transition-all',
+                  className={cx('relative size-7 rounded-full border-2 border-paper font-mono text-[10px] transition-[translate,box-shadow,background-color,border-color,color]',
                     on ? 'z-20 -translate-y-0.5 bg-ink font-semibold text-paper shadow-sm ring-2 ring-brand hover:bg-ink hover:text-paper'
                       : 'z-10 bg-cloud font-medium text-ink hover:z-30 hover:border-slate hover:bg-cloud')}>
                   {u?.initials}
@@ -72,7 +72,7 @@ function PeopleFilter({ members, picked, toggle }: { members: string[]; picked: 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button type="button" variant="ghost" size="sm" aria-label={`${rest.length} more people`}
-                className={cx('relative z-0 h-7 gap-0.5 rounded-full border-2 border-paper pl-3.5 pr-2 font-mono text-[10px] font-medium shadow-sm has-[>svg]:pl-3.5 has-[>svg]:pr-2',
+                className={cx('relative z-0 h-7 gap-0.5 rounded-full border-2 border-paper pl-4 pr-2 font-mono text-[10px] font-medium shadow-sm has-[>svg]:pl-4 has-[>svg]:pr-2',
                   restPicked ? 'bg-tint text-brand hover:bg-tint hover:text-brand' : 'bg-wash text-slate hover:bg-cloud hover:text-ink')}>
                 +{rest.length}<ChevronDown className="size-3" />
               </Button>
@@ -106,7 +106,7 @@ function StarView({ project }: { project: string }) {
   const existing = state.starred.find(v => v.project === project && v.view === view && sameQuery(v.query, query))
   if (existing) return (
     <Button type="button" variant="outline" size="sm" onClick={() => { dispatch({ t: 'unstar', id: existing.id }); toast('Removed from starred views', { kind: 'info', description: existing.name }) }}
-      className="hidden h-7 gap-1.5 rounded-[4px] border-warning/40 bg-[#FDF6EA] px-2 font-mono text-[10.5px] uppercase tracking-wide text-[#93500A] hover:border-warning hover:bg-[#FDF6EA] sm:inline-flex has-[>svg]:px-2">
+      className="hidden h-7 gap-2 rounded-[4px] border-warning/40 bg-[#FDF6EA] px-2 font-mono text-[11px] uppercase tracking-wide text-[#93500A] hover:border-warning hover:bg-[#FDF6EA] sm:inline-flex has-[>svg]:px-2">
       <Star className="size-3.5 fill-warning text-warning" />Starred
     </Button>
   )
@@ -114,7 +114,7 @@ function StarView({ project }: { project: string }) {
   return (
     <Popover open={open} onOpenChange={o => { setOpen(o); if (o) setName('') }}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="hidden h-7 gap-1.5 rounded-[4px] px-2 font-mono text-[10.5px] uppercase tracking-wide text-slate hover:text-ink sm:inline-flex has-[>svg]:px-2">
+        <Button type="button" variant="outline" size="sm" className="hidden h-7 gap-2 rounded-[4px] px-2 font-mono text-[11px] uppercase tracking-wide text-slate hover:text-ink sm:inline-flex has-[>svg]:px-2">
           <Star className="size-3.5" />Star view
         </Button>
       </PopoverTrigger>
@@ -146,11 +146,11 @@ export function FilterRow({ project, count, extra }: { project: string; count: n
 
   return (
     <div className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2 md:px-6">
-      <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
         <PeopleFilter members={p?.members ?? []} picked={picked} toggle={toggle} />
         <span className="hidden h-4 w-px bg-line sm:block" />
         <Select value={type} onValueChange={v => set('type', v)}>
-          <SelectTrigger size="sm" className="h-8 gap-1.5 text-[12.5px]" aria-label="Type"><Filter className="size-3.5 text-slate" /><SelectValue /></SelectTrigger>
+          <SelectTrigger size="sm" className="h-8 gap-2 text-[12.5px]" aria-label="Type"><Filter className="size-3.5 text-slate" /><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {(['task', 'bug'] as const).map(k => { const m = TYPE_META[k]; return <SelectItem key={k} value={k}><m.icon className={cx('size-3.5', m.iconCls)} />{m.label}s</SelectItem> })}
@@ -195,11 +195,11 @@ function Column({ status, keys, byKey, onAdd }: { status: Status; keys: string[]
   const { setNodeRef, isOver } = useDroppable({ id: status })
   const meta = STATUSES.find(s => s.id === status)!
   return (
-    <section className={cx('flex w-[85vw] max-w-[320px] shrink-0 snap-start flex-col rounded-[4px] border bg-cloud p-2.5 transition-colors md:w-auto md:max-w-none md:flex-1 md:shrink', isOver ? 'border-slate/50 bg-[#E8E8EE]' : 'border-line')}>
-      <header className="mb-2.5 flex items-center justify-between px-1">
+    <section className={cx('flex w-[85vw] max-w-[320px] shrink-0 snap-start flex-col rounded-[4px] border bg-cloud p-3 transition-colors md:w-auto md:max-w-none md:flex-1 md:shrink', isOver ? 'border-slate/50 bg-[#E8E8EE]' : 'border-line')}>
+      <header className="mb-3 flex items-center justify-between px-1">
         <h2 className="flex items-center gap-2">
           <StatusPill status={status} />
-          <span className="font-mono text-[12px] text-slate">{keys.length}</span>
+          <span className="font-mono text-[12.5px] text-slate">{keys.length}</span>
         </h2>
         <Tooltip>
           <TooltipTrigger asChild><Button variant="ghost" size="icon-sm" className="size-6 text-slate" onClick={onAdd} aria-label={`Add issue to ${meta.label}`}><Plus /></Button></TooltipTrigger>
@@ -224,7 +224,7 @@ export function daysLeft(end: string | null) {
 function SprintTag({ sprint }: { sprint: Sprint }) {
   const left = daysLeft(sprint.end)
   return (
-    <span className="hidden items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-slate sm:flex">
+    <span className="hidden items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-slate sm:flex">
       <span className="size-1.5 rounded-full bg-brand" />{sprint.name}
       {left !== null && <><span className="text-line">·</span><span className={left < 0 ? 'text-destructive' : ''}>{left < 0 ? `${-left} days over` : left === 0 ? 'Ends today' : `${left} days left`}</span></>}
     </span>
@@ -312,7 +312,7 @@ export default function Board() {
       {!sprint ? (
         <main className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 bg-wash p-8 text-center">
           <p className="text-[15px] font-medium">No sprint is running</p>
-          <p className="max-w-[40ch] text-[13.5px] text-slate">Plan issues into a sprint and start it from the backlog. The board shows the sprint while it runs.</p>
+          <p className="max-w-[40ch] text-[14px] text-slate">Plan issues into a sprint and start it from the backlog. The board shows the sprint while it runs.</p>
           <Button asChild variant="secondary"><Link to={`/app/${project}/backlog`}>Go to the backlog</Link></Button>
         </main>
       ) : (

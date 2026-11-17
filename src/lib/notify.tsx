@@ -18,12 +18,12 @@ export function notify(title: string, opts: NotifyOptions = {}) {
   const kind = opts.kind ?? (opts.status ? 'status' : 'info')
   const I = ICONS[kind]
   toast.custom(id => (
-    <div className="pointer-events-auto flex w-[360px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-[6px] border border-line bg-paper px-3.5 py-3 text-ink shadow-[0_12px_32px_-8px_rgba(0,0,0,.18)]">
+    <div className="pointer-events-auto flex w-[360px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-[6px] border border-line bg-paper px-4 py-3 text-ink shadow-[0_12px_32px_-8px_rgba(0,0,0,.18)]">
       <span className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${TONES[kind]}`}><I className="size-3.5" strokeWidth={2.25} /></span>
       <div className="min-w-0 flex-1">
-        <div className="text-[13.5px] font-medium leading-snug">{title}</div>
+        <div className="text-[14px] font-medium leading-snug">{title}</div>
         {(opts.description || opts.status) && (
-          <div className="mt-1.5 flex min-w-0 items-center gap-2">
+          <div className="mt-2 flex min-w-0 items-center gap-2">
             {opts.status && <StatusPill status={opts.status} size="sm" />}
             {opts.description && <span className="truncate text-[12.5px] text-slate">{opts.description}</span>}
           </div>
@@ -31,7 +31,7 @@ export function notify(title: string, opts: NotifyOptions = {}) {
       </div>
       {opts.action && (
         <button onClick={() => { opts.action!.onClick(); toast.dismiss(id) }}
-          className="shrink-0 rounded-[4px] border border-line bg-cloud px-2 py-1 text-[12px] font-medium text-ink transition-colors hover:border-ink">
+          className="shrink-0 rounded-[4px] border border-line bg-cloud px-2 py-1 text-[12.5px] font-medium text-ink transition-colors hover:border-ink">
           {opts.action.label}
         </button>
       )}

@@ -33,11 +33,11 @@ export default function Login() {
           <div className="anim-rise w-full max-w-[360px]">
             <h1 className="text-[32px] font-medium leading-tight tracking-[-0.02em]">Welcome back.</h1>
             <p className="mt-2 text-[15px] text-slate">Sign in with your company Google account to open your team’s board.</p>
-            <Button variant="outline" size="lg" onClick={signIn} disabled={busy} className="mt-8 w-full gap-3 text-[14.5px] font-medium">
+            <Button variant="outline" size="lg" onClick={signIn} disabled={busy} className="mt-8 w-full gap-3 text-[14px] font-medium">
               {busy ? <Loader2 className="animate-spin" /> : <GoogleG />}
               {busy ? 'Signing you in…' : 'Continue with Google'}
             </Button>
-            <p className="mt-4 flex items-center gap-1.5 text-[12.5px] text-slate"><Lock className="size-3.5" />Only company accounts can sign in.</p>
+            <p className="mt-4 flex items-center gap-2 text-[12.5px] text-slate"><Lock className="size-3.5" />Only company accounts can sign in.</p>
             <div className="mt-10 rounded-[4px] border border-dashed border-line px-4 py-3 text-[12.5px] text-slate">
               <span className="font-medium text-ink">Demo:</span> no account needed. The button signs you in as Alex Lin.
             </div>
@@ -58,7 +58,7 @@ export default function Login() {
                   <p className="text-[14px] font-medium leading-snug">{t}</p>
                   <Avatar user={USERS.find(u => u.id === w)} size={24} />
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="font-mono text-[11px] text-slate">{k}</span>
                   <TypeBadge type={ty} /><PriorityBadge priority={p} />
                   <span className="ml-auto"><StatusPill status={s} size="sm" /></span>

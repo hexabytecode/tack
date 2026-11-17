@@ -95,14 +95,14 @@ export default function CommandPalette() {
       <DialogContent className="top-[14%] block w-[calc(100%-2rem)] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-[640px] [&>button.absolute]:hidden">
         <DialogTitle className="sr-only">Search or jump to</DialogTitle>
         <DialogDescription className="sr-only">Find an issue by key or title, or jump to a page or starred view.</DialogDescription>
-        <Command shouldFilter={false} value={value} onValueChange={setValue} onKeyDown={onKeyDown} loop className="w-full min-w-0 rounded-none [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.06em] [&_[cmdk-group-heading]]:text-slate">
+        <Command shouldFilter={false} value={value} onValueChange={setValue} onKeyDown={onKeyDown} loop className="w-full min-w-0 rounded-none [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-2 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.06em] [&_[cmdk-group-heading]]:text-slate">
           <div className="flex items-center gap-2 border-b border-line pr-4 [&_[data-slot=command-input-wrapper]]:h-14 [&_[data-slot=command-input-wrapper]]:flex-1 [&_[data-slot=command-input-wrapper]]:border-0 [&_[data-slot=command-input-wrapper]]:px-4 [&_[data-slot=command-input-wrapper]_svg]:size-[18px] [&_[data-slot=command-input-wrapper]_svg]:opacity-100 [&_[data-slot=command-input-wrapper]_svg]:text-slate">
             <CommandInput value={q} onValueChange={setQ} placeholder="Search issues, pages and starred views…" className="h-14 text-[16px] placeholder:text-placeholder" />
             {q && <Button variant="ghost" size="icon-sm" onClick={() => setQ('')} aria-label="Clear" className="text-slate"><X /></Button>}
             <Kbd>Esc</Kbd>
           </div>
-          <CommandList className="max-h-[min(60vh,440px)] px-1.5 pb-2 scrollbar-thin">
-            <CommandEmpty className="px-4 py-10 text-center text-[13.5px] text-slate">Nothing matches “{q}”.</CommandEmpty>
+          <CommandList className="max-h-[min(60vh,440px)] px-2 pb-2 scrollbar-thin">
+            <CommandEmpty className="px-4 py-10 text-center text-[14px] text-slate">Nothing matches “{q}”.</CommandEmpty>
             {issues.length > 0 && (
               <CommandGroup heading={needle ? `Issues (${issues.length})` : 'Recent issues'}>
                 {issues.map(i => {
@@ -110,15 +110,15 @@ export default function CommandPalette() {
                   return (
                     <CommandItem key={i.key} value={`issue:${i.key}`} onSelect={() => openIssue(i, false)} className={cx(item, 'group')}>
                       <span className={cx('size-1.5 shrink-0 rounded-full', DOT[i.status])} />
-                      <span className="w-[62px] shrink-0 font-mono text-[12px] text-ink group-data-[selected=true]:text-brand">{i.key}</span>
+                      <span className="w-[62px] shrink-0 font-mono text-[12.5px] text-ink group-data-[selected=true]:text-brand">{i.key}</span>
                       <span className="min-w-0 flex-1 truncate text-[14px]"><Highlight text={i.title} q={q.trim()} /></span>
-                      <span className="hidden shrink-0 items-center gap-1.5 sm:flex">
+                      <span className="hidden shrink-0 items-center gap-2 sm:flex">
                         <Badge variant="outline" className={cx('h-[18px] rounded-[3px] px-1 font-mono text-[10px] uppercase', T.cls)}>{T.label}</Badge>
                         <Badge variant="outline" className={cx('h-[18px] rounded-[3px] px-1 font-mono text-[10px] uppercase', P.cls)}>{P.short}</Badge>
-                        <span className="hidden w-[78px] font-mono text-[10.5px] uppercase text-slate md:inline">{STATUSES.find(s => s.id === i.status)?.label}</span>
-                        <Badge variant="outline" className="size-5 justify-center rounded-[3px] p-0 font-mono text-[9.5px]">{u?.initials ?? '–'}</Badge>
+                        <span className="hidden w-[78px] font-mono text-[11px] uppercase text-slate md:inline">{STATUSES.find(s => s.id === i.status)?.label}</span>
+                        <Badge variant="outline" className="size-5 justify-center rounded-[3px] p-0 font-mono text-[10px]">{u?.initials ?? '–'}</Badge>
                       </span>
-                      <Badge variant="outline" className="hidden h-[20px] shrink-0 rounded-[3px] border-brand/30 bg-paper px-1.5 font-mono text-[10.5px] text-brand group-data-[selected=true]:inline-flex">↵ to open</Badge>
+                      <Badge variant="outline" className="hidden h-[20px] shrink-0 rounded-[3px] border-brand/30 bg-paper px-2 font-mono text-[11px] text-brand group-data-[selected=true]:inline-flex">↵ to open</Badge>
                     </CommandItem>
                   )
                 })}
@@ -150,18 +150,18 @@ export default function CommandPalette() {
                         <span className="block truncate text-[14px]">{v.name}</span>
                         <span className="block truncate font-mono text-[11px] capitalize text-slate">{v.view} · {p?.name}</span>
                       </span>
-                      <Badge variant="secondary" className="h-[20px] shrink-0 rounded-[3px] px-1.5 font-mono text-[10.5px] text-slate">{n} {n === 1 ? 'issue' : 'issues'}</Badge>
+                      <Badge variant="secondary" className="h-[20px] shrink-0 rounded-[3px] px-2 font-mono text-[11px] text-slate">{n} {n === 1 ? 'issue' : 'issues'}</Badge>
                     </CommandItem>
                   )
                 })}
               </CommandGroup>
             )}
           </CommandList>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-wash px-4 py-2.5 text-[11.5px] text-slate">
-            <span className="flex items-center gap-1.5"><Kbd>↑↓</Kbd>Navigate</span>
-            <span className="flex items-center gap-1.5"><Kbd>↵</Kbd>Open</span>
-            <span className="flex items-center gap-1.5"><Kbd>⌘↵</Kbd>Open in side panel</span>
-            <span className="ml-auto flex items-center gap-1.5"><Kbd>Esc</Kbd>Close</span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-wash px-4 py-3 text-[11px] text-slate">
+            <span className="flex items-center gap-2"><Kbd>↑↓</Kbd>Navigate</span>
+            <span className="flex items-center gap-2"><Kbd>↵</Kbd>Open</span>
+            <span className="flex items-center gap-2"><Kbd>⌘↵</Kbd>Open in side panel</span>
+            <span className="ml-auto flex items-center gap-2"><Kbd>Esc</Kbd>Close</span>
           </div>
         </Command>
       </DialogContent>

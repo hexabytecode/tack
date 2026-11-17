@@ -39,12 +39,12 @@ const EASE = 'cubic-bezier(0.22, 0.9, 0.24, 1)'
 
 function Card({ c, lifted, landed, done }: { c: DemoCard; lifted: boolean; landed: boolean; done: boolean }) {
   return (
-    <div className={cx('flex h-full flex-col justify-between rounded-[4px] border bg-paper p-2.5 transition-[box-shadow,border-color] duration-200',
+    <div className={cx('flex h-full flex-col justify-between rounded-[4px] border bg-paper p-3 transition-[box-shadow,border-color] duration-200',
       lifted ? 'border-ink shadow-[0_16px_32px_-6px_rgba(0,0,0,.22)]' : 'border-line', landed && 'flash')}>
       <p className={cx('line-clamp-2 text-[12.5px] font-medium leading-snug', done && 'text-slate')}>{c.title}</p>
       <div className="flex items-center justify-between gap-1">
         <span className="flex min-w-0 items-center gap-1">
-          <span className="whitespace-nowrap font-mono text-[10.5px] text-slate">{c.key}</span>
+          <span className="whitespace-nowrap font-mono text-[11px] text-slate">{c.key}</span>
           <TypeBadge type={c.type} compact /><PriorityBadge priority={c.prio} compact />
         </span>
         <Avatar user={USERS.find(u => u.id === c.who)} size={20} />
@@ -132,7 +132,7 @@ export function DragBoard({ columns, initial, hops, width, rows, interval = 3400
     <div ref={boxRef} className={cx('relative bg-wash', className)} style={{ width, height }}>
       {columns.map((col, ci) => (
         <div key={col} className="absolute rounded-[4px] border border-line bg-cloud" style={{ left: PAD + ci * (colW + COL_GAP), top: PAD, width: colW, height: height - 2 * PAD }}>
-          <div className="flex h-[36px] items-center gap-1.5 px-2"><StatusPill status={col} size="sm" /><span className="font-mono text-[10.5px] text-slate">{cards.filter(c => c.col === col).length}</span></div>
+          <div className="flex h-[36px] items-center gap-2 px-2"><StatusPill status={col} size="sm" /><span className="font-mono text-[11px] text-slate">{cards.filter(c => c.col === col).length}</span></div>
         </div>
       ))}
       {cards.map(c => (

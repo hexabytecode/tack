@@ -48,7 +48,7 @@ export const USERS: User[] = [
   { id: 'al', name: 'Alex Lin', initials: 'AL', email: 'alex@company.com', role: 'Admin', title: 'Engineering lead' },
   { id: 'sk', name: 'Samira Khan', initials: 'SK', email: 'samira@company.com', role: 'Admin', title: 'Frontend' },
   { id: 'mr', name: 'Marcus Reid', initials: 'MR', email: 'marcus@company.com', role: 'Member', title: 'Design' },
-  { id: 'jd', name: 'Jane Doe', initials: 'JD', email: 'jane@company.com', role: 'Member', title: 'Backend' },
+  { id: 'jd', name: 'Jonah Dlamini', initials: 'JD', email: 'jonah@company.com', role: 'Member', title: 'Backend' },
   { id: 'cm', name: 'Carlos Mendez', initials: 'CM', email: 'carlos@company.com', role: 'Member', title: 'Mobile' },
   { id: 'pp', name: 'Priya Patel', initials: 'PP', email: 'priya@company.com', role: 'Member', title: 'Product' },
 ]

@@ -16,7 +16,7 @@ function Section({ label, icon: I, children, danger, aside }: { label: string; i
   return (
     <section className="mt-10 first:mt-0">
       <div className={cx('label-mono mb-5 flex items-center justify-between border-b border-line pb-2', danger ? 'text-destructive' : 'text-slate')}>
-        <span className="flex items-center gap-1.5"><I className="size-3.5" />{label}</span>{aside}
+        <span className="flex items-center gap-2"><I className="size-3.5" />{label}</span>{aside}
       </div>
       {children}
     </section>
@@ -61,14 +61,14 @@ export default function Settings() {
 
           <Section label="General" icon={FileText}>
             <form className="flex flex-col gap-5" onSubmit={e => { e.preventDefault(); if (name.trim()) { dispatch({ t: 'project', key: p.key, patch: { name: name.trim() } }); toast('Project saved', { kind: 'success' }) } }}>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="project-name">Project name</Label>
                 <Input id="project-name" value={name} onChange={e => setName(e.target.value)} className="h-[38px] bg-paper" />
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="project-key">Key</Label>
                 <Input id="project-key" value={p.key} readOnly className="h-[38px] max-w-[120px] bg-cloud font-mono text-slate" />
-                <span className="font-mono text-[11.5px] text-slate">Issues are numbered {p.key}-1, {p.key}-2…</span>
+                <span className="font-mono text-[11px] text-slate">Issues are numbered {p.key}-1, {p.key}-2…</span>
               </div>
               <div><Button type="submit" disabled={!name.trim() || name.trim() === p.name}><Save />Save changes</Button></div>
             </form>
@@ -86,7 +86,7 @@ export default function Settings() {
                     <Avatar user={u} size={30} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 text-[14px] font-medium">{u.name}{u.id === ME && <Badge variant="outline" className="h-4 rounded-[3px] px-1 font-mono text-[10px] font-normal text-slate">You</Badge>}</div>
-                      <div className="truncate font-mono text-[11.5px] text-slate">{u.email}</div>
+                      <div className="truncate font-mono text-[11px] text-slate">{u.email}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export default function Settings() {
             </p>
             <div className="flex flex-col gap-4">
               <div className="rounded-[4px] border border-line bg-paper p-4">
-                <div className="label-mono mb-2 flex items-center gap-1.5 text-slate"><KeyRound className="size-3.5" />Your personal key</div>
+                <div className="label-mono mb-2 flex items-center gap-2 text-slate"><KeyRound className="size-3.5" />Your personal key</div>
                 <div className="flex flex-wrap items-center gap-2">
                   <code className="min-w-0 flex-1 truncate rounded-[4px] bg-cloud px-3 py-2 font-mono text-[12.5px]">{key}</code>
                   <Button size="sm" variant="secondary" onClick={() => setShowKey(s => !s)}>{showKey ? <EyeOff /> : <Eye />}{showKey ? 'Hide' : 'Show'}</Button>
@@ -119,17 +119,17 @@ export default function Settings() {
               </div>
               <div className="rounded-[4px] bg-ink p-4">
                 <div className="label-mono mb-2 flex items-center justify-between text-[#8E93A8]">
-                  <span className="flex items-center gap-1.5"><Terminal className="size-3.5" />Connect Claude Code</span>
-                  <Button variant="ghost" size="xs" className="h-6 gap-1 px-1.5 font-mono text-[11px] normal-case tracking-normal text-[#8E93A8] hover:bg-white/10 hover:text-paper" onClick={async () => toast(await copy(command) ? 'Command copied' : 'Copy blocked by the browser', { kind: 'copy', description: 'Paste it into your terminal' })}><Copy className="size-3.5" />Copy</Button>
+                  <span className="flex items-center gap-2"><Terminal className="size-3.5" />Connect Claude Code</span>
+                  <Button variant="ghost" size="xs" className="h-6 gap-1 px-2 font-mono text-[11px] normal-case tracking-normal text-[#8E93A8] hover:bg-white/10 hover:text-paper" onClick={async () => toast(await copy(command) ? 'Command copied' : 'Copy blocked by the browser', { kind: 'copy', description: 'Paste it into your terminal' })}><Copy className="size-3.5" />Copy</Button>
                 </div>
                 <code className="block whitespace-pre-wrap break-all font-mono text-[12.5px] leading-relaxed text-brand-soft">{command}</code>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-[4px] border border-line bg-paper px-4 py-3">
-                <span className="flex items-center gap-2.5 text-[13.5px]"><FileText className="size-4 text-slate" />Short guides your AI can read: one index, one file per topic.</span>
+                <span className="flex items-center gap-3 text-[14px]"><FileText className="size-4 text-slate" />Short guides your AI can read: one index, one file per topic.</span>
                 <Button size="sm" variant="secondary" asChild><Link to="/ai">Open the AI guide</Link></Button>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-[4px] border border-dashed border-brand/40 bg-tint px-4 py-3">
-                <span className="flex items-center gap-2 text-[13.5px]"><Bot className="size-4 text-brand" />See what an AI update looks like on the board.</span>
+                <span className="flex items-center gap-2 text-[14px]"><Bot className="size-4 text-brand" />See what an AI update looks like on the board.</span>
                 <Button size="sm" onClick={agentDemo}><Play />Show me</Button>
               </div>
             </div>

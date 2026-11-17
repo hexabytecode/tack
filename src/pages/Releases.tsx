@@ -51,16 +51,16 @@ function IssueRow({ issue }: { issue: Issue }) {
   return (
     <Button type="button" variant="ghost" onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
       className="h-[42px] w-full shrink justify-between gap-3 rounded-none px-4 text-left font-normal hover:bg-wash">
-      <span className="flex min-w-0 items-center gap-2.5">
+      <span className="flex min-w-0 items-center gap-3">
         <TypeBadge type={issue.type} compact />
-        <span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{issue.key}</span>
+        <span className="w-[62px] shrink-0 font-mono text-[11px] text-slate">{issue.key}</span>
         <span className={cx('truncate text-[13px] font-medium', issue.status === 'done' && 'text-slate')}>{issue.title}</span>
       </span>
       <span className="flex shrink-0 items-center gap-3">
         <span className="hidden w-[104px] md:block"><StatusPill status={issue.status} size="sm" /></span>
         <span className="hidden sm:block"><PriorityBadge priority={issue.priority} compact /></span>
-        <span className="hidden w-12 text-right font-mono text-[11.5px] text-slate sm:block">{issue.points ?? '–'} pts</span>
-        <span className="flex items-center gap-1.5"><Avatar user={u} size={22} /><span className="hidden w-[92px] truncate text-[12.5px] lg:block">{u?.name ?? 'Unassigned'}</span></span>
+        <span className="hidden w-12 text-right font-mono text-[11px] text-slate sm:block">{issue.points ?? '–'} pts</span>
+        <span className="flex items-center gap-2"><Avatar user={u} size={22} /><span className="hidden w-[92px] truncate text-[12.5px] lg:block">{u?.name ?? 'Unassigned'}</span></span>
       </span>
     </Button>
   )
@@ -92,12 +92,12 @@ function ReleaseDialog({ open, release, project, onClose }: { open: boolean; rel
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); submit() }}>
           <div className="grid grid-cols-[110px_1fr] gap-3">
-            <div className="flex flex-col gap-1.5"><Label htmlFor="rel-version">Version</Label><Input id="rel-version" value={version} onChange={e => setVersion(e.target.value)} placeholder="v1.6" className="font-mono" /></div>
-            <div className="flex flex-col gap-1.5"><Label htmlFor="rel-title">Name</Label><Input id="rel-title" value={title} onChange={e => setTitle(e.target.value)} placeholder="What it brings" /></div>
+            <div className="flex flex-col gap-2"><Label htmlFor="rel-version">Version</Label><Input id="rel-version" value={version} onChange={e => setVersion(e.target.value)} placeholder="v1.6" className="font-mono" /></div>
+            <div className="flex flex-col gap-2"><Label htmlFor="rel-title">Name</Label><Input id="rel-title" value={title} onChange={e => setTitle(e.target.value)} placeholder="What it brings" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5"><Label htmlFor="rel-target">Target date</Label><DatePicker id="rel-target" value={target || null} onChange={v => setTarget(v ?? '')} placeholder="Target date" className="h-9 w-full" /></div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2"><Label htmlFor="rel-target">Target date</Label><DatePicker id="rel-target" value={target || null} onChange={v => setTarget(v ?? '')} placeholder="Target date" className="h-9 w-full" /></div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="rel-lead">Lead</Label>
               <Select value={lead} onValueChange={setLead}>
                 <SelectTrigger id="rel-lead" className="w-full"><SelectValue /></SelectTrigger>
@@ -134,9 +134,9 @@ function ManageDialog({ release, onClose }: { release: Release | null; onClose: 
           {shown.map(i => {
             const other = i.release && i.release !== release?.id ? state.releases.find(r => r.id === i.release)?.version : null
             return (
-              <Label key={i.key} className="flex h-10 cursor-pointer items-center gap-2.5 border-b border-line/60 px-3 font-normal last:border-b-0 hover:bg-wash">
+              <Label key={i.key} className="flex h-10 cursor-pointer items-center gap-3 border-b border-line/60 px-3 font-normal last:border-b-0 hover:bg-wash">
                 <Checkbox checked={i.release === release?.id} onCheckedChange={c => dispatch({ t: 'update', key: i.key, patch: { release: c ? release!.id : null } })} className="data-[state=checked]:border-brand data-[state=checked]:bg-brand" />
-                <span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{i.key}</span>
+                <span className="w-[62px] shrink-0 font-mono text-[11px] text-slate">{i.key}</span>
                 <span className="min-w-0 flex-1 truncate text-[13px]">{i.title}</span>
                 {other && <Badge variant="outline" className="h-[18px] shrink-0 rounded-[3px] px-1 font-mono text-[10px] font-normal text-slate">in {other}</Badge>}
                 <StatusPill status={i.status} size="sm" />
@@ -176,8 +176,8 @@ function NotesDialog({ release, mode, onClose }: { release: Release | null; mode
         {mode === 'changelog' ? (
           <ul className="max-h-[55vh] divide-y divide-line/60 overflow-y-auto rounded-[4px] border border-line">
             {changelog.map(i => (
-              <li key={i.key} className="flex items-center gap-2.5 px-3 py-2.5 text-[13px]">
-                <TypeBadge type={i.type} compact /><span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{i.key}</span><span className="min-w-0 truncate">{i.title}</span>
+              <li key={i.key} className="flex items-center gap-3 px-3 py-3 text-[13px]">
+                <TypeBadge type={i.type} compact /><span className="w-[62px] shrink-0 font-mono text-[11px] text-slate">{i.key}</span><span className="min-w-0 truncate">{i.title}</span>
               </li>
             ))}
             {!changelog.length && <li className="px-3 py-6 text-center text-[13px] text-slate">Nothing finished in this release yet.</li>}
@@ -221,16 +221,16 @@ function ReleaseCard({ r, onEdit, onManage, onNotes }: { r: Release; onEdit: () 
       <div className="flex flex-col gap-4 p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5 font-mono text-[11.5px] text-slate">
-              <Badge variant="outline" className={cx('h-[18px] gap-1.5 rounded-[3px] px-1.5 font-mono text-[10px] uppercase tracking-wider', meta.cls)}><span className={cx('size-1.5 rounded-full', meta.dot)} />{meta.label}</Badge>
+            <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-slate">
+              <Badge variant="outline" className={cx('h-[18px] gap-2 rounded-[3px] px-2 font-mono text-[10px] uppercase tracking-wider', meta.cls)}><span className={cx('size-1.5 rounded-full', meta.dot)} />{meta.label}</Badge>
               <span className="text-[13px] font-medium text-ink">{r.version}</span>
               <span className="text-line">|</span>
               {r.state === 'shipped'
                 ? <span className="flex items-center gap-1"><CheckCircle2 className="size-3.5 text-success" />Shipped {day(r.shippedAt)}</span>
                 : <span className="flex items-center gap-1"><CalendarDays className="size-3.5" />Target {day(r.target)}{left !== null && <span className={cx(left < 0 ? 'text-destructive' : r.state === 'active' && 'text-brand')}>({left < 0 ? `${-left} days late` : `${left} days left`})</span>}</span>}
-              {lead && <><span className="text-line">|</span><span className="flex items-center gap-1.5">Lead <Avatar user={lead} size={18} /><span className="text-ink">{lead.name}</span></span></>}
+              {lead && <><span className="text-line">|</span><span className="flex items-center gap-2">Lead <Avatar user={lead} size={18} /><span className="text-ink">{lead.name}</span></span></>}
             </div>
-            <h2 className="mt-1.5 text-[18px] font-medium tracking-[-0.01em]">{r.version}: {r.title}</h2>
+            <h2 className="mt-2 text-[18px] font-medium tracking-[-0.01em]">{r.version}: {r.title}</h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {r.state === 'shipped' ? (<>
@@ -246,7 +246,7 @@ function ReleaseCard({ r, onEdit, onManage, onNotes }: { r: Release; onEdit: () 
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11.5px]">
+          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
             <span className="flex flex-wrap items-center gap-2 text-slate">
               <span className="text-ink">{done.length} / {issues.length} issues done</span><span>·</span>
               <span className={cx('font-medium', r.state === 'shipped' ? 'text-success' : 'text-brand')}>{pct}%</span><span>·</span>
@@ -254,7 +254,7 @@ function ReleaseCard({ r, onEdit, onManage, onNotes }: { r: Release; onEdit: () 
             </span>
             {r.state !== 'shipped' && (
               <span className="flex flex-wrap items-center gap-3 text-slate">
-                {STATUSES.map(s => { const n = issues.filter(i => i.status === s.id).length; return n ? <span key={s.id} className="flex items-center gap-1.5"><span className={cx('size-2 rounded-full', BAR[s.id])} />{n} {s.label}</span> : null })}
+                {STATUSES.map(s => { const n = issues.filter(i => i.status === s.id).length; return n ? <span key={s.id} className="flex items-center gap-2"><span className={cx('size-2 rounded-full', BAR[s.id])} />{n} {s.label}</span> : null })}
               </span>
             )}
           </div>
@@ -271,7 +271,7 @@ function ReleaseCard({ r, onEdit, onManage, onNotes }: { r: Release; onEdit: () 
           </div>
           <div className="divide-y divide-line/60">
             {shown.map(i => <IssueRow key={i.key} issue={i} />)}
-            {!issues.length && <Button type="button" variant="ghost" onClick={onManage} className="h-12 w-full gap-1.5 rounded-none font-mono text-[11px] font-normal text-slate hover:text-brand"><Plus className="size-3.5" />Add issues to this release</Button>}
+            {!issues.length && <Button type="button" variant="ghost" onClick={onManage} className="h-12 w-full gap-2 rounded-none font-mono text-[11px] font-normal text-slate hover:text-brand"><Plus className="size-3.5" />Add issues to this release</Button>}
           </div>
         </div>
       )}
@@ -306,8 +306,8 @@ export default function Releases() {
         <div className="flex flex-col gap-5 p-4 md:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
             <div>
-              <div className="flex items-center gap-3"><h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Releases</h1><Badge variant="outline" className="h-[20px] rounded-[3px] border-brand/25 bg-tint px-1.5 font-mono text-[11px] font-normal text-brand">{project}</Badge></div>
-              <p className="mt-1 font-mono text-[12px] text-slate">{counts.active} in progress · {counts.planned} planned · {counts.shipped} shipped · {tracked} issues tracked</p>
+              <div className="flex items-center gap-3"><h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">Releases</h1><Badge variant="outline" className="h-[20px] rounded-[3px] border-brand/25 bg-tint px-2 font-mono text-[11px] font-normal text-brand">{project}</Badge></div>
+              <p className="mt-1 font-mono text-[12.5px] text-slate">{counts.active} in progress · {counts.planned} planned · {counts.shipped} shipped · {tracked} issues tracked</p>
             </div>
             <Button variant="secondary" disabled={!unshipped.length} onClick={() => setGenOpen(true)}><Sparkles />Release notes generator</Button>
           </div>
@@ -319,7 +319,7 @@ export default function Releases() {
                 <TabsTrigger value="shipped">Shipped <span className="font-mono text-[11px] opacity-70">{counts.shipped}</span></TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button type="button" variant="ghost" size="xs" onClick={() => setAsc(a => !a)} className="gap-1 font-mono text-[11.5px] font-normal text-slate hover:text-ink">
+            <Button type="button" variant="ghost" size="xs" onClick={() => setAsc(a => !a)} className="gap-1 font-mono text-[11px] font-normal text-slate hover:text-ink">
               Sort: <span className="text-ink">Target date</span>{asc ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />}
             </Button>
           </div>
@@ -341,11 +341,11 @@ export default function Releases() {
             <DialogTitle>Release notes generator</DialogTitle>
             <DialogDescription>Pick a release. Tack drafts its notes from the finished issues; you edit before saving.</DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {unshipped.map(r => (
               <Button key={r.id} type="button" variant="outline" onClick={() => { setGenOpen(false); setNotes({ release: r, mode: 'generate' }) }}
-                className="h-auto justify-between rounded-[4px] px-3 py-2.5 font-normal has-[>svg]:px-3">
-                <span className="text-[13.5px]"><span className="font-mono font-medium">{r.version}</span> · {r.title}</span>
+                className="h-auto justify-between rounded-[4px] px-3 py-3 font-normal has-[>svg]:px-3">
+                <span className="text-[14px]"><span className="font-mono font-medium">{r.version}</span> · {r.title}</span>
                 <Sparkles className="size-4 text-slate" />
               </Button>
             ))}

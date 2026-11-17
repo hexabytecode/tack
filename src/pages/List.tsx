@@ -60,13 +60,13 @@ export default function List() {
               const a = user(i.assignee)
               return (
                 <TableRow key={i.key} onClick={() => open(i.key)} className={cx('h-11 cursor-pointer border-line hover:bg-[#F7F7FA]', state.flash === i.key && 'flash')}>
-                  <TableCell className="pl-6 pr-3 font-mono text-[12px] text-slate">{i.key}</TableCell>
-                  <TableCell className="max-w-[420px] px-3"><Button variant="link" className="block h-auto w-full shrink truncate p-0 text-left text-[13.5px] font-medium text-ink hover:no-underline" onClick={e => { e.stopPropagation(); open(i.key) }}>{i.title}</Button></TableCell>
+                  <TableCell className="pl-6 pr-3 font-mono text-[12.5px] text-slate">{i.key}</TableCell>
+                  <TableCell className="max-w-[420px] px-3"><Button variant="link" className="block h-auto w-full shrink truncate p-0 text-left text-[14px] font-medium text-ink hover:no-underline" onClick={e => { e.stopPropagation(); open(i.key) }}>{i.title}</Button></TableCell>
                   <TableCell className="px-3"><StatusPill status={i.status} size="sm" /></TableCell>
-                  <TableCell className="px-3"><span className="flex gap-1.5"><IssueChips issue={i} /></span></TableCell>
+                  <TableCell className="px-3"><span className="flex gap-2"><IssueChips issue={i} /></span></TableCell>
                   <TableCell className="px-3"><span className="flex items-center gap-2 text-[13px]"><Avatar user={a} />{a?.name.split(' ')[0] ?? <span className="text-slate">—</span>}</span></TableCell>
-                  <TableCell className={cx('px-3 font-mono text-[12px]', due?.overdue && i.status !== 'done' ? 'text-warning' : 'text-slate')}>{due?.text ?? '—'}</TableCell>
-                  <TableCell className="pl-3 pr-6 font-mono text-[12px] text-slate">{timeAgo(i.updatedAt)}</TableCell>
+                  <TableCell className={cx('px-3 font-mono text-[12.5px]', due?.overdue && i.status !== 'done' ? 'text-warning' : 'text-slate')}>{due?.text ?? '—'}</TableCell>
+                  <TableCell className="pl-3 pr-6 font-mono text-[12.5px] text-slate">{timeAgo(i.updatedAt)}</TableCell>
                 </TableRow>
               )
             })}
@@ -78,14 +78,14 @@ export default function List() {
               <Button variant="ghost" onClick={() => open(i.key)} className="h-auto w-full flex-col items-stretch gap-2 whitespace-normal rounded-none px-4 py-3 text-left font-normal">
                 <span className="text-[14px] font-medium leading-snug">{i.title}</span>
                 <span className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><span className="font-mono text-[11.5px] text-slate">{i.key}</span><StatusPill status={i.status} size="sm" /></span>
+                  <span className="flex items-center gap-2"><span className="font-mono text-[11px] text-slate">{i.key}</span><StatusPill status={i.status} size="sm" /></span>
                   <Avatar user={user(i.assignee)} />
                 </span>
               </Button>
             </li>
           ))}
         </ul>
-        {rows.length === 0 && <p className="p-10 text-center text-[13.5px] text-slate">No issues match these filters.</p>}
+        {rows.length === 0 && <p className="p-10 text-center text-[14px] text-slate">No issues match these filters.</p>}
       </main>
     </>
   )

@@ -24,20 +24,20 @@ const IssueCard = forwardRef<HTMLDivElement, Props>(function IssueCard({ issue, 
       )}
     >
       {byAgent && (
-        <Badge variant="outline" className="anim-rise mb-1.5 h-[18px] gap-1 rounded-[3px] border-brand bg-paper px-1 font-mono text-[9.5px] uppercase tracking-[0.04em] text-brand">
+        <Badge variant="outline" className="anim-rise mb-2 h-[18px] gap-1 rounded-[3px] border-brand bg-paper px-1 font-mono text-[10px] uppercase tracking-[0.04em] text-brand">
           <Bot className="size-3" />By agent · Claude
         </Badge>
       )}
-      <p className={cx('line-clamp-2 text-[13.5px] font-medium leading-snug', issue.status === 'done' && 'text-slate')}>{issue.title}</p>
+      <p className={cx('line-clamp-2 text-[14px] font-medium leading-snug', issue.status === 'done' && 'text-slate')}>{issue.title}</p>
       <div className="mt-3 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-          <span className="font-mono text-[11.5px] text-slate">{issue.key}</span>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="font-mono text-[11px] text-slate">{issue.key}</span>
           <IssueChips issue={issue} />
         </div>
         <Avatar user={assignee} />
       </div>
       {(comments > 0 || (due && issue.status !== 'done')) && (
-        <div className="mt-2.5 flex items-center gap-3 border-t border-line pt-2 font-mono text-[10.5px] text-slate">
+        <div className="mt-3 flex items-center gap-3 border-t border-line pt-2 font-mono text-[11px] text-slate">
           {due && issue.status !== 'done' && (
             <span className={cx('inline-flex items-center gap-1', due.overdue && 'text-[#B42318]', due.soon && !due.overdue && 'text-warning')}>
               <CalendarClock className="size-3" />{due.overdue ? `Overdue · ${due.text}` : due.text}

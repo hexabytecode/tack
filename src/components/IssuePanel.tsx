@@ -22,7 +22,7 @@ async function copy(text: string) {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="flex flex-col gap-1.5"><div className="label-mono text-slate">{label}</div>{children}</div>
+  return <div className="flex flex-col gap-2"><div className="label-mono text-slate">{label}</div>{children}</div>
 }
 
 export default function IssuePanel() {
@@ -91,7 +91,7 @@ export default function IssuePanel() {
                   onBlur={() => title.trim() && title !== issue.title && patch({ title: title.trim() })}
                   className="min-h-0 w-full resize-none rounded-[4px] border-transparent px-1 py-0.5 text-[20px] font-medium leading-snug tracking-tight shadow-none [field-sizing:content] hover:border-line focus-visible:border-line focus-visible:ring-0 md:text-[20px]"
                 />
-                <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+                <div className="mt-2 flex flex-wrap gap-2 px-1">
                   {issue.labels.map(l => <Badge key={l} variant="secondary" className="gap-1 rounded-[4px] font-mono text-[11px] font-normal"><Tag className="!size-3 text-slate" />{l}</Badge>)}
                 </div>
 
@@ -106,16 +106,16 @@ export default function IssuePanel() {
                       onCancel={() => { setDesc(issue.description); setEditingDesc(false) }} />
                   ) : (
                     <div className="rounded-[4px] px-1">
-                      {issue.description ? <Markdown>{issue.description}</Markdown> : <Button variant="link" className="h-auto p-0 text-[13.5px] font-normal text-placeholder" onClick={() => setEditingDesc(true)}>Add a description…</Button>}
+                      {issue.description ? <Markdown>{issue.description}</Markdown> : <Button variant="link" className="h-auto p-0 text-[14px] font-normal text-placeholder" onClick={() => setEditingDesc(true)}>Add a description…</Button>}
                     </div>
                   )}
                 </section>
                 {!!issue.attachments?.length && (
                   <section className="mt-5">
-                    <div className="label-mono mb-2 flex items-center gap-1.5 text-slate"><Paperclip className="size-3.5" />Attachments<span className="ml-auto">{issue.attachments.length}</span></div>
+                    <div className="label-mono mb-2 flex items-center gap-2 text-slate"><Paperclip className="size-3.5" />Attachments<span className="ml-auto">{issue.attachments.length}</span></div>
                     <ul className="flex flex-col gap-1">
                       {issue.attachments.map((f, i) => (
-                        <li key={i} className="flex items-center gap-2 rounded-[4px] border border-line px-2.5 py-1.5 text-[12.5px]"><Paperclip className="size-3.5 shrink-0 text-slate" /><span className="truncate">{f.name}</span></li>
+                        <li key={i} className="flex items-center gap-2 rounded-[4px] border border-line px-3 py-2 text-[12.5px]"><Paperclip className="size-3.5 shrink-0 text-slate" /><span className="truncate">{f.name}</span></li>
                       ))}
                     </ul>
                   </section>
@@ -124,7 +124,7 @@ export default function IssuePanel() {
                 <Separator className="my-6" />
 
                 <section>
-                  <div className="label-mono mb-3 flex items-center gap-1.5 text-slate"><MessageSquare className="size-3.5" />Comments<span className="ml-auto">{comments.length}</span></div>
+                  <div className="label-mono mb-3 flex items-center gap-2 text-slate"><MessageSquare className="size-3.5" />Comments<span className="ml-auto">{comments.length}</span></div>
                   <ul className="flex flex-col gap-4">
                     {comments.map(c => {
                       const a = user(c.author)
@@ -136,7 +136,7 @@ export default function IssuePanel() {
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-baseline gap-2">
                               <span className="text-[13px] font-medium">{c.agent ?? a?.name}</span>
-                              {c.agent && <Badge variant="outline" className="h-4 rounded-[3px] border-brand px-1 font-mono text-[9.5px] uppercase text-brand">by agent · for {a?.name}</Badge>}
+                              {c.agent && <Badge variant="outline" className="h-4 rounded-[3px] border-brand px-1 font-mono text-[10px] uppercase text-brand">by agent · for {a?.name}</Badge>}
                               <span className="font-mono text-[11px] text-slate">{timeAgo(c.at)}</span>
                             </div>
                             <Markdown className="mt-0.5">{c.body}</Markdown>
@@ -154,11 +154,11 @@ export default function IssuePanel() {
                 <Separator className="my-6" />
 
                 <section className="pb-4">
-                  <div className="label-mono mb-2 flex items-center gap-1.5 text-slate"><History className="size-3.5" />History</div>
-                  <ul className="flex flex-col gap-1.5">
+                  <div className="label-mono mb-2 flex items-center gap-2 text-slate"><History className="size-3.5" />History</div>
+                  <ul className="flex flex-col gap-2">
                     {activity.map(a => (
-                      <li key={a.id} className="flex items-start gap-2 font-mono text-[11.5px] leading-relaxed text-slate">
-                        <span className={cn('mt-1.5 size-1.5 shrink-0 rounded-full', a.agent ? 'bg-brand' : 'bg-line')} />
+                      <li key={a.id} className="flex items-start gap-2 font-mono text-[11px] leading-relaxed text-slate">
+                        <span className={cn('mt-2 size-1.5 shrink-0 rounded-full', a.agent ? 'bg-brand' : 'bg-line')} />
                         <span>{a.agent ? <span className="text-brand">{a.agent} (agent)</span> : <span className="text-ink">{user(a.actor)?.name}</span>} {a.text} · {timeAgo(a.at)}</span>
                       </li>
                     ))}
@@ -182,7 +182,7 @@ export default function IssuePanel() {
                     <SelectTrigger id="issue-sprint" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {state.sprints.filter(x => x.project === issue.project && x.state !== 'closed').map(x => (
-                        <SelectItem key={x.id} value={x.id}>{x.name}<Badge variant="outline" className={cn('h-4 rounded-[3px] border-transparent px-1 font-mono text-[9.5px] uppercase tracking-wide', x.state === 'active' ? 'bg-tint text-brand' : 'bg-cloud text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</Badge></SelectItem>
+                        <SelectItem key={x.id} value={x.id}>{x.name}<Badge variant="outline" className={cn('h-4 rounded-[3px] border-transparent px-1 font-mono text-[10px] uppercase tracking-wide', x.state === 'active' ? 'bg-tint text-brand' : 'bg-cloud text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</Badge></SelectItem>
                       ))}
                       <SelectItem value="backlog">Backlog</SelectItem>
                     </SelectContent>
@@ -202,7 +202,7 @@ export default function IssuePanel() {
                     <SelectTrigger id="issue-release" className="h-8 w-full text-[13px]"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">No release</SelectItem>
-                      {state.releases.filter(r => r.project === issue.project).map(r => <SelectItem key={r.id} value={r.id}><span className="font-mono text-[12px]">{r.version}</span><span className="truncate text-slate">{r.title}</span></SelectItem>)}
+                      {state.releases.filter(r => r.project === issue.project).map(r => <SelectItem key={r.id} value={r.id}><span className="font-mono text-[12.5px]">{r.version}</span><span className="truncate text-slate">{r.title}</span></SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
@@ -231,7 +231,7 @@ export default function IssuePanel() {
                   <DatePicker id="issue-due" value={issue.due} onChange={v => patch({ due: v })} className="w-full" warn={dueLabel(issue.due)?.overdue && issue.status !== 'done'} />
                 </Field>
                 <Field label="Created">
-                  <span className="font-mono text-[11.5px] text-slate">{new Date(issue.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · updated {timeAgo(issue.updatedAt)}</span>
+                  <span className="font-mono text-[11px] text-slate">{new Date(issue.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · updated {timeAgo(issue.updatedAt)}</span>
                 </Field>
               </aside>
             </div>

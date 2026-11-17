@@ -6,7 +6,7 @@ export const Bone = ({ className }: { className?: string }) => <span className={
 
 function CardBone() {
   return (
-    <div className="flex flex-col gap-2 rounded-[4px] border border-line bg-paper p-2.5">
+    <div className="flex flex-col gap-2 rounded-[4px] border border-line bg-paper p-3">
       <Bone className="h-2.5 w-[85%]" /><Bone className="h-2.5 w-[55%]" />
       <div className="mt-1 flex items-center justify-between"><Bone className="h-3 w-[40%]" /><Bone className="size-5 rounded-full" /></div>
     </div>
@@ -19,7 +19,7 @@ export function BoardSkeleton() {
       <div className="mb-4 flex gap-2"><Bone className="h-8 w-40" /><Bone className="h-8 w-28" /><Bone className="h-8 w-28" /></div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[3, 2, 2, 3].map((n, i) => (
-          <div key={i} className={cx('flex flex-col gap-2 rounded-[4px] border border-line bg-cloud p-2.5', i > 0 && 'hidden sm:flex', i > 1 && 'sm:hidden lg:flex')}>
+          <div key={i} className={cx('flex flex-col gap-2 rounded-[4px] border border-line bg-cloud p-3', i > 0 && 'hidden sm:flex', i > 1 && 'sm:hidden lg:flex')}>
             <Bone className="mb-1 h-[18px] w-24 rounded-full" />
             {Array.from({ length: n }, (_, k) => <CardBone key={k} />)}
           </div>

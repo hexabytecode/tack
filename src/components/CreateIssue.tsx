@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 export const POINT_STEPS = [1, 2, 3, 5, 8, 13]
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
-  return <div className="flex flex-col gap-1.5"><Label htmlFor={htmlFor} className="label-mono text-slate">{label}</Label>{children}</div>
+  return <div className="flex flex-col gap-2"><Label htmlFor={htmlFor} className="label-mono text-slate">{label}</Label>{children}</div>
 }
 
 const kb = (n: number) => n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`
@@ -85,25 +85,25 @@ export default function CreateIssue() {
     requestAnimationFrame(() => addLabelRef.current?.focus())
   }
 
-  const trigger = 'h-9 w-full px-2.5 text-[13px]'
+  const trigger = 'h-9 w-full px-3 text-[13px]'
 
   return (
     <Sheet open={createOpen} onOpenChange={setCreateOpen}>
       <SheetContent side="right" className="w-full gap-0 p-0 outline-none sm:max-w-[760px] [&>button.absolute]:hidden" onOpenAutoFocus={e => { e.preventDefault(); titleRef.current?.focus() }}>
         <form className="flex min-h-0 flex-1 flex-col" onSubmit={e => { e.preventDefault(); submit() }} onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submit() } }}>
           <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-line px-5">
-            <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex min-w-0 items-center gap-3">
               <SheetTitle className="label-mono rounded-[3px] border border-line bg-cloud px-2 py-0.5 text-ink">New issue</SheetTitle>
               <span className="text-line">/</span>
               <Select value={project} onValueChange={v => { setProject(v); setSprint(state.sprints.find(s => s.project === v && s.state === 'active')?.id ?? 'backlog') }}>
-                <SelectTrigger size="sm" className="h-7 gap-1.5 border-0 px-1.5 text-[12.5px] shadow-none" aria-label="Project"><SelectValue /></SelectTrigger>
+                <SelectTrigger size="sm" className="h-7 gap-2 border-0 px-2 text-[12.5px] shadow-none" aria-label="Project"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {state.projects.map(x => <SelectItem key={x.key} value={x.key}><span className="font-mono text-[11px] font-medium">{x.key}</span><span className="text-slate">·</span>{x.name}</SelectItem>)}
                 </SelectContent>
               </Select>
               <SheetDescription className="sr-only">Create an issue. Only the title is required.</SheetDescription>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Kbd className="hidden sm:inline-flex">Esc</Kbd>
               <Tooltip><TooltipTrigger asChild>
                 <Button type="button" size="icon-sm" variant="ghost" aria-label="Close" onClick={() => setCreateOpen(false)}><X /></Button>
@@ -126,12 +126,12 @@ export default function CreateIssue() {
                   onDrop={e => { e.preventDefault(); const list = Array.from(e.dataTransfer.files).map(f => ({ name: f.name, size: f.size })); setFiles(fs => [...fs, ...list]) }}
                   className="h-auto w-full justify-between rounded-[4px] border-dashed border-line bg-wash px-3 py-3 font-normal text-slate hover:border-slate/50 hover:text-ink">
                   <span className="flex items-center gap-2 text-[13px]"><Paperclip className="size-4" />Attach files or drop screenshots here</span>
-                  <span className="font-mono text-[10.5px] uppercase tracking-wide">Max 25 MB</span>
+                  <span className="font-mono text-[11px] uppercase tracking-wide">Max 25 MB</span>
                 </Button>
                 {files.length > 0 && (
                   <ul className="mt-2 flex flex-col gap-1">
                     {files.map((f, i) => (
-                      <li key={i} className="flex items-center justify-between rounded-[4px] border border-line px-2.5 py-1.5 text-[12.5px]">
+                      <li key={i} className="flex items-center justify-between rounded-[4px] border border-line px-3 py-2 text-[12.5px]">
                         <span className="flex min-w-0 items-center gap-2"><Paperclip className="size-3.5 shrink-0 text-slate" /><span className="truncate">{f.name}</span><span className="font-mono text-[11px] text-slate">{kb(f.size)}</span></span>
                         <Button type="button" size="icon-sm" variant="ghost" className="size-6" aria-label={`Remove ${f.name}`} onClick={() => setFiles(fs => fs.filter((_, j) => j !== i))}><X /></Button>
                       </li>
@@ -152,8 +152,8 @@ export default function CreateIssue() {
                 <Select value={sprint} onValueChange={setSprint}>
                   <SelectTrigger id="new-sprint" className={trigger}><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {active && <SelectItem value={active.id}>{active.name}<Badge variant="outline" className="h-4 rounded-[3px] border-transparent bg-tint px-1 font-mono text-[9.5px] uppercase tracking-wide text-brand">Active</Badge></SelectItem>}
-                    {sprints.filter(s => s.state === 'planned').map(s => <SelectItem key={s.id} value={s.id}>{s.name}<Badge variant="outline" className="h-4 rounded-[3px] border-transparent bg-cloud px-1 font-mono text-[9.5px] uppercase tracking-wide text-slate">Planned</Badge></SelectItem>)}
+                    {active && <SelectItem value={active.id}>{active.name}<Badge variant="outline" className="h-4 rounded-[3px] border-transparent bg-tint px-1 font-mono text-[10px] uppercase tracking-wide text-brand">Active</Badge></SelectItem>}
+                    {sprints.filter(s => s.state === 'planned').map(s => <SelectItem key={s.id} value={s.id}>{s.name}<Badge variant="outline" className="h-4 rounded-[3px] border-transparent bg-cloud px-1 font-mono text-[10px] uppercase tracking-wide text-slate">Planned</Badge></SelectItem>)}
                     <SelectItem value="backlog">Backlog</SelectItem>
                   </SelectContent>
                 </Select>
@@ -192,21 +192,21 @@ export default function CreateIssue() {
                 <DatePicker id="new-due" value={due} onChange={setDue} className="w-full" />
               </Field>
               <Field label="Labels">
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   {labels.map(l => (
-                    <span key={l} className="flex items-center gap-1 rounded-[3px] border border-line bg-cloud py-0.5 pl-1.5 pr-0.5 font-mono text-[11px]">
+                    <span key={l} className="flex items-center gap-1 rounded-[3px] border border-line bg-cloud py-0.5 pl-2 pr-0.5 font-mono text-[11px]">
                       <Tag className="size-3 text-slate" />{l}
                       <Button type="button" variant="ghost" size="icon-xs" className="size-4 rounded-[2px] text-slate hover:bg-paper hover:text-ink" aria-label={`Remove label ${l}`} onClick={() => setLabels(labels.filter(x => x !== l))}><X className="size-3" /></Button>
                     </span>
                   ))}
                   {labelDraft === null ? (
-                    <Button ref={addLabelRef} type="button" variant="outline" size="xs" onClick={() => setLabelDraft('')} className="h-6 gap-0.5 rounded-[3px] border-dashed px-1.5 font-mono text-[10.5px] font-normal text-slate hover:border-slate hover:text-ink has-[>svg]:px-1.5">
+                    <Button ref={addLabelRef} type="button" variant="outline" size="xs" onClick={() => setLabelDraft('')} className="h-6 gap-0.5 rounded-[3px] border-dashed px-2 font-mono text-[11px] font-normal text-slate hover:border-slate hover:text-ink has-[>svg]:px-2">
                       <Plus className="size-3" />Add
                     </Button>
                   ) : (
                     <Input autoFocus aria-label="New label" value={labelDraft} onChange={e => setLabelDraft(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); addLabel() } if (e.key === 'Escape') { e.stopPropagation(); setLabelDraft(null) } }}
-                      onBlur={addLabel} placeholder="label" className="h-6 w-24 px-1.5 font-mono text-[11px]" />
+                      onBlur={addLabel} placeholder="label" className="h-6 w-24 px-2 font-mono text-[11px]" />
                   )}
                 </div>
               </Field>
@@ -214,7 +214,7 @@ export default function CreateIssue() {
           </div>
 
           <footer className="flex h-14 shrink-0 items-center justify-between gap-3 border-t border-line px-5">
-            <span className="hidden min-w-0 items-center gap-1.5 truncate text-[12.5px] text-slate sm:flex"><Eye className="size-3.5 shrink-0" />Visible to everyone in {p.name}</span>
+            <span className="hidden min-w-0 items-center gap-2 truncate text-[12.5px] text-slate sm:flex"><Eye className="size-3.5 shrink-0" />Visible to everyone in {p.name}</span>
             <div className="ml-auto flex shrink-0 items-center gap-2">
               <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
               <Button type="submit">Create issue <span className="hidden items-center gap-0.5 rounded-[3px] bg-white/15 px-1 font-mono text-[10px] sm:inline-flex">⌘<CornerDownLeft className="!size-2.5" /></span></Button>

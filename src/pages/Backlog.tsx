@@ -46,12 +46,12 @@ function Row({ issue, picked, onPick }: { issue: Issue; picked: boolean; onPick:
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cx('group flex h-[42px] items-center justify-between gap-3 bg-paper px-3 transition-colors hover:bg-wash md:px-4', isDragging && 'opacity-40', picked && 'bg-tint/60')}>
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <Button type="button" variant="ghost" size="icon-xs" className="hidden size-5 cursor-grab touch-none text-placeholder hover:bg-transparent group-hover:text-slate active:cursor-grabbing sm:inline-flex" aria-label={`Drag ${issue.key}`} {...attributes} {...listeners}>
           <GripVertical className="size-4" />
         </Button>
         <Checkbox checked={picked} onCheckedChange={onPick} aria-label={`Select ${issue.key}`} className="data-[state=checked]:border-brand data-[state=checked]:bg-brand" />
-        <span className="w-[62px] shrink-0 font-mono text-[11.5px] text-slate">{issue.key}</span>
+        <span className="w-[62px] shrink-0 font-mono text-[11px] text-slate">{issue.key}</span>
         <span className="hidden sm:inline-flex"><TypeBadge type={issue.type} compact /></span>
         <Button type="button" variant="link" onClick={() => setParams(p => { p.set('issue', issue.key); return p })}
           className={cx('block h-auto min-w-0 shrink truncate p-0 text-left text-[13px] font-medium text-ink hover:text-brand hover:no-underline', issue.status === 'done' && 'text-slate')}>{issue.title}</Button>
@@ -59,7 +59,7 @@ function Row({ issue, picked, onPick }: { issue: Issue; picked: boolean; onPick:
       <div className="flex shrink-0 items-center gap-3">
         <span className="hidden w-[104px] md:block"><StatusPill status={issue.status} size="sm" /></span>
         <span className="hidden sm:block"><PriorityBadge priority={issue.priority} compact /></span>
-        <span className="w-6 text-right font-mono text-[12px] text-slate" title="Story points">{issue.points ?? '–'}</span>
+        <span className="w-6 text-right font-mono text-[12.5px] text-slate" title="Story points">{issue.points ?? '–'}</span>
         <Avatar user={user(issue.assignee)} size={22} />
       </div>
     </div>
@@ -74,8 +74,8 @@ function Section({ id, keys, byKey, picked, onPick, header, goal, footer }: {
   const [open, setOpen] = useState(true)
   return (
     <section className={cx('overflow-hidden rounded-[6px] border bg-paper transition-colors', isOver ? 'border-brand/50' : 'border-line')}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-cloud/50 px-3 py-2.5 md:px-4">
-        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-cloud/50 px-3 py-3 md:px-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Button type="button" variant="ghost" size="icon-xs" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-label={open ? 'Collapse' : 'Expand'} className="rounded-[3px] text-slate hover:text-ink">
             <ChevronDown className={cx('size-4 transition-transform', !open && '-rotate-90')} />
           </Button>
@@ -101,11 +101,11 @@ function Goal({ sprint }: { sprint: Sprint }) {
   const [v, setV] = useState(sprint.goal)
   useEffect(() => setV(sprint.goal), [sprint.goal])
   return (
-    <div className="flex items-center gap-2 border-b border-line/70 bg-paper px-4 py-1.5 text-[13px]">
+    <div className="flex items-center gap-2 border-b border-line/70 bg-paper px-4 py-2 text-[13px]">
       <Label htmlFor={`goal-${sprint.id}`} className="label-mono shrink-0 text-slate">Goal</Label>
       <Input id={`goal-${sprint.id}`} value={v} onChange={e => setV(e.target.value)} onBlur={() => v !== sprint.goal && dispatch({ t: 'sprintUpdate', id: sprint.id, patch: { goal: v.trim() } })}
         onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
-        placeholder="What should this sprint achieve?" className="h-7 min-w-0 flex-1 border-transparent bg-transparent px-1.5 text-[13px] shadow-none hover:border-line focus-visible:border-line focus-visible:ring-0" />
+        placeholder="What should this sprint achieve?" className="h-7 min-w-0 flex-1 border-transparent bg-transparent px-2 text-[13px] shadow-none hover:border-line focus-visible:border-line focus-visible:ring-0" />
     </div>
   )
 }
@@ -137,10 +137,10 @@ function SprintDialog({ sprint, mode, onClose }: { sprint: Sprint | null; mode: 
           <DialogDescription>{mode === 'start' ? 'The board will show this sprint until you complete it.' : 'Change the name, dates or goal.'}</DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); submit() }}>
-          <div className="flex flex-col gap-1.5"><Label htmlFor="sprint-name">Name</Label><Input id="sprint-name" value={name} onChange={e => setName(e.target.value)} /></div>
+          <div className="flex flex-col gap-2"><Label htmlFor="sprint-name">Name</Label><Input id="sprint-name" value={name} onChange={e => setName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5"><Label htmlFor="sprint-start">Starts</Label><DatePicker id="sprint-start" value={start} onChange={v => setStart(v ?? iso(Date.now()))} placeholder="Start date" className="h-9 w-full" /></div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2"><Label htmlFor="sprint-start">Starts</Label><DatePicker id="sprint-start" value={start} onChange={v => setStart(v ?? iso(Date.now()))} placeholder="Start date" className="h-9 w-full" /></div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="sprint-length">Length</Label>
               <Select value={weeks} onValueChange={setWeeks}>
                 <SelectTrigger id="sprint-length" className="w-full"><SelectValue /></SelectTrigger>
@@ -148,8 +148,8 @@ function SprintDialog({ sprint, mode, onClose }: { sprint: Sprint | null; mode: 
               </Select>
             </div>
           </div>
-          <p className="-mt-2 font-mono text-[11.5px] text-slate">Ends {day(end)}</p>
-          <div className="flex flex-col gap-1.5"><Label htmlFor="sprint-goal">Goal</Label><Textarea id="sprint-goal" value={goal} onChange={e => setGoal(e.target.value)} rows={2} placeholder="What should this sprint achieve?" /></div>
+          <p className="-mt-2 font-mono text-[11px] text-slate">Ends {day(end)}</p>
+          <div className="flex flex-col gap-2"><Label htmlFor="sprint-goal">Goal</Label><Textarea id="sprint-goal" value={goal} onChange={e => setGoal(e.target.value)} rows={2} placeholder="What should this sprint achieve?" /></div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
             <Button type="submit">{mode === 'start' ? <><Play />Start sprint</> : 'Save'}</Button>
@@ -183,7 +183,7 @@ function CompleteDialog({ sprint, onClose }: { sprint: Sprint | null; onClose: (
           <DialogDescription>{done.length} done ({pts(done)} pts), {open.length} still open ({pts(open)} pts).</DialogDescription>
         </DialogHeader>
         {open.length > 0 && (
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="complete-to">Move the open issues to</Label>
             <Select value={to} onValueChange={setTo}>
               <SelectTrigger id="complete-to" className="w-full"><SelectValue /></SelectTrigger>
@@ -299,16 +299,16 @@ export default function Backlog() {
     const count = (s: Status) => items.filter(i => i.status === s).length
     return (
       <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <span className="text-[15px] font-semibold">{x.name}</span>
-          <Badge variant={x.state === 'active' ? 'default' : 'outline'} className={cx('h-[18px] rounded-[3px] px-1.5 font-mono text-[10px] uppercase tracking-wider', x.state === 'active' ? 'border-brand bg-brand text-paper' : 'bg-paper text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</Badge>
+          <Badge variant={x.state === 'active' ? 'default' : 'outline'} className={cx('h-[18px] rounded-[3px] px-2 font-mono text-[10px] uppercase tracking-wider', x.state === 'active' ? 'border-brand bg-brand text-paper' : 'bg-paper text-slate')}>{x.state === 'active' ? 'Active' : 'Planned'}</Badge>
           <span className="hidden text-line sm:inline">|</span>
           {x.start ? (
-            <Button type="button" variant="ghost" size="xs" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="gap-1.5 px-1 font-mono text-[11.5px] font-normal text-slate hover:text-ink has-[>svg]:px-1">
+            <Button type="button" variant="ghost" size="xs" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="gap-2 px-1 font-mono text-[11px] font-normal text-slate hover:text-ink has-[>svg]:px-1">
               <CalendarDays className="size-3.5" />{day(x.start)} – {day(x.end)}{x.state === 'active' && <> · <Remaining end={x.end} /></>}
             </Button>
           ) : (
-            <Button type="button" variant="ghost" size="xs" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="gap-1.5 px-1 font-mono text-[11.5px] font-normal text-slate underline decoration-dotted underline-offset-2 hover:text-ink has-[>svg]:px-1">
+            <Button type="button" variant="ghost" size="xs" onClick={() => setStarting({ sprint: x, mode: 'edit' })} className="gap-2 px-1 font-mono text-[11px] font-normal text-slate underline decoration-dotted underline-offset-2 hover:text-ink has-[>svg]:px-1">
               <CalendarDays className="size-3.5" />Set dates
             </Button>
           )}
@@ -316,7 +316,7 @@ export default function Backlog() {
         <div className="flex flex-wrap items-center gap-3">
           {x.state === 'active' && (
             <span className="hidden items-center gap-3 font-mono text-[11px] text-slate lg:flex">
-              {STATUSES.filter(s => s.id !== 'done').map(s => <span key={s.id} className="flex items-center gap-1.5"><span className={cx('size-2 rounded-full', STATUS_BAR[s.id])} />{count(s.id)} {s.label}</span>)}
+              {STATUSES.filter(s => s.id !== 'done').map(s => <span key={s.id} className="flex items-center gap-2"><span className={cx('size-2 rounded-full', STATUS_BAR[s.id])} />{count(s.id)} {s.label}</span>)}
             </span>
           )}
           <Badge variant="outline" className="h-[20px] rounded-[3px] bg-paper px-2 font-mono text-[11px]">{items.length} issues · {pts(items)} pts</Badge>
@@ -331,7 +331,7 @@ export default function Backlog() {
 
   const addRow = (label: string, sprint: string | null) => (
     <Button type="button" variant="ghost" onClick={() => setCreateOpen(true, project, 'todo', sprint)}
-      className="h-9 w-full justify-start gap-1.5 rounded-none border-t border-line/60 bg-cloud/30 px-4 font-mono text-[11px] font-normal text-slate hover:bg-tint/50 hover:text-brand has-[>svg]:px-4">
+      className="h-9 w-full justify-start gap-2 rounded-none border-t border-line/60 bg-cloud/30 px-4 font-mono text-[11px] font-normal text-slate hover:bg-tint/50 hover:text-brand has-[>svg]:px-4">
       <Plus className="size-3.5" />{label}
     </Button>
   )
@@ -351,7 +351,7 @@ export default function Backlog() {
                 <Badge className="size-9 justify-center rounded-[6px] border-brand bg-brand p-0 font-mono text-[11px] text-paper">S{active.name.match(/\d+/)?.[0]}</Badge>
                 <div>
                   <div className="flex flex-wrap items-center gap-2"><span className="text-[15px] font-semibold">{active.name}</span><StatusPill status="progress" size="sm" /></div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[11.5px] text-slate">{day(active.start)} – {day(active.end)}<span>·</span><Remaining end={active.end} /></div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate">{day(active.start)} – {day(active.end)}<span>·</span><Remaining end={active.end} /></div>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-5">
@@ -383,11 +383,11 @@ export default function Backlog() {
             <Section id={BACKLOG} keys={lists[BACKLOG] ?? []} byKey={byKey} picked={picked} onPick={toggle}
               header={
                 <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-3">
                     <span className="text-[15px] font-semibold">Backlog</span>
-                    <Badge variant="outline" className="h-[20px] rounded-[3px] bg-paper px-2 font-mono text-[10.5px] font-normal text-slate">{backlogCount} issues</Badge>
+                    <Badge variant="outline" className="h-[20px] rounded-[3px] bg-paper px-2 font-mono text-[11px] font-normal text-slate">{backlogCount} issues</Badge>
                     <span className="hidden text-line sm:inline">|</span>
-                    <span className="font-mono text-[11.5px] text-slate">Estimate: {pts(all(BACKLOG).filter(i => i.status !== 'done'))} pts</span>
+                    <span className="font-mono text-[11px] text-slate">Estimate: {pts(all(BACKLOG).filter(i => i.status !== 'done'))} pts</span>
                   </div>
                   <MoveMenu from={BACKLOG} />
                 </div>
@@ -395,8 +395,8 @@ export default function Backlog() {
               footer={addRow('Create issue in the backlog', null)} />
             <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
               {dragIssue && (
-                <div className="flex h-[42px] items-center gap-2.5 rounded-[4px] border border-ink bg-paper px-4 shadow-[0_12px_28px_-8px_rgba(0,0,0,.25)]">
-                  <span className="font-mono text-[11.5px] text-slate">{dragIssue.key}</span>
+                <div className="flex h-[42px] items-center gap-3 rounded-[4px] border border-ink bg-paper px-4 shadow-[0_12px_28px_-8px_rgba(0,0,0,.25)]">
+                  <span className="font-mono text-[11px] text-slate">{dragIssue.key}</span>
                   <span className="truncate text-[13px] font-medium">{dragIssue.title}</span>
                   <span className="ml-auto"><Avatar user={user(dragIssue.assignee)} size={22} /></span>
                 </div>
